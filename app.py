@@ -1,4 +1,6 @@
 # app.py
+
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -7,8 +9,11 @@ import os
 from datetime import datetime
 import shap
 import matplotlib.pyplot as plt
+import requests
+from streamlit_lottie import st_lottie
 
 # Load model and supporting files
+
 model = joblib.load("credit_risk_model.pkl")
 scaler = joblib.load("scaler.pkl")
 feature_names = joblib.load("feature_names.pkl")
@@ -16,24 +21,96 @@ feature_names = joblib.load("feature_names.pkl")
 LOG_PATH = "prediction_logs.csv"
 FLAG_THRESHOLD = 0.6  # Flag if probability of default > 60%
 
-st.set_page_config(page_title="Credit Risk Agentic AI", layout="wide")
-st.title("💼 Credit Risk Prediction (Agentic AI with SHAP Explainability)")
 
-# Input fields
-age = st.number_input("Person Age", min_value=18, max_value=100, value=30)
-income = st.number_input("Annual Income", value=50000)
-home = st.selectbox("Home Ownership", ["RENT", "OWN", "MORTGAGE", "OTHER"])
-emp_length = st.number_input("Employment Length (in months)", value=12.0)
-intent = st.selectbox("Loan Intent", ["PERSONAL", "EDUCATION", "MEDICAL", "VENTURE", "HOMEIMPROVEMENT", "DEBTCONSOLIDATION"])
-grade = st.selectbox("Loan Grade", ["A", "B", "C", "D", "E", "F", "G"])
-loan_amnt = st.number_input("Loan Amount", value=10000)
-loan_rate = st.number_input("Loan Interest Rate (%)", value=10.0)
-percent_income = st.number_input("Loan % of Income", value=0.25)
-default_on_file = st.selectbox("Previous Default on File", ["Y", "N"])
-cred_hist = st.number_input("Credit History Length (years)", value=5)
+
+st.set_page_config(page_title="Credit Risk Agentic AI", layout="wide")
+
+
+# Sidebar with Lottie animation and info
+def load_lottieurl(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+lottie_url = "https://assets2.lottiefiles.com/packages/lf20_4kx2q32n.json"  # finance animation
+lottie_json = load_lottieurl(lottie_url)
+
+with st.sidebar:
+    st_lottie(lottie_json, height=120, key="credit-lottie")
+    st.markdown("# 💼 Credit Risk App")
+    st.markdown(
+        "<span style='color:#43a047;font-weight:bold;'>AI-powered credit risk prediction with SHAP explainability.</span>",
+        unsafe_allow_html=True)
+    st.markdown("---")
+    st.markdown("**Created by Kaneki016**")
+
+
+# Flashy CSS: gradient background, custom font, animated result box
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+html, body, [class*="css"]  {
+    font-family: 'Montserrat', sans-serif !important;
+}
+.main {
+    background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%) !important;
+}
+.block-container {
+    padding-top: 2rem;
+}
+.result-box {
+    background: linear-gradient(90deg, #f0f2f6 60%, #e0eafc 100%);
+    border-radius: 0.7rem;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 4px 24px 0 rgba(60,60,60,0.08);
+    animation: fadeIn 1.2s cubic-bezier(.4,0,.2,1);
+}
+.risk-high {background: linear-gradient(90deg, #ffeaea 60%, #ffdde1 100%); border-left: 8px solid #e53935; animation: pulse 1.2s infinite alternate;}
+.risk-borderline {background: linear-gradient(90deg, #fff8e1 60%, #fffde4 100%); border-left: 8px solid #ffb300;}
+.risk-low {background: linear-gradient(90deg, #e8f5e9 60%, #e0f7fa 100%); border-left: 8px solid #43a047;}
+@keyframes fadeIn {from {opacity:0;transform:translateY(30px);} to {opacity:1;transform:translateY(0);}}
+@keyframes pulse {0% {box-shadow:0 0 0 0 #e5393533;} 100% {box-shadow:0 0 16px 8px #e5393533;}}
+.stButton>button {background: linear-gradient(90deg,#43a047,#1976d2); color:white; font-weight:bold; border-radius:8px; border:none;}
+.stButton>button:hover {background: linear-gradient(90deg,#1976d2,#43a047);}
+.st-expanderHeader {font-size:1.1rem; color:#1976d2;}
+</style>
+""", unsafe_allow_html=True)
+
+
+st.markdown("<h1>💼 <span style='color:#1976d2;'>Credit Risk Prediction</span></h1>", unsafe_allow_html=True)
+st.markdown(
+    "<span style='color: #888; font-size:1.1rem;'>Agentic AI with <b>SHAP Explainability</b></span>", unsafe_allow_html=True
+)
+st.markdown("<hr style='margin-top:0.5rem;margin-bottom:1.5rem;border:0;border-top:2px solid #1976d2;'>", unsafe_allow_html=True)
+
+
+
+# Group input fields in columns and expanders, with emoji and color
+with st.expander("📝 Enter Applicant Information", expanded=True):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        age = st.number_input("👤 Person Age", min_value=18, max_value=100, value=30)
+        emp_length = st.number_input("💼 Employment Length (months)", value=12.0)
+        cred_hist = st.number_input("📅 Credit History Length (years)", value=5)
+    with col2:
+        income = st.number_input("💰 Annual Income", value=50000)
+        percent_income = st.number_input("📊 Loan % of Income", value=0.25)
+        loan_amnt = st.number_input("💵 Loan Amount", value=10000)
+    with col3:
+        home = st.selectbox("🏠 Home Ownership", ["RENT", "OWN", "MORTGAGE", "OTHER"])
+        intent = st.selectbox("🎯 Loan Intent", ["PERSONAL", "EDUCATION", "MEDICAL", "VENTURE", "HOMEIMPROVEMENT", "DEBTCONSOLIDATION"])
+        grade = st.selectbox("🏅 Loan Grade", ["A", "B", "C", "D", "E", "F", "G"])
+        loan_rate = st.number_input("📈 Loan Interest Rate (%)", value=10.0)
+        default_on_file = st.selectbox("⚠️ Previous Default on File", ["Y", "N"])
+
+
+st.markdown("<hr style='margin-top:1.5rem;margin-bottom:1.5rem;border:0;border-top:2px dashed #43a047;'>", unsafe_allow_html=True)
 
 # Predict button
-if st.button("🔍 Predict Credit Risk"):
+if st.button("✨ Predict Credit Risk! ✨", use_container_width=True):
     # Build feature dict for model
     input_dict = {
         "person_age": age,
@@ -60,21 +137,33 @@ if st.button("🔍 Predict Credit Risk"):
     pred = model.predict(scaled)[0]
     prob = model.predict_proba(scaled)[0][1]
 
+
     # Categorize risk
     if prob > FLAG_THRESHOLD:
         risk_level = "High Risk 🔴"
+        risk_class = "risk-high"
     elif prob > 0.4:
         risk_level = "Borderline Risk 🟠"
+        risk_class = "risk-borderline"
     else:
         risk_level = "Low Risk 🟢"
+        risk_class = "risk-low"
 
-    # Display result
-    st.subheader("Prediction Result")
-    st.write(f"**Risk Level:** {risk_level}")
-    st.write(f"**Probability of Default:** {round(prob * 100, 2)}%")
+
+    # Display result with animated colored box
+    st.markdown("<h4 style='color:#1976d2;'>🎉 Prediction Result</h4>", unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='result-box {risk_class}'>"
+        f"<span style='font-size:1.3rem;'><b>Risk Level:</b> {risk_level}</span><br>"
+        f"<span style='font-size:1.1rem;'><b>Probability of Default:</b> <span style='color:#1976d2;'>{round(prob * 100, 2)}%</span></span>"
+        f"</div>", unsafe_allow_html=True
+    )
+    st.balloons()
+
 
     # SHAP Explanation
-    st.subheader("🔎 Why This Prediction?")
+    st.markdown("<hr style='margin-top:1.5rem;margin-bottom:1.5rem;border:0;border-top:2px dashed #1976d2;'>", unsafe_allow_html=True)
+    st.markdown("<h3>🔎 <span style='color:#1976d2;'>Why This Prediction?</span></h3>", unsafe_allow_html=True)
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(scaled)
     expected_value = explainer.expected_value
