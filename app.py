@@ -1,6 +1,5 @@
 # app.py
 
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -23,7 +22,7 @@ FLAG_THRESHOLD = 0.6  # Flag if probability of default > 60%
 
 
 
-st.set_page_config(page_title="Credit Risk Agentic AI", layout="wide")
+st.set_page_config(page_title="Loan Credit Risk Agentic AI", layout="wide")
 
 
 # Sidebar with Lottie animation and info
