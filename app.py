@@ -12,11 +12,16 @@ import matplotlib.pyplot as plt
 import requests
 from streamlit_lottie import st_lottie
 
-# Load model and supporting files
+# Initialize predictor
+from predictor import CreditRiskPredictor
 
-model = joblib.load("credit_risk_model.pkl")
-scaler = joblib.load("scaler.pkl")
-feature_names = joblib.load("feature_names.pkl")
+predictor = None
+load_error = None
+try:
+    predictor = CreditRiskPredictor()
+except Exception as e:
+    # Save the exception and continue so the Streamlit app can show a helpful message
+    load_error = e
 
 LOG_PATH = "prediction_logs.csv"
 FLAG_THRESHOLD = 0.6  # Flag if probability of default > 60%
@@ -28,16 +33,25 @@ st.set_page_config(page_title="Credit Risk Agentic AI", layout="wide")
 
 # Sidebar with Lottie animation and info
 def load_lottieurl(url: str):
-    r = requests.get(url)
-    if r.status_code != 200:
+    try:
+        r = requests.get(url, timeout=5)
+        r.raise_for_status()
+        return r.json()
+    except Exception:
         return None
-    return r.json()
 
 lottie_url = "https://assets2.lottiefiles.com/packages/lf20_4kx2q32n.json"  # finance animation
 lottie_json = load_lottieurl(lottie_url)
 
 with st.sidebar:
-    st_lottie(lottie_json, height=120, key="credit-lottie")
+    if lottie_json is not None:
+        try:
+            st_lottie(lottie_json, height=120, key="credit-lottie")
+        except Exception:
+            # fallback: simple header if lottie fails
+            st.header("Credit Risk App")
+    else:
+        st.header("Credit Risk App")
     st.markdown("# 💼 Credit Risk App")
     st.markdown(
         "<span style='color:#43a047;font-weight:bold;'>AI-powered credit risk prediction with SHAP explainability.</span>",
@@ -111,6 +125,13 @@ st.markdown("<hr style='margin-top:1.5rem;margin-bottom:1.5rem;border:0;border-t
 
 # Predict button
 if st.button("✨ Predict Credit Risk! ✨", use_container_width=True):
+    if load_error is not None or predictor is None:
+        st.error(
+            "Model artifacts failed to load. See details below and retrain the model before using the app."
+        )
+        st.exception(load_error)
+        st.info("To retrain the model run: `python credit_model.py` or `python retrain_agent.py` in this project root.")
+        st.stop()
     # Build feature dict for model
     input_dict = {
         "person_age": age,
@@ -126,28 +147,9 @@ if st.button("✨ Predict Credit Risk! ✨", use_container_width=True):
         f"cb_person_default_on_file_{default_on_file}": 1
     }
 
-    # Fill all model columns (missing = 0)
-    input_full = {col: input_dict.get(col, 0) for col in feature_names}
-    df_input = pd.DataFrame([input_full])
-
-    # Scale numeric input
-    scaled = scaler.transform(df_input)
-
-    # Make prediction
-    pred = model.predict(scaled)[0]
-    prob = model.predict_proba(scaled)[0][1]
-
-
-    # Categorize risk
-    if prob > FLAG_THRESHOLD:
-        risk_level = "High Risk 🔴"
-        risk_class = "risk-high"
-    elif prob > 0.4:
-        risk_level = "Borderline Risk 🟠"
-        risk_class = "risk-borderline"
-    else:
-        risk_level = "Low Risk 🟢"
-        risk_class = "risk-low"
+    # Make prediction using the predictor
+    risk_level, prob, pred = predictor.predict(input_dict, FLAG_THRESHOLD)
+    risk_class = risk_level.split()[0].lower() + "-" + risk_level.split()[1].lower()
 
 
     # Display result with animated colored box
@@ -161,12 +163,12 @@ if st.button("✨ Predict Credit Risk! ✨", use_container_width=True):
     st.balloons()
 
 
-    # SHAP Explanation
+    # SHAP Explanation (guarded)
     st.markdown("<hr style='margin-top:1.5rem;margin-bottom:1.5rem;border:0;border-top:2px dashed #1976d2;'>", unsafe_allow_html=True)
     st.markdown("<h3>🔎 <span style='color:#1976d2;'>Why This Prediction?</span></h3>", unsafe_allow_html=True)
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(scaled)
-    expected_value = explainer.expected_value
+    
+    # Get SHAP values from predictor
+    shap_values, expected_value, df_input = predictor.get_shap_values(input_dict)
 
     shap.initjs()
     plt.figure(figsize=(10, 4))

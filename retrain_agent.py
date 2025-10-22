@@ -9,7 +9,8 @@ import os
 import datetime
 
 THRESHOLD_AUC = 0.75
-DATA_PATH = "credit_data.csv"
+# Use the dataset included in the repository by default
+DATA_PATH = "credit_risk_dataset.csv"
 MODEL_PATH = "credit_risk_model.pkl"
 
 def retrain_if_needed():
@@ -21,15 +22,17 @@ def retrain_if_needed():
     # Ensure we keep track of columns for future inputs
     feature_names = X.columns.tolist()
 
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    # Split before scaling to avoid leakage
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
     model = XGBClassifier(use_label_encoder=False, eval_metric="logloss")
-    model.fit(X_train, y_train)
+    model.fit(X_train_scaled, y_train)
 
-    auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+    auc = roc_auc_score(y_test, model.predict_proba(X_test_scaled)[:, 1])
     print(f"Current AUC: {auc:.4f}")
 
     if auc < THRESHOLD_AUC:
