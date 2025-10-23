@@ -1,4 +1,5 @@
 # api.py
+import joblib
 import pandas as pd
 import numpy as np
 import json
@@ -6,11 +7,22 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List, Optional
 from predictor import CreditRiskPredictor
+from retrain_agent import retrain_if_needed
 import logging
+import requests
+import os  # REQUIRED for os.getenv()
+from dotenv import load_dotenv  # REQUIRED to load the .env file
+ 
 
 # --- Setup Logging ---
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# --- Gemini API ---
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent"
+
 
 # --- 1. Initialize the Core Predictor Class ---
 # This loads the model and preprocessors once when the API starts.
@@ -47,6 +59,60 @@ app = FastAPI(
     version="1.0.0",
     description="Serves the XGBoost credit risk model for automated workflows (n8n)."
 )
+
+# --- NEW: Function to Call LLM for Explanation ---
+def generate_llm_explanation(
+    input_data: Dict[str, Any], 
+    shap_explanation: Dict[str, float], 
+    risk_level: str
+) -> str:
+    """Sends SHAP results and application data to Gemini for natural language explanation."""
+    
+    # 1. Prepare the prompt with the most impactful features
+    # Convert SHAP dict to a DataFrame, sort by absolute value, and take the top 5
+    shap_series = pd.Series(shap_explanation).sort_values(key=abs, ascending=False).head(5)
+    
+    prompt = f"""
+    You are an expert Credit Risk Analyst. Explain the decision for this loan application 
+    in a concise, single paragraph suitable for a bank client.
+    
+    The predicted outcome is: {risk_level}.
+    
+    The top 5 most impactful features (SHAP values) contributing to this decision are:
+    {shap_series.to_dict()}
+    
+    The raw applicant data is: {input_data}
+    
+    Focus on summarizing *why* the loan was approved or rejected based on these factors.
+    """
+    
+    # 2. Build the API Payload
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "systemInstruction": {
+            "parts": [{"text": "You are a friendly, expert financial analyst explaining complex risk to a non-expert."}]
+        }
+    }
+    
+    # 3. Make the API Call (using synchronous requests for simplicity)
+    try:
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(
+            f"{GEMINI_API_URL}?key={GEMINI_API_KEY}", 
+            headers=headers, 
+            json=payload,
+            timeout=15
+        )
+        response.raise_for_status()
+        
+        # 4. Extract Text
+        result = response.json()
+        text = result.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', 'LLM explanation unavailable.')
+        return text
+
+    except Exception as e:
+        logger.error(f"Gemini API call failed: {e}")
+        return f"Could not generate LLM explanation due to API error: {str(e)}"
 
 # --- 4. Health Check Endpoint ---
 @app.get("/")
@@ -123,7 +189,14 @@ def predict_risk(application: LoanApplication):
             detail={"status": "error", "message": f"Internal prediction error: {str(e)}"}
         )
 
-    # Prepare final response object for n8n
+    # --- 6. Generate LLM Explanation ---
+    llm_explanation = generate_llm_explanation(
+        input_data=raw_input_dict,
+        shap_explanation=shap_explanation,
+        risk_level=risk_level
+    )
+    
+    # --- 7. Prepare final response object for n8n ---
     return {
         "status": "success",
         "timestamp": pd.Timestamp.now().isoformat(),
@@ -132,5 +205,21 @@ def predict_risk(application: LoanApplication):
         "binary_prediction": pred,
         "model_confidence_threshold": 0.6,
         "input_features": raw_input_dict,
-        "shap_explanation": shap_explanation
+        "shap_explanation": shap_explanation,
+        "llm_explanation": llm_explanation
     }
+
+@app.post("/trigger_retrain")
+def trigger_retrain_cycle():
+    """Triggers the model retraining and returns the outcome."""
+    try:
+        # Execute the core retraining function, capturing the result
+        retrain_result = retrain_if_needed()
+        return {"status": "success", "result": retrain_result}
+    except Exception as e:
+        logger.error(f"Retraining failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={"status": "error", "message": f"Retraining failed: {str(e)}"}
+        )
+    

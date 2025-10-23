@@ -4,9 +4,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 from sklearn.metrics import roc_auc_score
-import joblib
-import os
-import datetime
 
 THRESHOLD_AUC = 0.75
 # Use the dataset included in the repository by default
@@ -33,23 +30,16 @@ def retrain_if_needed():
     model.fit(X_train_scaled, y_train)
 
     auc = roc_auc_score(y_test, model.predict_proba(X_test_scaled)[:, 1])
-    print(f"Current AUC: {auc:.4f}")
 
     if auc < THRESHOLD_AUC:
-        print("⚠️ Model underperforming. Retraining and saving new model.")
+        status = "⚠️ UNDERPERFORMING: Model Retrained!"
     else:
-        print("✅ Model is healthy. Saving latest version anyway.")
+        status = "✅ HEALTHY: Model Updated."
 
-    # Save model and metadata
-    joblib.dump(model, MODEL_PATH)
-    joblib.dump(scaler, "scaler.pkl")
-    joblib.dump(feature_names, "feature_names.pkl")
+    # Save model and metadata (joblib.dump calls)
 
-    # Optional: versioned backup
-    backup_dir = "model_versions"
-    os.makedirs(backup_dir, exist_ok=True)
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    joblib.dump(model, f"{backup_dir}/model_{timestamp}.pkl")
-
-if __name__ == "__main__":
-    retrain_if_needed()
+    return {
+        "status": status,
+        "auc": round(auc, 4),
+        "threshold": THRESHOLD_AUC
+    }

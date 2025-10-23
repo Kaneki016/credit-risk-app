@@ -11,6 +11,10 @@ import shap
 import matplotlib.pyplot as plt
 import requests
 from streamlit_lottie import st_lottie
+import requests
+
+#n8n webhook
+N8N_WEBHOOK_URL = "http://localhost:5678/webhook/6c5765f3-1d52-4d65-be13-c37133a73bf1"
 
 # Initialize predictor
 from predictor import CreditRiskPredictor
@@ -25,8 +29,6 @@ except Exception as e:
 
 LOG_PATH = "prediction_logs.csv"
 FLAG_THRESHOLD = 0.6  # Flag if probability of default > 60%
-
-
 
 st.set_page_config(page_title="Credit Risk Agentic AI", layout="wide")
 
@@ -125,69 +127,153 @@ st.markdown("<hr style='margin-top:1.5rem;margin-bottom:1.5rem;border:0;border-t
 
 # Predict button
 if st.button("✨ Predict Credit Risk! ✨", use_container_width=True):
-    if load_error is not None or predictor is None:
-        st.error(
-            "Model artifacts failed to load. See details below and retrain the model before using the app."
+    # ----------------------------------------------------
+    # 1. BUILD RAW INPUT PAYLOAD (MUST MATCH N8N WEBHOOK)
+    # ----------------------------------------------------
+    # The payload MUST match the Pydantic/Webhook structure exactly
+    # Ensure correct data types before sending to API
+    input_payload = {
+        "person_age": int(age),  # Ensure integer
+        "person_income": float(income),
+        "person_emp_length": float(emp_length),
+        "loan_amnt": float(loan_amnt),
+        "loan_int_rate": float(loan_rate),
+        "loan_percent_income": float(percent_income),
+        "cb_person_cred_hist_length": int(cred_hist),  # Ensure integer
+        "home_ownership": str(home).upper(),  # Ensure uppercase string
+        "loan_intent": str(intent).upper(),
+        "loan_grade": str(grade).upper(),
+        "default_on_file": str(default_on_file).upper()
+    }
+
+    st.markdown("<h3>🚀 Sending Data to Agentic Workflow...</h3>", unsafe_allow_html=True)
+
+    try:
+        # ----------------------------------------------------
+        # 2. CALL THE N8N WEBHOOK (HTTP POST)
+        # ----------------------------------------------------
+        response = requests.post(
+            N8N_WEBHOOK_URL,
+            json=input_payload,
+            timeout=30 # Increased timeout for the full workflow execution
         )
-        st.exception(load_error)
-        st.info("To retrain the model run: `python credit_model.py` or `python retrain_agent.py` in this project root.")
-        st.stop()
-    # Build feature dict for model
-    input_dict = {
-        "person_age": age,
-        "person_income": income,
-        "person_emp_length": emp_length,
-        "loan_amnt": loan_amnt,
-        "loan_int_rate": loan_rate,
-        "loan_percent_income": percent_income,
-        "cb_person_cred_hist_length": cred_hist,
-        f"person_home_ownership_{home}": 1,
-        f"loan_intent_{intent}": 1,
-        f"loan_grade_{grade}": 1,
-        f"cb_person_default_on_file_{default_on_file}": 1
-    }
+        
+        # Raise an exception for bad status codes (4xx or 5xx)
+        response.raise_for_status()
 
-    # Make prediction using the predictor
-    risk_level, prob, pred = predictor.predict(input_dict, FLAG_THRESHOLD)
-    risk_class = risk_level.split()[0].lower() + "-" + risk_level.split()[1].lower()
+        # The n8n Webhook should be configured to return a response after the 
+        # HTTP Request to FastAPI finishes.
+        # The response structure we expect is the output of the FastAPI API.
+        webhook_response = response.json()
+        
+        # Normalize common n8n / webhook wrappers
+        def normalize_webhook_response(resp):
+            """Unwrap common n8n wrappers so the Streamlit app can handle different webhook outputs.
 
+            - n8n may wrap the real payload inside arrays or inside keys like 'body' or 'data'.
+            - This helper tries common unwrap patterns and returns a dict-like payload.
+            """
+            # If it's a list with one element, unwrap it
+            if isinstance(resp, list) and len(resp) == 1:
+                resp = resp[0]
 
-    # Display result with animated colored box
-    st.markdown("<h4 style='color:#1976d2;'>🎉 Prediction Result</h4>", unsafe_allow_html=True)
-    st.markdown(
-        f"<div class='result-box {risk_class}'>"
-        f"<span style='font-size:1.3rem;'><b>Risk Level:</b> {risk_level}</span><br>"
-        f"<span style='font-size:1.1rem;'><b>Probability of Default:</b> <span style='color:#1976d2;'>{round(prob * 100, 2)}%</span></span>"
-        f"</div>", unsafe_allow_html=True
-    )
-    st.balloons()
+            # If n8n returns something like { "body": {...} } or { "data": {...} }, prefer the nested dict
+            for key in ("body", "data", "json", "payload"):
+                if isinstance(resp, dict) and key in resp and isinstance(resp[key], (dict, list)):
+                    # If nested is a list of length 1, unwrap that too
+                    nested = resp[key]
+                    if isinstance(nested, list) and len(nested) == 1:
+                        nested = nested[0]
+                    if isinstance(nested, dict):
+                        return nested
 
+            # Otherwise return as-is if it's already a dict
+            return resp
 
-    # SHAP Explanation (guarded)
-    st.markdown("<hr style='margin-top:1.5rem;margin-bottom:1.5rem;border:0;border-top:2px dashed #1976d2;'>", unsafe_allow_html=True)
-    st.markdown("<h3>🔎 <span style='color:#1976d2;'>Why This Prediction?</span></h3>", unsafe_allow_html=True)
-    
-    # Get SHAP values from predictor
-    shap_values, expected_value, df_input = predictor.get_shap_values(input_dict)
+        webhook_response = normalize_webhook_response(webhook_response)
 
-    shap.initjs()
-    plt.figure(figsize=(10, 4))
-    shap.force_plot(expected_value, shap_values[0], df_input, matplotlib=True, show=False)
-    st.pyplot(plt.gcf())
+        # Validate response structure
+        required_fields = ['risk_level', 'probability_default_percent', 'binary_prediction', 'shap_explanation']
+        if not isinstance(webhook_response, dict) or not all(field in webhook_response for field in required_fields):
+            missing_fields = []
+            if isinstance(webhook_response, dict):
+                missing_fields = [field for field in required_fields if field not in webhook_response]
+            # Provide diagnostics: show raw response and help on common shapes
+            st.error("Incomplete response from API. See raw response for debugging.")
+            st.markdown("**Raw webhook response:**")
+            try:
+                st.json(webhook_response)
+            except Exception:
+                st.write(str(webhook_response))
 
-    # Log prediction
-    log_data = {
-        "timestamp": datetime.now().isoformat(),
-        "prediction": int(pred),
-        "probability": prob,
-        "risk_level": risk_level,
-        "input_data": str(input_dict)
-    }
+            # Also log to console for deeper inspection
+            print("[DEBUG] Raw webhook response:", repr(webhook_response))
+            raise ValueError(f"Incomplete response from API. Missing fields: {missing_fields}")
 
-    log_df = pd.DataFrame([log_data])
-    if not os.path.exists(LOG_PATH):
-        log_df.to_csv(LOG_PATH, index=False)
-    else:
-        log_df.to_csv(LOG_PATH, mode="a", index=False, header=False)
+        # Extract results from the response
+        risk_level = webhook_response['risk_level']
+        prob = webhook_response['probability_default_percent'] / 100  # Convert back to 0-1 range for display
+        pred = webhook_response['binary_prediction']
+        
+        # Extract the NEW LLM field
+        llm_explanation = webhook_response.get('llm_explanation', 'LLM explanation not returned.')
 
-    st.success("✅ Prediction logged successfully.")
+        # Validate probability range
+        if not 0 <= webhook_response['probability_default_percent'] <= 100:
+            raise ValueError(f"Invalid probability value: {webhook_response['probability_default_percent']}%")
+        
+        # The SHAP explanation data is nested in the response
+        shap_explanation_data = webhook_response['shap_explanation']
+        
+        # Validate SHAP data
+        if not isinstance(shap_explanation_data, dict) or not shap_explanation_data:
+            raise ValueError("Invalid or empty SHAP explanation data received")
+        
+        # ----------------------------------------------------
+        # 3. DISPLAY RESULTS & SHAP (Using data from n8n)
+        # ----------------------------------------------------
+
+        # Determine CSS class for display
+        risk_class = risk_level.split()[0].lower() + "-" + risk_level.split()[1].lower()
+
+        st.markdown("<h4 style='color:#1976d2;'>🎉 Prediction Result</h4>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='result-box {risk_class}'>"
+            f"<span style='font-size:1.3rem;'><b>Risk Level:</b> {risk_level}</span><br>"
+            f"<span style='font-size:1.1rem;'><b>Probability of Default:</b> <span style='color:#1976d2;'>{round(prob * 100, 2)}%</span></span>"
+            f"</div>", unsafe_allow_html=True
+        )
+        st.balloons()
+        st.success("✅ Agentic Workflow Completed: Logging, Decision, and Action Performed.")
+
+        # SHAP Explanation (Reconstruct force plot using the SHAP data received)
+        st.markdown("<hr style='margin-top:1.5rem;margin-bottom:1.5rem;border:0;border-top:2px dashed #1976d2;'>", unsafe_allow_html=True)
+        st.markdown("<h3>🔎 <span style='color:#1976d2;'>Why This Prediction?</span></h3>", unsafe_allow_html=True)
+        
+        # --- NEW: Display LLM Explanation First ---
+        st.subheader("Natural Language Explanation:")
+        st.info(llm_explanation) # Use st.info for a prominent box
+
+        # --- Display SHAP Dataframe (for visual inspection/audit) ---
+        st.markdown("<h4>Top Feature Contributions (SHAP Audit Data):</h4>", unsafe_allow_html=True)
+        st.dataframe(pd.Series(shap_explanation_data).sort_values(ascending=False).head(5).rename("SHAP Value").to_frame().style.format("{:.4f}"))
+        st.info("The Agentic System performed all logging and decision logic successfully.")
+
+    except requests.exceptions.RequestException as e:
+        st.error("Error communicating with the Agentic AI Backend (n8n/FastAPI).")
+        if isinstance(e, requests.exceptions.Timeout):
+            st.error("Request timed out. The n8n workflow may be taking too long.")
+        elif isinstance(e, requests.exceptions.ConnectionError):
+            st.error("Could not connect to the n8n server. Please check if n8n is running.")
+        else:
+            st.error(f"API request failed: {str(e)}")
+        st.exception(e)
+    except ValueError as e:
+        st.error("Invalid data received from the API")
+        st.exception(e)
+    except KeyError as e:
+        st.error("Unexpected API response structure")
+        st.exception(e)
+    except Exception as e:
+        st.error("An unexpected error occurred while processing the response.")
+        st.exception(e)
