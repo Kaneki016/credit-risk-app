@@ -4,6 +4,8 @@ import numpy as np
 from typing import Dict, Union, Tuple
 import os
 from config import MODEL_PKL, SCALER_PKL, FEATURE_NAMES_PKL
+import json
+from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,10 +21,41 @@ class CreditRiskPredictor:
     def _load_model(self) -> None:
         """Load the model and supporting files."""
         try:
-            # Use filenames from centralized config
-            self.model = joblib.load(MODEL_PKL)
-            self.scaler = joblib.load(SCALER_PKL)
-            self.feature_names = joblib.load(FEATURE_NAMES_PKL)
+            # Prefer loading the latest versioned artifacts from models/manifest.json if present
+            manifest_path = os.path.join("models", "manifest.json")
+            if os.path.exists(manifest_path):
+                try:
+                    with open(manifest_path, "r", encoding="utf-8") as mf:
+                        manifest = json.load(mf)
+                    # manifest is a list of entries, pick the last (most recent)
+                    if isinstance(manifest, list) and len(manifest) > 0:
+                        latest = manifest[-1]
+                        model_path = latest.get("model")
+                        scaler_path = latest.get("scaler")
+                        features_path = latest.get("features")
+                        if model_path and os.path.exists(model_path):
+                            self.model = joblib.load(model_path)
+                        if scaler_path and os.path.exists(scaler_path):
+                            self.scaler = joblib.load(scaler_path)
+                        if features_path and os.path.exists(features_path):
+                            with open(features_path, "r", encoding="utf-8") as f:
+                                self.feature_names = json.load(f)
+                except Exception:
+                    # Fall back to legacy artifact names if manifest parsing/loading fails
+                    pass
+
+            # Fallback to legacy filenames from centralized config if anything missing
+            if self.model is None:
+                self.model = joblib.load(MODEL_PKL)
+            if self.scaler is None:
+                self.scaler = joblib.load(SCALER_PKL)
+            if self.feature_names is None:
+                # feature names may be stored as json or a pickle
+                try:
+                    with open(FEATURE_NAMES_PKL, "r", encoding="utf-8") as f:
+                        self.feature_names = json.load(f)
+                except Exception:
+                    self.feature_names = joblib.load(FEATURE_NAMES_PKL)
         except Exception as e:
             self.load_error = e
             # Re-raise so callers (API/app) can decide how to handle load failures

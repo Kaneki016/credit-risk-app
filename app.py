@@ -252,6 +252,12 @@ if st.button("✨ Predict Credit Risk! ✨", use_container_width=True):
         st.subheader("Natural Language Explanation:")
         st.info(llm_explanation) # Use st.info for a prominent box
 
+        # --- NEW: Display Operational Notes (Data Drift) Separately ---
+        operational_notes = webhook_response.get('operational_notes', '')
+        if operational_notes:
+            st.subheader("Operational Notes:")
+            st.warning(operational_notes)
+
         # --- Display SHAP Dataframe (for visual inspection/audit) ---
         st.markdown("<h4>Top Feature Contributions (SHAP Audit Data):</h4>", unsafe_allow_html=True)
         st.dataframe(pd.Series(shap_explanation_data).sort_values(ascending=False).head(5).rename("SHAP Value").to_frame().style.format("{:.4f}"))

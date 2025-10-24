@@ -13,6 +13,7 @@ LOG_PATH = "prediction_logs.csv"
 FLAG_THRESHOLD = 0.6
 
 # Model artifact filenames (relative to project root)
-MODEL_PKL = "credit_risk_model.pkl"
-SCALER_PKL = "scaler.pkl"
-FEATURE_NAMES_PKL = "feature_names.pkl"
+MODELS_DIR = "models"
+MODEL_PKL = "models/credit_risk_model.pkl"
+SCALER_PKL = "models/scaler.pkl"
+FEATURE_NAMES_PKL = "models/feature_names.json"

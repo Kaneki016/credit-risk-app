@@ -41,13 +41,37 @@ notebooks/
 .env
 
 # Model files (if you want to ignore them)
-# *.pkl
+# Ignore generated model artifacts and model cards (created by retrain)
+models/
+model_cards/
+*.pkl
+*.joblib
 
 # Logs
 *.log
+.log
 
 # Prediction logs generated at runtime
 prediction_logs.csv
+
+# pip verbose/install logs
+pip_install.log
+
+# Python cache and test outputs
+.pytest_cache/
+htmlcov/
+.mypy_cache/
+coverage.xml
+
+# OS files
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+
+# Notebook outputs
+*.nbconvert.ipynb
 
 # Local data folder (if you move large datasets here)
 data/
