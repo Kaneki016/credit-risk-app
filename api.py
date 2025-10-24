@@ -7,15 +7,19 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List, Optional
 from predictor import CreditRiskPredictor
+# Use the single canonical Pydantic model from model_schema.py
+from model_schema import LoanApplication
 from retrain_agent import retrain_if_needed
 import logging
 import requests
 import os  # REQUIRED for os.getenv()
 from dotenv import load_dotenv  # REQUIRED to load the .env file
+from logging_setup import configure_logging
  
 
 # --- Setup Logging ---
-logging.basicConfig(level=logging.INFO)
+# Use centralized logging setup
+configure_logging()
 logger = logging.getLogger(__name__)
 
 # --- Gemini API ---
@@ -34,24 +38,8 @@ except Exception as e:
     logger.error(f"FATAL: Model loading failed. Prediction API will be disabled. Error: {e}")
     predictor = None
     
-# --- 2. Define the Pydantic Input Schema ---
-# This Pydantic model ensures incoming JSON data from n8n is correct.
-# It MUST match the features expected by your Streamlit/Predictor input dictionary.
-class LoanApplication(BaseModel):
-    # Core numerical features
-    person_age: int = Field(..., description="Age of the borrower (years).", example=30)
-    person_income: float = Field(..., description="Annual Income.", example=75000.0)
-    person_emp_length: float = Field(..., description="Employment length (months).", example=60.0)
-    loan_amnt: float = Field(..., description="Loan amount requested.", example=12000.0)
-    loan_int_rate: float = Field(..., description="Loan interest rate (%).", example=11.99)
-    loan_percent_income: float = Field(..., description="Loan amount as % of income.", example=0.25)
-    cb_person_cred_hist_length: int = Field(..., description="Credit history length (years).", example=5)
-    
-    # Raw categorical inputs (these will be one-hot encoded by the predictor)
-    home_ownership: str = Field(..., description="Home Ownership (RENT, OWN, MORTGAGE, OTHER).", example="RENT")
-    loan_intent: str = Field(..., description="Purpose of the loan.", example="DEBTCONSOLIDATION")
-    loan_grade: str = Field(..., description="Loan Grade (A-G).", example="B")
-    default_on_file: str = Field(..., description="Previous Default on File (Y/N).", example="N")
+# --- 2. Input schema ---
+# `LoanApplication` is defined in `model_schema.py` and imported above.
 
 # --- 3. Initialize FastAPI Application ---
 app = FastAPI(
@@ -179,8 +167,20 @@ def predict_risk(application: LoanApplication):
         else:
             # For single-class output (returns single array)
             shap_data = shap_values
-            
-        shap_explanation = dict(zip(feature_names, shap_data.tolist()[0]))
+
+        # Try to extract the first row of SHAP values in a robust way
+        try:
+            row = shap_data.tolist()[0]
+        except Exception:
+            # shap_data may already be 1-D or not have a nested list structure
+            row = np.asarray(shap_data).ravel().tolist()
+
+        # If lengths mismatch, zip will truncate to the shorter; log for diagnostics
+        if len(feature_names) != len(row):
+            logger.warning("SHAP feature count (%s) != feature_names count (%s). Truncating to min length.", len(row), len(feature_names))
+
+        # Ensure all SHAP values are native Python floats for JSON serialization
+        shap_explanation = {k: float(v) for k, v in zip(feature_names, row)}
 
     except Exception as e:
         logger.error(f"Prediction or SHAP calculation failed: {e}")

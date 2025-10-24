@@ -3,6 +3,10 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Union, Tuple
 import os
+from config import MODEL_PKL, SCALER_PKL, FEATURE_NAMES_PKL
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CreditRiskPredictor:
     def __init__(self):
@@ -15,11 +19,13 @@ class CreditRiskPredictor:
     def _load_model(self) -> None:
         """Load the model and supporting files."""
         try:
-            self.model = joblib.load("credit_risk_model.pkl")
-            self.scaler = joblib.load("scaler.pkl")
-            self.feature_names = joblib.load("feature_names.pkl")
+            # Use filenames from centralized config
+            self.model = joblib.load(MODEL_PKL)
+            self.scaler = joblib.load(SCALER_PKL)
+            self.feature_names = joblib.load(FEATURE_NAMES_PKL)
         except Exception as e:
             self.load_error = e
+            # Re-raise so callers (API/app) can decide how to handle load failures
             raise e
 
     def preprocess_features(self, input_dict: Dict[str, Union[float, str]]) -> pd.DataFrame:
@@ -65,17 +71,19 @@ class CreditRiskPredictor:
             # Check the size of the probability output
             if len(raw_proba) == 2:
                 # Standard binary output: [P(Class 0), P(Class 1)]
-                prob = raw_proba[1] 
+                prob = raw_proba[1]
             elif len(raw_proba) == 1:
                 # Single column output: [P(Class 1)]
-                prob = raw_proba[0] 
+                prob = raw_proba[0]
             else:
                 # Fallback if prediction fails or is unexpected
-                prob = float(pred) # use raw prediction as probability-like value
+                prob = float(pred)  # use raw prediction as probability-like value
+            # Ensure native Python float for JSON friendliness
+            prob = float(prob)
                 
         except Exception as e:
             # fallback if predict_proba itself throws an error
-            print(f"Warning: predict_proba failed with error: {e}")
+            logger.warning("predict_proba failed; falling back to raw prediction. Error: %s", e)
             prob = float(pred)
         
         # Determine risk level

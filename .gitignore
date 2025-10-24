@@ -34,6 +34,9 @@ wheels/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Notebooks folder
+notebooks/
+
 # Environment variables
 .env
 
@@ -42,3 +45,14 @@ wheels/
 
 # Logs
 *.log
+
+# Prediction logs generated at runtime
+prediction_logs.csv
+
+# Local data folder (if you move large datasets here)
+data/
+
+# Virtual env
+.venv/
+venv/
+logs/

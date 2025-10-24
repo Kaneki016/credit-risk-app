@@ -4,17 +4,15 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import joblib
 import os
 from datetime import datetime
-import shap
-import matplotlib.pyplot as plt
 import requests
 from streamlit_lottie import st_lottie
-import requests
+from config import N8N_WEBHOOK_URL, LOG_PATH, FLAG_THRESHOLD
 
-#n8n webhook
-N8N_WEBHOOK_URL = "http://localhost:5678/webhook/6c5765f3-1d52-4d65-be13-c37133a73bf1"
+# Configure logging early so libraries can use logging
+from logging_setup import configure_logging
+configure_logging()
 
 # Initialize predictor
 from predictor import CreditRiskPredictor
