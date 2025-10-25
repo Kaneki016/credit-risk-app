@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 import requests
 from streamlit_lottie import st_lottie
-from config import N8N_WEBHOOK_URL, LOG_PATH, FLAG_THRESHOLD
+from config import N8N_WEBHOOK_URL, FLAG_THRESHOLD
 
 # Configure logging early so libraries can use logging
 from logging_setup import configure_logging
@@ -25,7 +25,6 @@ except Exception as e:
     # Save the exception and continue so the Streamlit app can show a helpful message
     load_error = e
 
-LOG_PATH = "prediction_logs.csv"
 FLAG_THRESHOLD = 0.6  # Flag if probability of default > 60%
 
 st.set_page_config(page_title="Credit Risk Agentic AI", layout="wide")
@@ -153,17 +152,17 @@ if st.button("✨ Predict Credit Risk! ✨", use_container_width=True):
         response = requests.post(
             N8N_WEBHOOK_URL,
             json=input_payload,
-            timeout=30 # Increased timeout for the full workflow execution
+            timeout=30  # Increased timeout for the full workflow execution
         )
-        
+
         # Raise an exception for bad status codes (4xx or 5xx)
         response.raise_for_status()
 
-        # The n8n Webhook should be configured to return a response after the 
+        # The n8n Webhook should be configured to return a response after the
         # HTTP Request to FastAPI finishes.
         # The response structure we expect is the output of the FastAPI API.
         webhook_response = response.json()
-        
+
         # Normalize common n8n / webhook wrappers
         def normalize_webhook_response(resp):
             """Unwrap common n8n wrappers so the Streamlit app can handle different webhook outputs.
@@ -212,21 +211,22 @@ if st.button("✨ Predict Credit Risk! ✨", use_container_width=True):
         risk_level = webhook_response['risk_level']
         prob = webhook_response['probability_default_percent'] / 100  # Convert back to 0-1 range for display
         pred = webhook_response['binary_prediction']
-        
+
         # Extract the NEW LLM field
         llm_explanation = webhook_response.get('llm_explanation', 'LLM explanation not returned.')
+        remediation_suggestion = webhook_response.get('remediation_suggestion')
 
         # Validate probability range
         if not 0 <= webhook_response['probability_default_percent'] <= 100:
             raise ValueError(f"Invalid probability value: {webhook_response['probability_default_percent']}%")
-        
+
         # The SHAP explanation data is nested in the response
         shap_explanation_data = webhook_response['shap_explanation']
-        
+
         # Validate SHAP data
         if not isinstance(shap_explanation_data, dict) or not shap_explanation_data:
             raise ValueError("Invalid or empty SHAP explanation data received")
-        
+
         # ----------------------------------------------------
         # 3. DISPLAY RESULTS & SHAP (Using data from n8n)
         # ----------------------------------------------------
@@ -247,16 +247,21 @@ if st.button("✨ Predict Credit Risk! ✨", use_container_width=True):
         # SHAP Explanation (Reconstruct force plot using the SHAP data received)
         st.markdown("<hr style='margin-top:1.5rem;margin-bottom:1.5rem;border:0;border-top:2px dashed #1976d2;'>", unsafe_allow_html=True)
         st.markdown("<h3>🔎 <span style='color:#1976d2;'>Why This Prediction?</span></h3>", unsafe_allow_html=True)
-        
+
         # --- NEW: Display LLM Explanation First ---
         st.subheader("Natural Language Explanation:")
-        st.info(llm_explanation) # Use st.info for a prominent box
+        st.info(llm_explanation)  # Use st.info for a prominent box
 
         # --- NEW: Display Operational Notes (Data Drift) Separately ---
         operational_notes = webhook_response.get('operational_notes', '')
         if operational_notes:
             st.subheader("Operational Notes:")
             st.warning(operational_notes)
+
+        # --- NEW: Display remediation suggestion if present ---
+        if remediation_suggestion:
+            st.subheader("Suggested Remediation:")
+            st.info(remediation_suggestion)
 
         # --- Display SHAP Dataframe (for visual inspection/audit) ---
         st.markdown("<h4>Top Feature Contributions (SHAP Audit Data):</h4>", unsafe_allow_html=True)
