@@ -17,6 +17,7 @@ import requests
 import os  # REQUIRED for os.getenv()
 from dotenv import load_dotenv  # REQUIRED to load the .env file
 from logging_setup import configure_logging
+from fastapi.middleware.cors import CORSMiddleware
  
 
 # --- Setup Logging ---
@@ -58,6 +59,23 @@ app = FastAPI(
     title="Agentic Credit Risk Prediction API for n8n",
     version="1.0.0",
     description="Serves the XGBoost credit risk model for automated workflows (n8n)."
+)
+
+# Allow cross-origin requests from local frontend (development)
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 # --- NEW: Async Function to Call LLM for Explanation ---
