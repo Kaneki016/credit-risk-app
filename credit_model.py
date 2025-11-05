@@ -1,4 +1,6 @@
 # credit_model.py
+import os
+import json
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -41,8 +43,10 @@ y_pred = model.predict(X_test_scaled)
 print(classification_report(y_test, y_pred))
 print("AUC:", roc_auc_score(y_test, model.predict_proba(X_test_scaled)[:, 1]))
 
-# Save model and metadata
-joblib.dump(model, "credit_risk_model.pkl")
-joblib.dump(scaler, "scaler.pkl")
-# Persist the full feature list (from the encoded dataframe) so inference can construct the same ordering
-joblib.dump(X.columns.tolist(), "feature_names.pkl")
+# Save model and metadata into the canonical `models/` directory
+os.makedirs("models", exist_ok=True)
+joblib.dump(model, os.path.join("models", "credit_risk_model.pkl"))
+joblib.dump(scaler, os.path.join("models", "scaler.pkl"))
+# Persist the full feature list (from the encoded dataframe) as JSON for consistency
+with open(os.path.join("models", "feature_names.json"), "w", encoding="utf-8") as f:
+	json.dump(X.columns.tolist(), f)
