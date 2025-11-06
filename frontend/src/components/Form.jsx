@@ -8,7 +8,7 @@ const API_WEBHOOK = window.__API_WEBHOOK_URL__ || 'http://localhost:5678/webhook
 const fieldInfo = {
   person_age: { min: 18, max: 120, tip: "Applicant must be at least 18 years old" },
   person_income: { min: 0, max: 1000000, tip: "Annual income before taxes" },
-  person_emp_length: { min: 0, max: 600, tip: "Employment length in months" },
+  person_emp_length: { min: 0, max: 600, tip: "Employment length in years" },
   loan_amnt: { min: 1000, max: 100000, tip: "Amount requested for the loan" },
   loan_int_rate: { min: 0, max: 30, tip: "Annual interest rate %" },
   loan_percent_income: { min: 0, max: 1, tip: "Loan amount as fraction of income (0-1)" }
@@ -117,7 +117,7 @@ export default function Form({onResult, onLoading, onError}){
           {errors.person_age && <span className="error-text">{errors.person_age}</span>}
         </label>
         <label data-tooltip-id="field-tip" data-tooltip-content={fieldInfo.person_emp_length.tip}>
-          Employment (months)
+          Employment (Years)
           <input 
             type="number" 
             value={form.person_emp_length} 
