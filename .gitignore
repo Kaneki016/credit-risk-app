@@ -1,55 +1,210 @@
-# Node/Vite/React frontend
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
-frontend/.env*
-frontend/.DS_Store
+# =============================================================================
+# Credit Risk App - .gitignore
+# Only source code, configuration templates, and documentation are committed.
+# =============================================================================
 
-downloads/
-
+# -----------------------------------------------------------------------------
 # Python
+# -----------------------------------------------------------------------------
+# Virtual environments
 .venv/
 venv/
 ENV/
+env/
+.conda/
+
+# Python cache and compiled files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Distribution / packaging
 build/
 dist/
 *.egg-info/
+.eggs/
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Testing
 .pytest_cache/
 .mypy_cache/
+.dmypy.json
+dmypy.json
 htmlcov/
+.tox/
+.coverage
+.coverage.*
 coverage.xml
+*.cover
+.hypothesis/
 
-# IDE/editor
-.idea/
-.vscode/
-*.swp
-*.swo
+# -----------------------------------------------------------------------------
+# Node.js / Frontend
+# -----------------------------------------------------------------------------
+# Dependencies
+frontend/node_modules/
+node_modules/
 
-# Jupyter/Notebooks
-.ipynb_checkpoints
-notebooks/
-*.nbconvert.ipynb
+# Build outputs
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.next/
+frontend/out/
 
-# Data, models, logs
+# Frontend environment files
+frontend/.env
+frontend/.env.local
+frontend/.env*.local
+
+# Package manager locks (optional - some teams commit these)
+# Uncomment if you want to ignore lock files:
+# frontend/package-lock.json
+# frontend/yarn.lock
+# frontend/pnpm-lock.yaml
+
+# -----------------------------------------------------------------------------
+# Environment & Secrets
+# -----------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.cert
+
+# Keep example files
+!env.example
+!*.example
+
+# -----------------------------------------------------------------------------
+# Data & Models (Large binary files)
+# -----------------------------------------------------------------------------
+# Datasets
 data/
+*.csv
+!requirements.txt  # Keep requirements.txt even though it has .txt extension
+
+# Model artifacts (large binary files)
 models/
-model_cards/
 *.pkl
 *.joblib
-*.log
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.onnx
+*.pb
+*.tflite
+
+# Model cards (generated artifacts)
+model_cards/
+
+# -----------------------------------------------------------------------------
+# Logs & Runtime Files
+# -----------------------------------------------------------------------------
 logs/
+*.log
+*.log.*
 prediction_logs.csv
 pip_install.log
 
-# Environment
-.env
+# -----------------------------------------------------------------------------
+# Jupyter Notebooks
+# -----------------------------------------------------------------------------
+notebooks/
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+*.nbconvert.ipynb
 
-# OS/Temp
+# -----------------------------------------------------------------------------
+# IDE & Editor Files
+# -----------------------------------------------------------------------------
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# -----------------------------------------------------------------------------
+# OS Files
+# -----------------------------------------------------------------------------
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# -----------------------------------------------------------------------------
+# Temporary & Backup Files
+# -----------------------------------------------------------------------------
 *.tmp
+*.temp
 *.bak
+*.backup
+*.swp
+*.swo
+*~
+.cache/
+
+# -----------------------------------------------------------------------------
+# Downloads & Misc
+# -----------------------------------------------------------------------------
+downloads/
+temp/
+tmp/
+
+# -----------------------------------------------------------------------------
+# Documentation Build (if using Sphinx, etc.)
+# -----------------------------------------------------------------------------
+docs/_build/
+docs/.doctrees/
+
+# -----------------------------------------------------------------------------
+# Local Development
+# -----------------------------------------------------------------------------
+.local/
+local_settings.py
+local_config.py
