@@ -44,11 +44,16 @@ except Exception as e:
 # --- Load feature statistics for drift detection if available ---
 FEATURE_STATS = {}
 try:
-    stats_path = os.path.join("models", "feature_statistics.json")
+    # Use absolute path to ensure it works regardless of working directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = script_dir  # api.py is in the project root
+    stats_path = os.path.join(project_root, "models", "feature_statistics.json")
     if os.path.exists(stats_path):
         with open(stats_path, "r", encoding="utf-8") as sf:
             FEATURE_STATS = json.load(sf)
-except Exception:
+        logger.info(f"Loaded feature statistics from: {stats_path}")
+except Exception as e:
+    logger.warning(f"Could not load feature statistics: {e}")
     FEATURE_STATS = {}
     
 # --- 2. Input schema ---
@@ -247,11 +252,37 @@ async def generate_llm_explanation(
 def health_check():
     """Check if the API is running and the model is loaded."""
     if predictor is None:
-        raise HTTPException(
-            status_code=503, 
-            detail={"status": "error", "message": "Model not loaded. Service unavailable.", "load_error": str(predictor.load_error) if predictor else "Unknown"}
-        )
+        error_msg = "Model not loaded. Service unavailable."
+        return {
+            "status": "error",
+            "message": error_msg,
+            "load_error": "Model failed to load during startup. Check logs for details."
+        }
     return {"status": "ok", "message": "API is running and model is ready."}
+
+# --- 4.5. Model Reload Endpoint ---
+@app.post("/reload_model")
+def reload_model():
+    """Reload the model from disk. Useful after retraining or fixing model files."""
+    global predictor
+    try:
+        logger.info("Reloading model...")
+        predictor = CreditRiskPredictor()
+        logger.info("Model reloaded successfully.")
+        return {
+            "status": "success",
+            "message": "Model reloaded successfully."
+        }
+    except Exception as e:
+        logger.error(f"Model reload failed: {e}", exc_info=True)
+        predictor = None
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "message": f"Model reload failed: {str(e)}"
+            }
+        )
 
 # --- 5. Prediction Endpoint (The main target for n8n) ---
 @app.post("/predict_risk", response_model=Dict[str, Any])

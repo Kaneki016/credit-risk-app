@@ -61,6 +61,16 @@ Agentic Credit Risk Prediction — a modern full-stack app for loan default risk
 
 ## Configuration
 
+### Environment Variables
+
+1. **Gemini API Key (for LLM explanations)**:
+   - Create a `.env` file in the project root (copy from `env.example`)
+   - Get your API key from: https://aistudio.google.com/app/apikey
+   - Add to `.env`: `GEMINI_API_KEY="your-api-key-here"`
+   - **Note**: Without this key, LLM explanations will be disabled and show "LLM explanation disabled (no API key)"
+
+### Other Configuration
+
 - Edit `config.py` to change webhook URLs, model filenames, log paths, and risk thresholds.
 - Place model artifacts in the project root or update paths in `config.py`:
 	- `credit_risk_model.pkl`

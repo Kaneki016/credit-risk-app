@@ -17,7 +17,7 @@ Fixes applied:
 """
 
 # Load dataset
-df = pd.read_csv("credit_risk_dataset.csv")
+df = pd.read_csv("F:\\credit-risk-app\\data\\credit_risk_dataset.csv")
 
 # Target variable
 y = df["loan_status"]
