@@ -1,15 +1,50 @@
 <#
-PowerShell helper to start the development services in separate terminals.
-- Starts FastAPI (uvicorn) and Streamlit in separate PowerShell windows.
-- Designed for local development on Windows.
+.SYNOPSIS
+    Start development services for Credit Risk App
+
+.DESCRIPTION
+    PowerShell helper to start the development services in separate terminals.
+    - Starts FastAPI backend (uvicorn) in one window
+    - Starts React frontend (Vite) in another window
+    - Automatically activates virtual environment
+    - Designed for local development on Windows
+
+.PARAMETER BackendModule
+    The Python module path for the FastAPI app (default: backend.api.main:app)
+
+.PARAMETER BackendPort
+    Port for the backend API (default: 8000)
+
+.PARAMETER Reload
+    Enable auto-reload for backend (default: true)
+
+.PARAMETER RunInCurrentWindow
+    Run services in current window instead of opening new windows
+
+.EXAMPLE
+    .\scripts\dev_start.ps1
+    Start both backend and frontend in separate windows
+
+.EXAMPLE
+    .\scripts\dev_start.ps1 -BackendPort 8080
+    Start with backend on port 8080
+
+.EXAMPLE
+    .\scripts\dev_start.ps1 -RunInCurrentWindow
+    Run in current window (blocks until stopped)
+
+.NOTES
+    Prerequisites:
+    - Python virtual environment at .venv/
+    - Node.js and npm installed
+    - Run 'pip install -r requirements.txt' first
+    - Run 'npm install' in frontend/ first
 #>
 
 param(
-    [string]$BackendModule = "api:app",
+    [string]$BackendModule = "backend.api.main:app",
     [int]$BackendPort = 8000,
     [switch]$Reload = $true,
-    [string]$StreamlitArgs = "run app.py",
-    [switch]$UseReact,
     [switch]$RunInCurrentWindow
 )
 
@@ -23,23 +58,51 @@ function Get-FrontendPackageManager {
 
 Write-Host "Starting development services..." -ForegroundColor Green
 
-# Build uvicorn args using python -m uvicorn for environment consistency
-$uvicornArgs = "$BackendModule"
-if ($Reload) { $uvicornArgs += " --reload" }
-$uvicornArgs += " --port $BackendPort"
+# Check if virtual environment exists
+$venvPath = Join-Path -Path (Get-Location) -ChildPath ".venv"
+$venvActivate = Join-Path -Path $venvPath -ChildPath "Scripts\Activate.ps1"
+
+if (-not (Test-Path $venvActivate)) {
+    Write-Host "Warning: Virtual environment not found at $venvPath" -ForegroundColor Yellow
+    Write-Host "Please create it first: python -m venv .venv" -ForegroundColor Yellow
+}
+
+# Check if .env file exists
+$envFile = Join-Path -Path (Get-Location) -ChildPath ".env"
+if (-not (Test-Path $envFile)) {
+    Write-Host "Warning: .env file not found. Gemini features may not work." -ForegroundColor Yellow
+    Write-Host "Create .env file with: GEMINI_API_KEY=your-key-here" -ForegroundColor Yellow
+}
+
+# Build uvicorn command
+$reloadFlag = if ($Reload) { "--reload" } else { "" }
+$uvicornCmd = "uvicorn $BackendModule --port $BackendPort $reloadFlag --host 0.0.0.0"
 
 # Start backend (uvicorn via python)
 if ($RunInCurrentWindow) {
-    Write-Host "Starting backend (python -m uvicorn $uvicornArgs) in current window..." -ForegroundColor Cyan
-    python -m uvicorn $uvicornArgs
+    Write-Host "Starting backend ($uvicornCmd) in current window..." -ForegroundColor Cyan
+    if (Test-Path $venvActivate) {
+        & $venvActivate
+    }
+    Invoke-Expression $uvicornCmd
 } else {
-    Write-Host "Opening new PowerShell window for backend (python -m uvicorn $uvicornArgs)" -ForegroundColor Cyan
-    Start-Process -FilePath pwsh -ArgumentList @('-NoExit','-Command',"cd '$(Get-Location)'; python -m uvicorn $uvicornArgs") -WorkingDirectory (Get-Location) -WindowStyle Normal
+    Write-Host "Opening new PowerShell window for backend..." -ForegroundColor Cyan
+    $backendScript = @"
+Write-Host 'Starting Backend API...' -ForegroundColor Cyan
+cd '$(Get-Location)'
+if (Test-Path '$venvActivate') {
+    & '$venvActivate'
+    Write-Host 'Virtual environment activated' -ForegroundColor Green
+}
+Write-Host 'Running: $uvicornCmd' -ForegroundColor Yellow
+$uvicornCmd
+"@
+    Start-Process -FilePath pwsh -ArgumentList @('-NoExit','-Command', $backendScript) -WorkingDirectory (Get-Location) -WindowStyle Normal
 }
 
-# Prepare frontend start
+# Start React frontend
 $frontendDir = Join-Path -Path (Get-Location) -ChildPath 'frontend'
-if ($UseReact.IsPresent -or (Test-Path (Join-Path $frontendDir 'package.json'))) {
+if (Test-Path (Join-Path $frontendDir 'package.json')) {
     $pm = Get-FrontendPackageManager
     switch ($pm) {
         'pnpm' { $startCmd = 'pnpm run dev' }
@@ -47,25 +110,35 @@ if ($UseReact.IsPresent -or (Test-Path (Join-Path $frontendDir 'package.json')))
         default { $startCmd = 'npm run dev' }
     }
 
+    # Check if node_modules exists
+    $nodeModules = Join-Path -Path $frontendDir -ChildPath 'node_modules'
+    if (-not (Test-Path $nodeModules)) {
+        Write-Host "Warning: node_modules not found. Run 'npm install' in frontend directory first." -ForegroundColor Yellow
+    }
+
     if ($RunInCurrentWindow) {
         Write-Host "Starting frontend ($startCmd) in current window (path: $frontendDir)" -ForegroundColor Cyan
         Push-Location $frontendDir
-        iex $startCmd
+        Invoke-Expression $startCmd
         Pop-Location
     } else {
         Write-Host "Opening new PowerShell window for frontend using $pm..." -ForegroundColor Cyan
-        # Use cd then run to ensure correct working directory
-        Start-Process -FilePath pwsh -ArgumentList @('-NoExit','-Command',"cd '$frontendDir'; $startCmd") -WorkingDirectory $frontendDir -WindowStyle Normal
+        $frontendScript = @"
+Write-Host 'Starting Frontend Dev Server...' -ForegroundColor Cyan
+cd '$frontendDir'
+Write-Host 'Running: $startCmd' -ForegroundColor Yellow
+$startCmd
+"@
+        Start-Process -FilePath pwsh -ArgumentList @('-NoExit','-Command', $frontendScript) -WorkingDirectory $frontendDir -WindowStyle Normal
     }
 } else {
-    # Fallback to Streamlit (run via python -m streamlit for environment consistency)
-    if ($RunInCurrentWindow) {
-        Write-Host "Starting Streamlit in current window: python -m streamlit $StreamlitArgs" -ForegroundColor Cyan
-        python -m streamlit $StreamlitArgs
-    } else {
-        Write-Host "Opening new PowerShell window for Streamlit..." -ForegroundColor Cyan
-        Start-Process -FilePath pwsh -ArgumentList @('-NoExit','-Command',"cd '$(Get-Location)'; python -m streamlit $StreamlitArgs") -WorkingDirectory (Get-Location) -WindowStyle Normal
-    }
+    Write-Host "Warning: frontend/package.json not found. Skipping frontend startup." -ForegroundColor Yellow
 }
 
-Write-Host "Dev services started. Close the spawned windows to stop them." -ForegroundColor Green
+Write-Host ""
+Write-Host "✅ Dev services started!" -ForegroundColor Green
+Write-Host "   Backend API: http://localhost:$BackendPort" -ForegroundColor Cyan
+Write-Host "   API Docs: http://localhost:${BackendPort}/docs" -ForegroundColor Cyan
+Write-Host "   Frontend: http://localhost:5173" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Close the spawned windows to stop the services." -ForegroundColor Yellow

@@ -11,7 +11,7 @@ class LoanApplication(BaseModel):
     loan_percent_income: float = Field(..., description="Loan amount as percentage of income")
     cb_person_cred_hist_length: float = Field(..., description="Credit history length in years")
 
-    # Categorical fields (match names used by Streamlit app and API)
+    # Categorical fields (match names used by frontend and API)
     home_ownership: str = Field(..., description="Home ownership status (RENT, OWN, MORTGAGE, OTHER)")
     loan_intent: str = Field(..., description="Purpose of the loan")
     loan_grade: str = Field(..., description="Loan grade assigned (A-G)")

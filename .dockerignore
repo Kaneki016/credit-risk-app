@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Git
+.git/
+.gitignore
+.github/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Data
+data/
+*.csv
+
+# Models (will be mounted as volume)
+models/
+*.pkl
+*.joblib
+
+# Model cards
+model_cards/
+
+# Notebooks
+notebooks/
+*.ipynb
+
+# Tests
+tests/
+pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Environment
+.env
+.env.local
+
+# Scripts
+scripts/
+reorganize.py
+cleanup_old_files.py

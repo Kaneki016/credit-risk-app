@@ -1,6 +1,6 @@
 # Frontend (React)
 
-This folder contains a Vite + React frontend for the credit-risk-app. It replaces the previous Streamlit UI.
+This folder contains the Vite + React frontend for the credit-risk-app.
 
 Quick start (from repository root):
 

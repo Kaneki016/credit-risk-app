@@ -1,26 +1,31 @@
 # =============================================================================
 # Credit Risk App - .gitignore
+# =============================================================================
+# This file specifies which files and directories should be ignored by Git.
 # Only source code, configuration templates, and documentation are committed.
+# Generated files, secrets, and large binaries are excluded.
 # =============================================================================
 
-# -----------------------------------------------------------------------------
-# Python
-# -----------------------------------------------------------------------------
-# Virtual environments
+# =============================================================================
+# PYTHON
+# =============================================================================
+
+# Virtual Environments
 .venv/
 venv/
 ENV/
 env/
 .conda/
+*.virtualenv
 
-# Python cache and compiled files
+# Python Cache & Compiled Files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 
-# Distribution / packaging
+# Distribution & Packaging
 build/
 dist/
 *.egg-info/
@@ -28,8 +33,9 @@ dist/
 *.egg
 pip-log.txt
 pip-delete-this-directory.txt
+wheels/
 
-# Testing
+# Testing & Coverage
 .pytest_cache/
 .mypy_cache/
 .dmypy.json
@@ -41,57 +47,73 @@ htmlcov/
 coverage.xml
 *.cover
 .hypothesis/
+.ruff_cache/
 
-# -----------------------------------------------------------------------------
-# Node.js / Frontend
-# -----------------------------------------------------------------------------
+# =============================================================================
+# NODE.JS / FRONTEND
+# =============================================================================
+
 # Dependencies
-frontend/node_modules/
 node_modules/
+frontend/node_modules/
+jspm_packages/
 
-# Build outputs
+# Build Outputs
 frontend/dist/
 frontend/build/
 frontend/.vite/
 frontend/.next/
 frontend/out/
 
-# Frontend environment files
+# Frontend Environment Files
 frontend/.env
 frontend/.env.local
 frontend/.env*.local
 
-# Package manager locks (optional - some teams commit these)
-# Uncomment if you want to ignore lock files:
+# Package Manager Files (optional - uncomment to ignore)
 # frontend/package-lock.json
 # frontend/yarn.lock
 # frontend/pnpm-lock.yaml
 
-# -----------------------------------------------------------------------------
-# Environment & Secrets
-# -----------------------------------------------------------------------------
+# =============================================================================
+# ENVIRONMENT & SECRETS
+# =============================================================================
+
+# Environment Variables
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+
+# Secrets & Certificates
 *.key
 *.pem
 *.cert
+*.crt
+secrets/
+.secrets/
 
-# Keep example files
+# Keep Example Files
 !env.example
 !*.example
+!example.*
 
-# -----------------------------------------------------------------------------
-# Data & Models (Large binary files)
-# -----------------------------------------------------------------------------
-# Datasets
+# =============================================================================
+# DATA & MODELS (Large Binary Files)
+# =============================================================================
+
+# Training Data
 data/
+datasets/
 *.csv
-!requirements.txt  # Keep requirements.txt even though it has .txt extension
+!**/sample*.csv        # Keep sample data files
+!requirements.txt      # Keep requirements.txt
 
-# Model artifacts (large binary files)
+# Model Artifacts
 models/
 *.pkl
+*.pickle
 *.joblib
 *.h5
 *.hdf5
@@ -100,63 +122,95 @@ models/
 *.onnx
 *.pb
 *.tflite
+*.safetensors
 
-# Model cards (generated artifacts)
+# Model Documentation
 model_cards/
 
-# -----------------------------------------------------------------------------
-# Logs & Runtime Files
-# -----------------------------------------------------------------------------
+# Prevent Duplicate Model Files in Root
+/*.pkl
+/*.h5
+/*.pt
+
+# =============================================================================
+# LOGS & RUNTIME FILES
+# =============================================================================
+
+# Application Logs
 logs/
 *.log
 *.log.*
 prediction_logs.csv
 pip_install.log
 
-# -----------------------------------------------------------------------------
-# Jupyter Notebooks
-# -----------------------------------------------------------------------------
+# Database Files (SQLite)
+*.db
+*.sqlite
+*.sqlite3
+!example.db
+
+# =============================================================================
+# JUPYTER NOTEBOOKS
+# =============================================================================
+
 notebooks/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 *.nbconvert.ipynb
 
-# -----------------------------------------------------------------------------
-# IDE & Editor Files
-# -----------------------------------------------------------------------------
-# VSCode
+# =============================================================================
+# IDE & EDITOR FILES
+# =============================================================================
+
+# Visual Studio Code
 .vscode/
 *.code-workspace
+.history/
 
 # PyCharm / IntelliJ
 .idea/
 *.iml
 *.iws
 *.ipr
+.idea_modules/
 
 # Vim
 *.swp
 *.swo
 *~
 .vim/
+Session.vim
 
 # Emacs
 *~
 \#*\#
 .\#*
+.emacs.desktop
+.emacs.desktop.lock
 
 # Sublime Text
 *.sublime-project
 *.sublime-workspace
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
 
-# -----------------------------------------------------------------------------
-# OS Files
-# -----------------------------------------------------------------------------
+# =============================================================================
+# OPERATING SYSTEM FILES
+# =============================================================================
+
 # macOS
 .DS_Store
 .AppleDouble
 .LSOverride
 ._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
 
 # Windows
 Thumbs.db
@@ -176,10 +230,12 @@ $RECYCLE.BIN/
 *~
 .directory
 .Trash-*
+.nfs*
 
-# -----------------------------------------------------------------------------
-# Temporary & Backup Files
-# -----------------------------------------------------------------------------
+# =============================================================================
+# TEMPORARY & BACKUP FILES
+# =============================================================================
+
 *.tmp
 *.temp
 *.bak
@@ -188,23 +244,57 @@ $RECYCLE.BIN/
 *.swo
 *~
 .cache/
+*.orig
 
-# -----------------------------------------------------------------------------
-# Downloads & Misc
-# -----------------------------------------------------------------------------
+# =============================================================================
+# PROJECT SPECIFIC
+# =============================================================================
+
+# Backups
+backups/
+backup_*/
+
+# Downloads & Temporary
 downloads/
 temp/
 tmp/
 
-# -----------------------------------------------------------------------------
-# Documentation Build (if using Sphinx, etc.)
-# -----------------------------------------------------------------------------
+# Documentation Build
 docs/_build/
 docs/.doctrees/
+site/
 
-# -----------------------------------------------------------------------------
 # Local Development
-# -----------------------------------------------------------------------------
 .local/
 local_settings.py
 local_config.py
+local_*.py
+
+# =============================================================================
+# DOCKER
+# =============================================================================
+
+# Docker volumes
+docker-compose.override.yml
+.dockerignore.local
+
+# =============================================================================
+# CI/CD
+# =============================================================================
+
+# GitHub Actions
+.github/workflows/*.local.yml
+
+# =============================================================================
+# KEEP THESE FILES
+# =============================================================================
+
+# Ensure important files are not ignored
+!.gitignore
+!.dockerignore
+!.github/
+!pytest.ini
+!requirements.txt
+!package.json
+!README.md
+!LICENSE
