@@ -17,9 +17,6 @@ from fastapi.middleware.cors import CORSMiddleware
 # Internal imports
 from backend.models.predictor import CreditRiskPredictor
 from backend.models.dynamic_predictor import DynamicCreditRiskPredictor
-from backend.models.gemini_predictor import GeminiCreditRiskPredictor
-from backend.models.gemini_mitigation_guide import GeminiMitigationGuide
-from backend.models.gemini_feature_engineer import GeminiFeatureEngineer, engineer_features_with_ai
 from backend.database import get_db, init_db, check_connection, crud
 from backend.database.models import Prediction as DBPrediction
 from sqlalchemy.orm import Session
@@ -62,32 +59,8 @@ except Exception as e:
     logger.warning(f"Dynamic predictor initialization failed: {e}")
     dynamic_predictor = None
 
-# --- Initialize Gemini Predictor ---
-gemini_predictor = None
-try:
-    gemini_predictor = GeminiCreditRiskPredictor()
-    logger.info("GeminiCreditRiskPredictor loaded successfully.")
-except Exception as e:
-    logger.warning(f"Gemini predictor initialization failed: {e}")
-    gemini_predictor = None
-
-# --- Initialize Gemini Mitigation Guide ---
-gemini_mitigation = None
-try:
-    gemini_mitigation = GeminiMitigationGuide()
-    logger.info("GeminiMitigationGuide loaded successfully.")
-except Exception as e:
-    logger.warning(f"Gemini mitigation guide initialization failed: {e}")
-    gemini_mitigation = None
-
-# --- Initialize Gemini Feature Engineer ---
-gemini_feature_engineer = None
-try:
-    gemini_feature_engineer = GeminiFeatureEngineer()
-    logger.info("GeminiFeatureEngineer loaded successfully.")
-except Exception as e:
-    logger.warning(f"Gemini feature engineer initialization failed: {e}")
-    gemini_feature_engineer = None
+# Gemini AI is used only for generating natural language explanations
+# No separate predictor needed - integrated into the main prediction flow
     
 # --- Load feature statistics for drift detection if available ---
 FEATURE_STATS = {}
@@ -111,7 +84,7 @@ except Exception as e:
 app = FastAPI(
     title="Credit Risk Prediction API",
     version="2.0.0",
-    description="AI-powered credit risk prediction with traditional ML and Gemini AI models."
+    description="AI-powered credit risk prediction with XGBoost ML model, SHAP explainability, and AI-generated insights."
 )
 
 # Initialize database on startup
@@ -348,12 +321,14 @@ def reload_model():
             }
         )
 
-# --- 5. Traditional ML Prediction Endpoint ---
+# --- 5. Single Prediction Endpoint (Legacy - kept for backward compatibility) ---
 @app.post("/predict_risk", response_model=Dict[str, Any])
 async def predict_risk(application: LoanApplication):
     """
-    Accepts loan application data and returns a credit risk prediction, probability,
-    and SHAP explanation data.
+    Accepts complete loan application data and returns a credit risk prediction, probability,
+    SHAP explanation, and AI-generated advice.
+    
+    Note: For CSV uploads and partial data, use /predict_risk_dynamic or /predict_risk_batch instead.
     """
     if predictor is None:
         raise HTTPException(
@@ -492,13 +467,18 @@ async def predict_risk(application: LoanApplication):
 @app.post("/predict_risk_dynamic", response_model=Dict[str, Any])
 async def predict_risk_dynamic(application: DynamicLoanApplication):
     """
+    Primary prediction endpoint for CSV uploads and flexible data input.
+    
     Accepts partial or complete loan application data with intelligent imputation.
     Missing fields are automatically filled using historical data, derived calculations, or safe defaults.
     
-    This endpoint is more flexible than /predict_risk and can handle:
-    - Partial data (missing fields will be imputed)
-    - Extra fields (ignored gracefully)
-    - Different feature sets across model versions
+    Features:
+    - Accepts partial data (missing fields will be imputed)
+    - SHAP explainability showing feature importance
+    - AI-generated natural language explanations and advice
+    - Data drift detection
+    
+    This is the recommended endpoint for all predictions.
     """
     if dynamic_predictor is None:
         raise HTTPException(
@@ -608,192 +588,22 @@ async def predict_risk_dynamic(application: DynamicLoanApplication):
         "operational_notes": operational_notes
     }
 
-# --- 7. Gemini Prediction Endpoint ---
-@app.post("/predict_risk_gemini", response_model=Dict[str, Any])
-async def predict_risk_gemini(application: DynamicLoanApplication):
-    """
-    Predict credit risk using Gemini AI model.
-    
-    This endpoint uses Google's Gemini AI instead of the traditional ML model.
-    Accepts partial data with intelligent imputation.
-    """
-    if gemini_predictor is None:
-        raise HTTPException(
-            status_code=503,
-            detail={"status": "error", "message": "Gemini predictor not available. Check GEMINI_API_KEY."}
-        )
-    
-    # Convert to dict
-    raw_input_dict = application.model_dump(exclude_none=False)
-    
-    # Impute missing values if using dynamic predictor
-    if dynamic_predictor:
-        imputed_data, imputation_log = dynamic_predictor.imputer.impute(raw_input_dict)
-    else:
-        imputed_data = raw_input_dict
-        imputation_log = []
-    
-    try:
-        # Get Gemini prediction
-        risk_level, prob, pred, full_result = gemini_predictor.predict(imputed_data)
-        
-        return {
-            "status": "success",
-            "timestamp": pd.Timestamp.now().isoformat(),
-            "risk_level": risk_level,
-            "probability_default_percent": round(prob * 100, 2),
-            "binary_prediction": pred,
-            "model_type": "gemini-ai",
-            "input_features_original": raw_input_dict,
-            "input_features_imputed": imputed_data,
-            "imputation_log": imputation_log,
-            "key_factors": full_result.get('key_factors', []),
-            "explanation": full_result.get('explanation', ''),
-            "remediation_suggestion": full_result.get('remediation_suggestion'),
-            "confidence": full_result.get('confidence'),
-            "operational_notes": f"Prediction made using Gemini AI. Confidence: {full_result.get('confidence', 'N/A')}%"
-        }
-        
-    except Exception as e:
-        logger.error(f"Gemini prediction failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail={"status": "error", "message": f"Gemini prediction error: {str(e)}"}
-        )
-
-# --- 8. Compare Predictions Endpoint ---
-@app.post("/predict_risk_compare", response_model=Dict[str, Any])
-async def predict_risk_compare(application: DynamicLoanApplication):
-    """
-    Compare predictions from both traditional ML model and Gemini AI.
-    
-    Returns predictions from both models side-by-side for comparison.
-    """
-    if not predictor or not gemini_predictor:
-        raise HTTPException(
-            status_code=503,
-            detail={"status": "error", "message": "One or both predictors not available."}
-        )
-    
-    raw_input_dict = application.model_dump(exclude_none=False)
-    
-    # Impute missing values
-    if dynamic_predictor:
-        imputed_data, imputation_log = dynamic_predictor.imputer.impute(raw_input_dict)
-        mapped_features = dynamic_predictor.mapper.map_to_model_features(imputed_data)
-        complete_features = dynamic_predictor.mapper.validate_and_fill(mapped_features)
-    else:
-        imputed_data = raw_input_dict
-        imputation_log = []
-        complete_features = raw_input_dict
-    
-    try:
-        # Get traditional ML prediction
-        trad_risk, trad_prob, trad_pred = predictor.predict(complete_features)
-        
-        # Get Gemini prediction
-        gemini_risk, gemini_prob, gemini_pred, gemini_full = gemini_predictor.predict(imputed_data)
-        
-        # Calculate agreement
-        prob_diff = abs(gemini_prob - trad_prob)
-        pred_agreement = (gemini_pred == trad_pred)
-        
-        return {
-            "status": "success",
-            "timestamp": pd.Timestamp.now().isoformat(),
-            "input_features": imputed_data,
-            "imputation_log": imputation_log,
-            "traditional_ml": {
-                "risk_level": trad_risk,
-                "probability_default_percent": round(trad_prob * 100, 2),
-                "binary_prediction": trad_pred,
-                "model_type": "xgboost"
-            },
-            "gemini_ai": {
-                "risk_level": gemini_risk,
-                "probability_default_percent": round(gemini_prob * 100, 2),
-                "binary_prediction": gemini_pred,
-                "key_factors": gemini_full.get('key_factors', []),
-                "explanation": gemini_full.get('explanation', ''),
-                "confidence": gemini_full.get('confidence'),
-                "model_type": "gemini-ai"
-            },
-            "comparison": {
-                "predictions_agree": pred_agreement,
-                "probability_difference": round(prob_diff * 100, 2),
-                "agreement_level": "High" if prob_diff < 0.1 else "Medium" if prob_diff < 0.3 else "Low",
-                "recommendation": "Both models agree" if pred_agreement else "Models disagree - manual review recommended"
-            }
-        }
-        
-    except Exception as e:
-        logger.error(f"Comparison prediction failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail={"status": "error", "message": f"Comparison error: {str(e)}"}
-        )
-
-@app.post("/get_mitigation_plan", response_model=Dict[str, Any])
-async def get_mitigation_plan(application: DynamicLoanApplication):
-    """
-    Generate a personalized mitigation plan for high-risk applicants.
-    
-    Uses Gemini AI to provide actionable recommendations to reduce credit risk.
-    """
-    if not gemini_predictor or not gemini_mitigation:
-        raise HTTPException(
-            status_code=503,
-            detail={"status": "error", "message": "Gemini services not available. Check GEMINI_API_KEY."}
-        )
-    
-    raw_input_dict = application.model_dump(exclude_none=False)
-    
-    # Impute missing values
-    if dynamic_predictor:
-        imputed_data, imputation_log = dynamic_predictor.imputer.impute(raw_input_dict)
-    else:
-        imputed_data = raw_input_dict
-        imputation_log = []
-    
-    try:
-        # Get risk assessment first
-        risk_level, prob, pred, full_result = gemini_predictor.predict(imputed_data)
-        
-        # Generate mitigation plan
-        mitigation_plan = gemini_mitigation.generate_mitigation_plan(
-            input_data=imputed_data,
-            risk_assessment=full_result
-        )
-        
-        return {
-            "status": "success",
-            "timestamp": pd.Timestamp.now().isoformat(),
-            "risk_assessment": {
-                "risk_level": risk_level,
-                "probability_default_percent": round(prob * 100, 2),
-                "binary_prediction": pred,
-                "key_factors": full_result.get('key_factors', []),
-                "explanation": full_result.get('explanation', '')
-            },
-            "mitigation_plan": mitigation_plan,
-            "input_features": imputed_data,
-            "imputation_log": imputation_log
-        }
-        
-    except Exception as e:
-        logger.error(f"Mitigation plan generation failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail={"status": "error", "message": f"Mitigation plan error: {str(e)}"}
-        )
+# Gemini-specific endpoints removed - AI is now integrated into main prediction flow
+# for generating explanations and advice based on SHAP values
 
 @app.post("/predict_risk_batch", response_model=Dict[str, Any])
-async def predict_risk_batch(applications: List[DynamicLoanApplication]):
+async def predict_risk_batch(applications: List[DynamicLoanApplication], include_explanations: bool = False):
     """
-    Batch prediction endpoint for multiple loan applications.
+    Batch prediction endpoint for CSV uploads.
     
     Accepts a list of loan applications and returns predictions for all.
-    Useful for processing CSV/Excel uploads.
+    
+    Args:
+        applications: List of loan applications (partial data accepted)
+        include_explanations: If True, includes SHAP explanations and AI advice (slower)
+    
+    Returns:
+        Batch prediction results with optional explanations
     """
     if dynamic_predictor is None:
         raise HTTPException(
@@ -815,7 +625,7 @@ async def predict_risk_batch(applications: List[DynamicLoanApplication]):
                 return_imputation_log=True
             )
             
-            results.append({
+            result = {
                 "index": idx,
                 "status": "success",
                 "risk_level": risk_level,
@@ -823,7 +633,46 @@ async def predict_risk_batch(applications: List[DynamicLoanApplication]):
                 "binary_prediction": pred,
                 "input_features": imputed_data,
                 "imputation_log": imputation_log
-            })
+            }
+            
+            # Add SHAP explanations and AI advice if requested
+            if include_explanations:
+                try:
+                    # Get SHAP values
+                    mapped_features = dynamic_predictor.mapper.map_to_model_features(imputed_data)
+                    complete_features = dynamic_predictor.mapper.validate_and_fill(mapped_features)
+                    shap_values, expected_value, df_features = predictor.get_shap_values(complete_features)
+                    
+                    # Format SHAP data
+                    feature_names = df_features.columns.tolist()
+                    if isinstance(shap_values, list):
+                        shap_data = shap_values[1]
+                    else:
+                        shap_data = shap_values
+                    
+                    try:
+                        row = shap_data.tolist()[0]
+                    except Exception:
+                        row = np.asarray(shap_data).ravel().tolist()
+                    
+                    shap_explanation = {k: float(v) for k, v in zip(feature_names, row)}
+                    
+                    # Generate AI explanation
+                    llm_result = await generate_llm_explanation(
+                        input_data=imputed_data,
+                        shap_explanation=shap_explanation,
+                        risk_level=risk_level,
+                    )
+                    
+                    result["shap_explanation"] = shap_explanation
+                    result["llm_explanation"] = llm_result.get("text") if isinstance(llm_result, dict) else str(llm_result)
+                    result["remediation_suggestion"] = llm_result.get("remediation_suggestion") if isinstance(llm_result, dict) else None
+                    
+                except Exception as e:
+                    logger.warning(f"Failed to generate explanation for row {idx}: {e}")
+                    result["explanation_error"] = str(e)
+            
+            results.append(result)
             
         except Exception as e:
             logger.error(f"Batch prediction failed for row {idx}: {e}")
@@ -843,94 +692,7 @@ async def predict_risk_batch(applications: List[DynamicLoanApplication]):
         "errors": errors
     }
 
-@app.post("/analyze_features", response_model=Dict[str, Any])
-async def analyze_features(data: Dict[str, Any]):
-    """
-    Analyze data and get AI-powered feature engineering recommendations.
-    
-    Accepts raw data and returns analysis with feature recommendations.
-    """
-    if not gemini_feature_engineer:
-        raise HTTPException(
-            status_code=503,
-            detail={"status": "error", "message": "Feature engineer not available. Check GEMINI_API_KEY."}
-        )
-    
-    try:
-        # Convert dict to DataFrame
-        if 'data' in data:
-            df = pd.DataFrame(data['data'])
-        else:
-            df = pd.DataFrame([data])
-        
-        # Analyze data
-        analysis = gemini_feature_engineer.analyze_data(df)
-        
-        return {
-            "status": "success",
-            "timestamp": pd.Timestamp.now().isoformat(),
-            "data_summary": {
-                "rows": len(df),
-                "columns": len(df.columns),
-                "column_names": list(df.columns)
-            },
-            "analysis": analysis
-        }
-        
-    except Exception as e:
-        logger.error(f"Feature analysis failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail={"status": "error", "message": f"Analysis error: {str(e)}"}
-        )
-
-@app.post("/engineer_features", response_model=Dict[str, Any])
-async def engineer_features(data: Dict[str, Any]):
-    """
-    Generate engineered features from raw data using AI.
-    
-    Accepts raw data and returns data with AI-generated features.
-    """
-    if not gemini_feature_engineer:
-        raise HTTPException(
-            status_code=503,
-            detail={"status": "error", "message": "Feature engineer not available. Check GEMINI_API_KEY."}
-        )
-    
-    try:
-        # Convert dict to DataFrame
-        if 'data' in data:
-            df = pd.DataFrame(data['data'])
-        else:
-            df = pd.DataFrame([data])
-        
-        # Analyze and generate features
-        analysis = gemini_feature_engineer.analyze_data(df)
-        engineered_df = gemini_feature_engineer.generate_features(df, analysis)
-        
-        # Get new features
-        new_features = list(set(engineered_df.columns) - set(df.columns))
-        
-        return {
-            "status": "success",
-            "timestamp": pd.Timestamp.now().isoformat(),
-            "original_features": list(df.columns),
-            "new_features": new_features,
-            "total_features": len(engineered_df.columns),
-            "engineered_data": engineered_df.to_dict('records'),
-            "analysis": analysis,
-            "feature_descriptions": {
-                feature['name']: feature.get('description', '')
-                for feature in analysis.get('recommended_features', [])
-            }
-        }
-        
-    except Exception as e:
-        logger.error(f"Feature engineering failed: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail={"status": "error", "message": f"Feature engineering error: {str(e)}"}
-        )
+# Feature engineering endpoints removed - focus is on CSV upload and prediction
 
 @app.get("/db/retraining/status")
 def get_retraining_status(db: Session = Depends(get_db)):

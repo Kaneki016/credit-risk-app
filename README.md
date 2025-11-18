@@ -2,7 +2,7 @@
 
 > AI-powered credit risk assessment with explainable predictions and intelligent automation
 
-A modern full-stack application for loan default risk prediction featuring traditional ML (XGBoost), Gemini AI integration, SHAP explainability, and comprehensive automation tools.
+A modern full-stack application for loan default risk prediction featuring traditional ML (XGBoost), SHAP explainability, and CSV batch processing with AI-generated insights.
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
@@ -13,20 +13,21 @@ A modern full-stack application for loan default risk prediction featuring tradi
 
 ## ✨ Features
 
-### 🎯 Dual Prediction Models
-- **Traditional ML (XGBoost)** - Fast, offline predictions with SHAP explanations
-- **Gemini AI** - Natural language explanations and mitigation strategies (no training needed)
-- **Model Comparison** - Side-by-side comparison of both approaches
+### 🎯 ML Prediction Model
+- **XGBoost Classifier** - Fast, accurate predictions with SHAP explanations
+- **AI-Powered Insights** - Natural language explanations and risk mitigation advice
+- **Explainable AI** - SHAP values show which features drive each decision
 
 ### 📊 Smart Data Handling
 - **CSV Upload** - Batch process loan applications from CSV files
 - **Dynamic Input** - Accepts partial data with intelligent imputation
 - **Auto Field Detection** - Automatically maps CSV columns to model features
+- **Row Navigation** - Navigate through CSV rows or batch process all at once
 
 ### 🤖 AI-Powered Features
-- **Feature Engineering** - Automatic feature generation and analysis
-- **Risk Mitigation Plans** - Personalized strategies to reduce default risk
-- **Natural Explanations** - Human-readable reasoning for predictions
+- **SHAP Explanations** - Visual and textual explanations of predictions
+- **Risk Mitigation Advice** - AI-generated recommendations to reduce default risk
+- **Natural Language Insights** - Human-readable reasoning for predictions
 
 ### 🔧 Developer Tools
 - **REST API** - Comprehensive FastAPI backend
@@ -74,13 +75,14 @@ A modern full-stack application for loan default risk prediction featuring tradi
    cd ..
    ```
 
-4. **Configure environment** (Optional - for Gemini AI features)
+4. **Configure environment** (Optional - for AI explanations)
    ```bash
    # Copy example environment file
    cp env.example .env
    
-   # Edit .env and add your Gemini API key
+   # Edit .env and add your Gemini API key for AI-powered explanations
    # Get key from: https://aistudio.google.com/app/apikey
+   # Note: AI explanations will use fallback logic if no API key is provided
    ```
 
 5. **Start the application**
@@ -111,32 +113,34 @@ A modern full-stack application for loan default risk prediction featuring tradi
 
 ### Web Interface
 
-1. **Manual Entry Mode**
-   - Fill in loan application details
-   - Get instant risk prediction
-   - View SHAP explanations
-
-2. **CSV Upload Mode**
+1. **CSV Upload**
    - Upload CSV file with loan applications
-   - Navigate through rows or batch process
-   - Download results as CSV
+   - Navigate through rows one-by-one or batch process all
+   - View predictions with SHAP explanations and AI insights
+   - Download results as CSV with all predictions
 
 ### API Usage
 
-#### Standard Prediction
+#### Batch Prediction (CSV Data)
 ```bash
-curl -X POST "http://localhost:8000/predict_risk" \
+curl -X POST "http://localhost:8000/predict_risk_batch" \
   -H "Content-Type: application/json" \
-  -d '{
-    "person_age": 30,
-    "person_income": 50000,
-    "loan_amnt": 10000,
-    "loan_int_rate": 10.5,
-    ...
-  }'
+  -d '[
+    {
+      "person_age": 30,
+      "person_income": 50000,
+      "loan_amnt": 10000,
+      "loan_int_rate": 10.5
+    },
+    {
+      "person_age": 25,
+      "person_income": 35000,
+      "loan_amnt": 15000
+    }
+  ]'
 ```
 
-#### Dynamic Prediction (Partial Data)
+#### Single Prediction (Partial Data Accepted)
 ```bash
 curl -X POST "http://localhost:8000/predict_risk_dynamic" \
   -H "Content-Type: application/json" \
@@ -146,18 +150,7 @@ curl -X POST "http://localhost:8000/predict_risk_dynamic" \
   }'
 ```
 
-#### Gemini AI Prediction
-```bash
-curl -X POST "http://localhost:8000/predict_risk_gemini" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "person_age": 30,
-    "person_income": 50000,
-    ...
-  }'
-```
-
-See [API Documentation](docs/api/DYNAMIC_INPUT_GUIDE.md) for complete endpoint reference.
+See [API Documentation](http://localhost:8000/docs) for complete endpoint reference.
 
 ---
 
@@ -214,22 +207,14 @@ See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed structure document
 ### Prediction Endpoints
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/predict_risk` | POST | Standard prediction (all fields required) |
-| `/predict_risk_dynamic` | POST | Dynamic prediction (partial data accepted) |
-| `/predict_risk_gemini` | POST | AI-powered prediction with explanations |
-| `/predict_risk_compare` | POST | Compare ML and Gemini predictions |
-
-### AI Features
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/get_mitigation_plan` | POST | Get risk mitigation strategies |
-| `/analyze_features` | POST | AI-powered data analysis |
-| `/engineer_features` | POST | Automatic feature generation |
+| `/predict_risk_dynamic` | POST | Single prediction (partial data accepted) |
+| `/predict_risk_batch` | POST | Batch prediction for CSV uploads |
 
 ### Model Management
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/trigger_retrain` | POST | Trigger model retraining |
+| `/reload_model` | POST | Reload model from disk |
 | `/health` | GET | Check API and model status |
 
 ### Database (Optional)
@@ -239,6 +224,7 @@ See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed structure document
 | `/db/predictions` | GET | Get prediction history |
 | `/db/predictions/{id}/feedback` | POST | Submit feedback |
 | `/db/retrain` | POST | Retrain from database |
+| `/db/statistics` | GET | Get database statistics |
 
 See [API Documentation](http://localhost:8000/docs) for interactive API explorer.
 
@@ -285,7 +271,8 @@ See [Test Documentation](tests/README.md) for detailed testing guide.
 Create a `.env` file in the project root:
 
 ```bash
-# Gemini AI (Optional - for AI features)
+# Gemini AI (Optional - for AI-powered explanations and advice)
+# If not provided, system will use rule-based fallback logic
 GEMINI_API_KEY=your-api-key-here
 
 # Database (Optional - defaults to SQLite)
@@ -311,15 +298,14 @@ Edit `backend/core/config.py` to customize:
 ## 📚 Documentation
 
 ### Getting Started
-- [Quick Start Guide](docs/api/GETTING_STARTED_DYNAMIC.md)
+- [Quick Start Guide](GETTING_STARTED.md)
 - [CSV Upload Guide](docs/features/CSV_QUICKSTART.md)
 - [Project Structure](PROJECT_STRUCTURE.md)
 
 ### Features
 - [Dynamic Input System](docs/api/DYNAMIC_INPUT_GUIDE.md)
 - [CSV Feature Guide](docs/features/CSV_FEATURE_SUMMARY.md)
-- [Gemini AI Predictor](docs/GEMINI_PREDICTOR_GUIDE.md)
-- [Feature Engineering](docs/FEATURE_ENGINEERING_GUIDE.md)
+- [SHAP Explainability](docs/features/SHAP_GUIDE.md)
 
 ### Development
 - [Test Documentation](tests/README.md)
@@ -462,8 +448,8 @@ cd frontend && npm install
 - **XGBoost** - Machine learning framework
 - **FastAPI** - Modern Python web framework
 - **React** - Frontend library
-- **Google Gemini** - AI-powered features
 - **SHAP** - Model explainability
+- **Google Gemini** - AI-powered explanations (optional)
 
 ---
 
@@ -471,13 +457,13 @@ cd frontend && npm install
 
 - ✅ Core prediction functionality
 - ✅ CSV upload and batch processing
-- ✅ Gemini AI integration
-- ✅ Dynamic input system
-- ✅ Model retraining
+- ✅ AI-powered SHAP explanations
+- ✅ Dynamic input system with imputation
+- ✅ Model retraining with feedback loop
 - ✅ Comprehensive testing
 - ✅ Docker deployment
 - 🚧 Advanced analytics dashboard (planned)
-- 🚧 Multi-model ensemble (planned)
+- 🚧 Real-time monitoring (planned)
 
 ---
 

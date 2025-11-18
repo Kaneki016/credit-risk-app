@@ -127,9 +127,9 @@ npm run dev
 
 ---
 
-## 🔑 Optional: Enable AI Features
+## 🔑 Optional: Enable AI-Powered Explanations
 
-To use Gemini AI features (natural language explanations, mitigation plans):
+To enable AI-generated natural language explanations and advice:
 
 1. **Get API Key**
    - Visit: https://aistudio.google.com/app/apikey
@@ -152,9 +152,10 @@ To use Gemini AI features (natural language explanations, mitigation plans):
    python run.py
    ```
 
-4. **Try AI Features**
-   - Use `/predict_risk_gemini` endpoint
-   - Get mitigation plans with `/get_mitigation_plan`
+4. **AI Features Enabled**
+   - Natural language explanations of SHAP results
+   - Risk mitigation advice for high-risk applicants
+   - Fallback to rule-based logic if no API key provided
 
 ---
 
@@ -235,15 +236,15 @@ pytest
 ### Learn the Basics
 
 1. **Read Documentation**
-   - [API Guide](docs/api/DYNAMIC_INPUT_GUIDE.md)
    - [CSV Upload Guide](docs/features/CSV_QUICKSTART.md)
    - [Project Structure](PROJECT_STRUCTURE.md)
+   - [API Documentation](http://localhost:8000/docs)
 
 2. **Try Different Features**
-   - Standard predictions
-   - Dynamic input (partial data)
-   - Gemini AI predictions
-   - CSV batch processing
+   - CSV upload and batch processing
+   - Single row predictions with partial data
+   - SHAP explainability
+   - AI-powered explanations and advice
 
 3. **Explore the API**
    - Interactive docs: http://localhost:8000/docs
