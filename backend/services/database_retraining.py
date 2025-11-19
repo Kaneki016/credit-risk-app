@@ -129,6 +129,8 @@ class DatabaseRetrainer:
         y = pd.Series(labels, name='loan_status')
         
         logger.info(f"Extracted {len(df)} samples with {len(df.columns)} features")
+        logger.info(f"Feature columns: {list(df.columns)}")
+        logger.info(f"Data types: {df.dtypes.to_dict()}")
         
         return df, y
     
@@ -144,6 +146,18 @@ class DatabaseRetrainer:
         """
         df_processed = df.copy()
         
+        # Map column names to match expected format
+        column_mapping = {
+            'person_home_ownership': 'home_ownership',
+            'cb_person_default_on_file': 'default_on_file'
+        }
+        
+        # Rename columns if needed
+        for old_name, new_name in column_mapping.items():
+            if old_name in df_processed.columns and new_name not in df_processed.columns:
+                df_processed[new_name] = df_processed[old_name]
+                df_processed = df_processed.drop(columns=[old_name])
+        
         # Handle categorical variables
         categorical_cols = {
             'home_ownership': ['RENT', 'OWN', 'MORTGAGE', 'OTHER'],
@@ -156,13 +170,28 @@ class DatabaseRetrainer:
         # One-hot encode categorical variables
         for col, categories in categorical_cols.items():
             if col in df_processed.columns:
-                # Get the value
+                # Convert to string and uppercase
+                df_processed[col] = df_processed[col].astype(str).str.upper()
+                
+                # Create one-hot encoded columns
                 for category in categories:
                     new_col = f"{col}_{category}"
                     df_processed[new_col] = (df_processed[col] == category).astype(int)
                 
                 # Drop original column
                 df_processed = df_processed.drop(columns=[col])
+        
+        # Ensure all columns are numeric
+        for col in df_processed.columns:
+            if df_processed[col].dtype == 'object':
+                try:
+                    df_processed[col] = pd.to_numeric(df_processed[col], errors='coerce')
+                except Exception:
+                    logger.warning(f"Could not convert column {col} to numeric, dropping it")
+                    df_processed = df_processed.drop(columns=[col])
+        
+        # Fill any NaN values with 0
+        df_processed = df_processed.fillna(0)
         
         return df_processed
     

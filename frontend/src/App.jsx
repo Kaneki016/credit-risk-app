@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import CSVUploader from './components/csv/CSVUploader'
 import DynamicForm from './components/csv/DynamicForm'
 import ResultCard from './components/results/ResultCard'
+import AdminPanel from './components/admin/AdminPanel'
+import Chatbot from './components/chatbot/Chatbot'
+import './styles/admin.css'
+import './styles/chatbot.css'
 
 export default function App(){
   const [result, setResult] = useState(null)
@@ -10,6 +14,7 @@ export default function App(){
   const [error, setError] = useState(null)
   const [csvData, setCsvData] = useState(null)
   const [layout, setLayout] = useState('split') // 'split' or 'stacked'
+  const [view, setView] = useState('prediction') // 'prediction' or 'admin'
 
   return (
     <div className="app-container">
@@ -18,29 +23,45 @@ export default function App(){
           <h1>📊 Credit Risk CSV Analyzer</h1>
           <p className="subtitle">Upload CSV files for batch credit risk prediction with AI-powered insights</p>
         </div>
-      </header>
-
-      {/* Layout Toggle */}
-      <div className="controls-container">
-        <div className="layout-toggle">
+        <div className="view-toggle">
           <button
-            className={`layout-button ${layout === 'split' ? 'active' : ''}`}
-            onClick={() => setLayout('split')}
-            title="Split view"
+            className={`view-button ${view === 'prediction' ? 'active' : ''}`}
+            onClick={() => setView('prediction')}
           >
-            ⬌ Split View
+            🔮 Predictions
           </button>
           <button
-            className={`layout-button ${layout === 'stacked' ? 'active' : ''}`}
-            onClick={() => setLayout('stacked')}
-            title="Stacked view"
+            className={`view-button ${view === 'admin' ? 'active' : ''}`}
+            onClick={() => setView('admin')}
           >
-            ☰ Stacked View
+            🔧 Admin
           </button>
         </div>
-      </div>
+      </header>
 
-      <main className={`main-grid ${layout === 'stacked' ? 'stacked' : ''}`}>
+      {view === 'prediction' && (
+        <>
+          {/* Layout Toggle */}
+          <div className="controls-container">
+            <div className="layout-toggle">
+              <button
+                className={`layout-button ${layout === 'split' ? 'active' : ''}`}
+                onClick={() => setLayout('split')}
+                title="Split view"
+              >
+                ⬌ Split View
+              </button>
+              <button
+                className={`layout-button ${layout === 'stacked' ? 'active' : ''}`}
+                onClick={() => setLayout('stacked')}
+                title="Stacked view"
+              >
+                ☰ Stacked View
+              </button>
+            </div>
+          </div>
+
+          <main className={`main-grid ${layout === 'stacked' ? 'stacked' : ''}`}>
         <motion.section 
           className="panel"
           initial={{ opacity: 0, y: 20 }}
@@ -94,9 +115,25 @@ export default function App(){
             {result && !loading && !error && <ResultCard data={result} />}
           </AnimatePresence>
         </motion.section>
-      </main>
+          </main>
+        </>
+      )}
 
-      <footer className="footer">CSV-based batch processing • AI-powered predictions • SHAP explainability</footer>
+      {view === 'admin' && (
+        <main>
+          <AdminPanel />
+        </main>
+      )}
+
+      <footer className="footer">
+        {view === 'prediction' 
+          ? 'CSV-based batch processing • AI-powered predictions • SHAP explainability'
+          : 'Admin Panel • Import Data • Retrain Model • System Status'
+        }
+      </footer>
+
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   )
 }

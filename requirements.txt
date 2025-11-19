@@ -51,7 +51,8 @@ tzdata==2025.2
 urllib3==2.5.0
 uvicorn==0.38.0
 xgboost==3.1.1
-google-generativeai==0.8.3
 openpyxl==3.1.5
+# google-generativeai==0.8.3  # Legacy - replaced by OpenRouter
 sqlalchemy>=2.0.0
 alembic>=1.13.0
+python-multipart==0.0.20
