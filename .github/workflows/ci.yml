@@ -1,8 +1,11 @@
-name: CI/CD Pipeline (Disabled)
+name: CI/CD Pipeline
 
-# Temporarily disabled - use minimal-ci.yml instead
 on:
-  workflow_dispatch:  # Manual trigger only
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
 
 jobs:
   # Backend Tests
@@ -193,10 +196,3 @@ jobs:
         echo "🚀 Ready to deploy!"
         echo "Backend: Python app with FastAPI"
         echo "Frontend: Static files in frontend/dist/"
-    
-    # Add your deployment steps here
-    # Examples:
-    # - Deploy to AWS
-    # - Deploy to Heroku
-    # - Deploy to Docker
-    # - Deploy to Vercel/Netlify

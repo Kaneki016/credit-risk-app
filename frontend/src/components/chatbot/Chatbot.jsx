@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ENDPOINTS } from '../../utils/api'
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)
@@ -50,7 +51,7 @@ export default function Chatbot() {
 
     try {
       // Call chatbot API
-      const response = await fetch('http://localhost:8000/chatbot/query', {
+      const response = await fetch(ENDPOINTS.CHATBOT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: messageText })
@@ -152,9 +153,9 @@ export default function Chatbot() {
                     <div className="message-text">{message.text}</div>
                     {message.data && formatData(message.data)}
                     <div className="message-time">
-                      {message.timestamp.toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
                       })}
                     </div>
                   </div>

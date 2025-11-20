@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
 
+import { ENDPOINTS } from '../../utils/api'
+import { loanApplicationSchema } from '../../schemas/loanApplicationSchema'
+
 // Use dynamic endpoint
-const API_DYNAMIC = 'http://localhost:8000/predict_risk_dynamic'
+const API_DYNAMIC = ENDPOINTS.PREDICT_DYNAMIC
 
 // Field metadata for smart form generation
 const FIELD_METADATA = {
@@ -14,23 +20,23 @@ const FIELD_METADATA = {
   loan_int_rate: { type: 'number', label: 'Interest Rate', min: 0, max: 100, hint: '%', step: 0.1 },
   loan_percent_income: { type: 'number', label: 'Loan % of Income', min: 0, max: 1, hint: '0-1', step: 0.01 },
   cb_person_cred_hist_length: { type: 'number', label: 'Credit History', min: 0, hint: 'Years' },
-  home_ownership: { 
-    type: 'select', 
+  home_ownership: {
+    type: 'select',
     label: 'Home Ownership',
     options: ['RENT', 'OWN', 'MORTGAGE', 'OTHER']
   },
-  loan_intent: { 
-    type: 'select', 
+  loan_intent: {
+    type: 'select',
     label: 'Loan Purpose',
     options: ['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE', 'HOMEIMPROVEMENT', 'DEBTCONSOLIDATION']
   },
-  loan_grade: { 
-    type: 'select', 
+  loan_grade: {
+    type: 'select',
     label: 'Loan Grade',
     options: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
   },
-  default_on_file: { 
-    type: 'select', 
+  default_on_file: {
+    type: 'select',
     label: 'Previous Default',
     options: ['N', 'Y']
   }
@@ -59,7 +65,6 @@ const COLUMN_MAPPINGS = {
 
 export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
   const [detectedFields, setDetectedFields] = useState([])
-  const [formData, setFormData] = useState({})
   const [currentRowIndex, setCurrentRowIndex] = useState(0)
   const [batchMode, setBatchMode] = useState(false)
   const [batchResults, setBatchResults] = useState([])
@@ -67,11 +72,39 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
   const [showMappings, setShowMappings] = useState(false)
   const [activeTab, setActiveTab] = useState('form')
 
+  // Setup React Hook Form
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors }
+  } = useForm({
+    resolver: zodResolver(loanApplicationSchema),
+    defaultValues: {}
+  })
+
+  // React Query Mutation
+  const mutation = useMutation({
+    mutationFn: (data) => axios.post(API_DYNAMIC, data, { timeout: 30000 }),
+    onMutate: () => {
+      onLoading && onLoading()
+    },
+    onSuccess: (response) => {
+      onResult && onResult(response.data)
+    },
+    onError: (err) => {
+      console.error(err)
+      const msg = err.response?.data?.detail || err.message || 'Request failed'
+      onError && onError(String(msg))
+    }
+  })
+
   // Detect and map CSV columns to form fields
   useEffect(() => {
     if (!csvData) {
       setDetectedFields([])
-      setFormData({})
+      reset({})
       return
     }
 
@@ -115,7 +148,7 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
     if (data.length > 0) {
       loadRowData(0, mapped, data)
     }
-  }, [csvData])
+  }, [csvData, reset])
 
   const loadRowData = (index, fields, data) => {
     const row = data[index]
@@ -124,30 +157,22 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
     fields.forEach(({ csvColumn, formField }) => {
       const value = row[csvColumn]
       if (value !== null && value !== undefined && value !== '') {
-        newFormData[formField] = value
+        // Convert types if necessary
+        const meta = FIELD_METADATA[formField]
+        if (meta.type === 'number') {
+          newFormData[formField] = parseFloat(value) || 0
+        } else {
+          newFormData[formField] = value
+        }
       }
     })
 
-    setFormData(newFormData)
+    reset(newFormData)
     setCurrentRowIndex(index)
   }
 
-  const handleFieldChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    onLoading && onLoading()
-
-    try {
-      const response = await axios.post(API_DYNAMIC, formData, { timeout: 30000 })
-      onResult && onResult(response.data)
-    } catch (err) {
-      console.error(err)
-      const msg = err.response?.data?.detail || err.message || 'Request failed'
-      onError && onError(String(msg))
-    }
+  const onSubmit = (data) => {
+    mutation.mutate(data)
   }
 
   const handleNextRow = () => {
@@ -176,7 +201,12 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
       detectedFields.forEach(({ csvColumn, formField }) => {
         const value = row[csvColumn]
         if (value !== null && value !== undefined && value !== '') {
-          rowData[formField] = value
+          const meta = FIELD_METADATA[formField]
+          if (meta.type === 'number') {
+            rowData[formField] = parseFloat(value) || 0
+          } else {
+            rowData[formField] = value
+          }
         }
       })
 
@@ -209,15 +239,14 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
   const downloadBatchResults = () => {
     const csv = [
       // Header
-      ['Row', 'Risk Level', 'Probability %', 'Prediction', 'Status', ...Object.keys(formData)].join(','),
+      ['Row', 'Risk Level', 'Probability %', 'Prediction', 'Status'].join(','),
       // Data
       ...batchResults.map(r => [
         r.rowIndex + 1,
         r.result?.risk_level || 'N/A',
         r.result?.probability_default_percent || 'N/A',
         r.result?.binary_prediction || 'N/A',
-        r.status,
-        ...Object.values(r.input)
+        r.status
       ].join(','))
     ].join('\n')
 
@@ -247,7 +276,7 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
   }
 
   const getFieldsByCategory = (category) => {
-    return detectedFields.filter(({ formField }) => 
+    return detectedFields.filter(({ formField }) =>
       groupedFields[category].includes(formField)
     )
   }
@@ -348,7 +377,7 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
         {activeTab === 'form' && (
           <motion.form
             key="form"
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             className="form"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -369,17 +398,24 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                           {meta.label}
                           {meta.hint && <span className="field-hint-compact">{meta.hint}</span>}
                         </span>
-                        <input
-                          type={meta.type}
-                          value={formData[formField] || ''}
-                          onChange={e => handleFieldChange(formField, 
-                            meta.type === 'number' ? parseFloat(e.target.value) || '' : e.target.value
+                        <Controller
+                          name={formField}
+                          control={control}
+                          render={({ field }) => (
+                            <input
+                              {...field}
+                              type={meta.type}
+                              min={meta.min}
+                              max={meta.max}
+                              step={meta.step}
+                              placeholder={meta.label}
+                              onChange={(e) => field.onChange(
+                                meta.type === 'number' ? parseFloat(e.target.value) : e.target.value
+                              )}
+                            />
                           )}
-                          min={meta.min}
-                          max={meta.max}
-                          step={meta.step}
-                          placeholder={meta.label}
                         />
+                        {errors[formField] && <span className="error-text">{errors[formField].message}</span>}
                       </label>
                     )
                   })}
@@ -401,29 +437,33 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                           {meta.label}
                           {meta.hint && <span className="field-hint-compact">{meta.hint}</span>}
                         </span>
-                        {meta.type === 'select' ? (
-                          <select
-                            value={formData[formField] || ''}
-                            onChange={e => handleFieldChange(formField, e.target.value)}
-                          >
-                            <option value="">-- Select --</option>
-                            {meta.options.map(opt => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type={meta.type}
-                            value={formData[formField] || ''}
-                            onChange={e => handleFieldChange(formField, 
-                              meta.type === 'number' ? parseFloat(e.target.value) || '' : e.target.value
-                            )}
-                            min={meta.min}
-                            max={meta.max}
-                            step={meta.step}
-                            placeholder={meta.label}
-                          />
-                        )}
+                        <Controller
+                          name={formField}
+                          control={control}
+                          render={({ field }) => (
+                            meta.type === 'select' ? (
+                              <select {...field}>
+                                <option value="">-- Select --</option>
+                                {meta.options.map(opt => (
+                                  <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                {...field}
+                                type={meta.type}
+                                min={meta.min}
+                                max={meta.max}
+                                step={meta.step}
+                                placeholder={meta.label}
+                                onChange={(e) => field.onChange(
+                                  meta.type === 'number' ? parseFloat(e.target.value) : e.target.value
+                                )}
+                              />
+                            )
+                          )}
+                        />
+                        {errors[formField] && <span className="error-text">{errors[formField].message}</span>}
                       </label>
                     )
                   })}
@@ -442,15 +482,19 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                     return (
                       <label key={formField} className="form-field-compact">
                         <span className="field-label-compact">{meta.label}</span>
-                        <select
-                          value={formData[formField] || ''}
-                          onChange={e => handleFieldChange(formField, e.target.value)}
-                        >
-                          <option value="">-- Select --</option>
-                          {meta.options.map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
+                        <Controller
+                          name={formField}
+                          control={control}
+                          render={({ field }) => (
+                            <select {...field}>
+                              <option value="">-- Select --</option>
+                              {meta.options.map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          )}
+                        />
+                        {errors[formField] && <span className="error-text">{errors[formField].message}</span>}
                       </label>
                     )
                   })}
@@ -459,8 +503,8 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
             )}
 
             <div className="form-actions">
-              <button type="submit" className="primary">
-                ✨ Predict This Row
+              <button type="submit" className="primary" disabled={mutation.isPending}>
+                {mutation.isPending ? '⏳ Predicting...' : '✨ Predict This Row'}
               </button>
             </div>
           </motion.form>
@@ -478,7 +522,7 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
               <div className="batch-icon">🚀</div>
               <h4>Batch Process All Rows</h4>
               <p>Process all {csvData.data.length} rows at once and download results as CSV.</p>
-              
+
               <div className="batch-stats-preview">
                 <div className="stat-preview">
                   <span className="stat-number">{csvData.data.length}</span>

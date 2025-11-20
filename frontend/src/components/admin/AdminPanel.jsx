@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
+import { ENDPOINTS } from '../../utils/api'
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('import')
@@ -19,7 +20,7 @@ export default function AdminPanel() {
   // Check retraining status
   const checkRetrainStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8000/db/retraining/status')
+      const response = await fetch(ENDPOINTS.RETRAIN_STATUS)
       const data = await response.json()
       setRetrainStatus(data.retraining)
     } catch (err) {
@@ -56,7 +57,7 @@ export default function AdminPanel() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await fetch('http://localhost:8000/db/import_csv', {
+      const response = await fetch(ENDPOINTS.IMPORT_CSV, {
         method: 'POST',
         body: formData
       })
@@ -67,7 +68,7 @@ export default function AdminPanel() {
 
       const result = await response.json()
       setImportResult(result)
-      
+
       // Check retrain status after import
       await checkRetrainStatus()
     } catch (err) {
@@ -84,7 +85,7 @@ export default function AdminPanel() {
     setRetrainResult(null)
 
     try {
-      const response = await fetch('http://localhost:8000/db/retrain', {
+      const response = await fetch(ENDPOINTS.RETRAIN, {
         method: 'POST'
       })
 
@@ -104,7 +105,7 @@ export default function AdminPanel() {
   // Reload model
   const handleReloadModel = async () => {
     try {
-      const response = await fetch('http://localhost:8000/reload_model', {
+      const response = await fetch(ENDPOINTS.RELOAD_MODEL, {
         method: 'POST'
       })
 
@@ -134,7 +135,7 @@ export default function AdminPanel() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await fetch('http://localhost:8000/train/flexible', {
+      const response = await fetch(ENDPOINTS.TRAIN_FLEXIBLE, {
         method: 'POST',
         body: formData
       })
@@ -159,7 +160,7 @@ export default function AdminPanel() {
     setClearResult(null)
 
     try {
-      const response = await fetch('http://localhost:8000/db/clear?confirm=true', {
+      const response = await fetch(`${ENDPOINTS.CLEAR_DB}?confirm=true`, {
         method: 'DELETE'
       })
 
@@ -170,7 +171,7 @@ export default function AdminPanel() {
       const result = await response.json()
       setClearResult(result)
       setShowClearConfirm(false)
-      
+
       // Refresh status
       await checkRetrainStatus()
     } catch (err) {
@@ -501,7 +502,7 @@ export default function AdminPanel() {
             className="admin-section"
           >
             <h3>System Status</h3>
-            
+
             {retrainStatus && (
               <div className="status-overview">
                 <div className="overview-card">
@@ -627,10 +628,10 @@ export default function AdminPanel() {
                       <div className="stat">
                         <span className="stat-label">Other Records:</span>
                         <span className="stat-value">
-                          {clearResult.deleted.feature_engineering + 
-                           clearResult.deleted.mitigation_plans + 
-                           clearResult.deleted.audit_logs + 
-                           clearResult.deleted.model_metrics}
+                          {clearResult.deleted.feature_engineering +
+                            clearResult.deleted.mitigation_plans +
+                            clearResult.deleted.audit_logs +
+                            clearResult.deleted.model_metrics}
                         </span>
                       </div>
                     </>
