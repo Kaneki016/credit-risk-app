@@ -1,15 +1,16 @@
-from fastapi import APIRouter, HTTPException, Depends
-from typing import Dict, Any, List
-import pandas as pd
-import numpy as np
-import logging
 import json
+import logging
 import os
+from typing import Any, Dict, List
 
-from backend.core.schemas import LoanApplication
-from backend.services.imputation import DynamicLoanApplication
+import numpy as np
+import pandas as pd
+from fastapi import APIRouter, Depends, HTTPException
+
 from backend.api.routes.model import ModelManager
+from backend.core.schemas import LoanApplication
 from backend.services.explanation_service import generate_llm_explanation
+from backend.services.imputation import DynamicLoanApplication
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

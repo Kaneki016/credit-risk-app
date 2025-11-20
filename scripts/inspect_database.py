@@ -11,14 +11,15 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from sqlalchemy import inspect, text
-from backend.database.config import engine, check_connection, DATABASE_URL
-from backend.database import crud
-from backend.database.models import LoanApplication, Prediction, FeatureEngineering, MitigationPlan, AuditLog, ModelMetrics
-from sqlalchemy.orm import Session
-from backend.database.config import SessionLocal
-import pandas as pd
 from datetime import datetime
+
+import pandas as pd
+from sqlalchemy import inspect, text
+from sqlalchemy.orm import Session
+
+from backend.database import crud
+from backend.database.config import DATABASE_URL, SessionLocal, check_connection, engine
+from backend.database.models import AuditLog, FeatureEngineering, LoanApplication, MitigationPlan, ModelMetrics, Prediction
 
 
 def print_header(title):

@@ -3,8 +3,9 @@
 Database models for credit risk application.
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Text, JSON
+from sqlalchemy import JSON, Boolean, Column, DateTime, Float, Integer, String, Text
 from sqlalchemy.sql import func
+
 from backend.database.config import Base
 
 

@@ -1,16 +1,17 @@
 # retrain_agent.py
-import os
 import json
+import os
+from datetime import datetime
+
 import joblib
+import numpy as np
 import pandas as pd
+import sklearn
+import xgboost as xgb
+from sklearn.metrics import classification_report, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
-from sklearn.metrics import roc_auc_score, classification_report
-import xgboost as xgb
-import numpy as np
-import sklearn
-from datetime import datetime
 
 THRESHOLD_AUC = 0.75
 # Use the dataset included in the repository by default

@@ -3,15 +3,17 @@ Database setup script for Credit Risk App.
 Creates database, tables, and initial data.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from dotenv import load_dotenv
-from backend.database import init_db, check_connection, engine
-from backend.database.models import Base
 import logging
+
+from dotenv import load_dotenv
+
+from backend.database import check_connection, engine, init_db
+from backend.database.models import Base
 
 # Try to import psycopg2 (only needed for PostgreSQL)
 try:
@@ -133,7 +135,7 @@ def verify_setup():
     print("\n3. Verifying setup...")
 
     try:
-        from sqlalchemy import text, inspect
+        from sqlalchemy import inspect, text
 
         with engine.connect() as conn:
             # Test query

@@ -3,18 +3,19 @@ Flexible Model Training Service
 Allows training with different CSV structures and column mappings.
 """
 
-import pandas as pd
+import json
+import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import joblib
 import numpy as np
+import pandas as pd
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-import joblib
-import json
-import logging
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Any
 
 logger = logging.getLogger(__name__)
 

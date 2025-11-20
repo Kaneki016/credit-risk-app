@@ -3,16 +3,18 @@ Test script for database retraining.
 Demonstrates how to retrain the model using database data.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import requests
+import random
+
 import pandas as pd
+import requests
+
 from backend.database import SessionLocal, crud
 from backend.services.database_retraining import DatabaseRetrainer
-import random
 
 
 def print_section(title):

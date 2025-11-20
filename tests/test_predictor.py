@@ -5,6 +5,7 @@ Run with: pytest -q (or `python -m pytest -q` from project root).
 
 import sys
 from pathlib import Path
+
 import pytest
 
 # Ensure project root is on sys.path so imports work when running tests

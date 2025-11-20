@@ -11,9 +11,10 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from backend.database.config import check_connection, DATABASE_URL, SessionLocal
-from backend.database.models import Prediction, LoanApplication
 from sqlalchemy import text
+
+from backend.database.config import DATABASE_URL, SessionLocal, check_connection
+from backend.database.models import LoanApplication, Prediction
 
 
 def main():

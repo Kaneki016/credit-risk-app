@@ -3,10 +3,11 @@ Test New Features
 Tests the clear database and flexible training features.
 """
 
-import pandas as pd
-import requests
 import json
 from pathlib import Path
+
+import pandas as pd
+import requests
 
 BASE_URL = "http://localhost:8000"
 

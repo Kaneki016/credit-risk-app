@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File
-from typing import Dict, Any
 import logging
-import shutil
 import os
+import shutil
 from pathlib import Path
+from typing import Any, Dict
+
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 
 from backend.services.database_retraining import check_retraining_status, retrain_from_database
 from backend.services.flexible_training import FlexibleModelTrainer

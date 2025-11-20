@@ -10,10 +10,11 @@ Then run this script: python tests/backend/test_dynamic_api.py
 For automated testing, use pytest with proper fixtures and mocking.
 """
 
-import requests
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
 import pytest
+import requests
 
 API_BASE = "http://localhost:8000"
 

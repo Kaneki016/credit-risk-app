@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, Body
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
 import logging
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Body, HTTPException
+from pydantic import BaseModel, Field
 
 from backend.utils.ai_client import get_ai_client
 

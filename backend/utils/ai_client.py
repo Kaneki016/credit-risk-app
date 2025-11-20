@@ -3,13 +3,15 @@ Robust AI Client with Retry Logic and Fallback
 Handles network errors gracefully with automatic retries.
 """
 
-import os
+import asyncio
 import json
 import logging
-import asyncio
-from typing import Dict, Any, Optional
+import os
+from typing import Any, Dict, Optional
+
 import httpx
 from dotenv import load_dotenv
+
 from backend.utils.api_counter import count_llm_request
 
 load_dotenv()

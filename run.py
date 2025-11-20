@@ -4,9 +4,10 @@ Main entry point for the Credit Risk API.
 Run this file to start the FastAPI server.
 """
 
-import uvicorn
 import sys
 from pathlib import Path
+
+import uvicorn
 
 # Add project root to Python path
 project_root = Path(__file__).parent

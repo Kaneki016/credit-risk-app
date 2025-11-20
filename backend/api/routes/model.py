@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException
 import logging
-from backend.models.predictor import CreditRiskPredictor
+
+from fastapi import APIRouter, HTTPException
+
 from backend.models.dynamic_predictor import DynamicCreditRiskPredictor
+from backend.models.predictor import CreditRiskPredictor
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

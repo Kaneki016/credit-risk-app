@@ -3,11 +3,12 @@
 Note: This test verifies that model artifacts exist and are valid.
 """
 
+import json
 import os
 import sys
 from pathlib import Path
+
 import pytest
-import json
 
 # Ensure project root is on sys.path
 ROOT = Path(__file__).resolve().parents[1]

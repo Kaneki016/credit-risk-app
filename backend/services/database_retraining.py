@@ -4,20 +4,21 @@ Model retraining using data from database.
 Enables continuous learning from predictions and feedback.
 """
 
-import pandas as pd
-import numpy as np
-import logging
-from typing import Dict, Any, Optional, Tuple
-from datetime import datetime
-from sqlalchemy.orm import Session
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-import joblib
 import json
+import logging
 import os
+from datetime import datetime
+from typing import Any, Dict, Optional, Tuple
+
+import joblib
+import numpy as np
+import pandas as pd
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
+from sklearn.model_selection import train_test_split
+from sqlalchemy.orm import Session
 
 from backend.database import SessionLocal, crud
-from backend.database.models import Prediction, ModelMetrics
+from backend.database.models import ModelMetrics, Prediction
 
 logger = logging.getLogger(__name__)
 
@@ -218,8 +219,8 @@ class DatabaseRetrainer:
         logger.info(f"Test set: {len(X_test)} samples")
 
         # Train model using existing training function
-        from xgboost import XGBClassifier
         from sklearn.preprocessing import StandardScaler
+        from xgboost import XGBClassifier
 
         # Scale features
         scaler = StandardScaler()

@@ -1,22 +1,25 @@
 # backend/api/main.py
 import logging
 import os
+
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
-# Internal imports
-from backend.database import init_db, check_connection
 from backend.api.clear_database_endpoint import router as clear_db_router
-from backend.core.logging_setup import configure_logging
-from backend.api.routes.model import router as model_router, ModelManager
+from backend.api.routes.chatbot import router as chatbot_router
+from backend.api.routes.data_management import router as data_router
+from backend.api.routes.model import ModelManager
+from backend.api.routes.model import router as model_router
 from backend.api.routes.prediction import router as prediction_router
 from backend.api.routes.retraining import router as retraining_router
-from backend.api.routes.data_management import router as data_router
-from backend.api.routes.chatbot import router as chatbot_router
+from backend.core.logging_setup import configure_logging
+
+# Internal imports
+from backend.database import check_connection, init_db
 
 # --- Setup Logging ---
 configure_logging()

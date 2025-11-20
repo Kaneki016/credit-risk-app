@@ -3,10 +3,12 @@ Database Clear Endpoint
 Provides functionality to clear all data from the database.
 """
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from backend.database import get_db, models
-import logging
 
 logger = logging.getLogger(__name__)
 

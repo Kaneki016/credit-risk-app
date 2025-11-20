@@ -5,8 +5,8 @@ Shows recent API requests and statistics.
 
 import json
 import os
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
 
 
 def monitor_api_calls():

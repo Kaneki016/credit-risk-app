@@ -5,19 +5,22 @@ Imports credit_risk_dataset.csv into database and triggers model retraining.
 """
 
 import sys
-from pathlib import Path
-import pandas as pd
 from datetime import datetime
+from pathlib import Path
+
+import pandas as pd
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from backend.database.config import SessionLocal, check_connection, init_db
-from backend.database.models import Prediction, LoanApplication
-from backend.services.database_retraining import DatabaseRetrainer
-from sqlalchemy import text
 import logging
+
+from sqlalchemy import text
+
+from backend.database.config import SessionLocal, check_connection, init_db
+from backend.database.models import LoanApplication, Prediction
+from backend.services.database_retraining import DatabaseRetrainer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

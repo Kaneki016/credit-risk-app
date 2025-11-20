@@ -5,8 +5,8 @@ Removes redundant files and reorganizes project structure.
 
 import os
 import shutil
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Files to delete
 MARKDOWN_TO_DELETE = [
