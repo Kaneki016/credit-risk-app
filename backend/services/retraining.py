@@ -34,13 +34,14 @@ def _write_model_card_markdown(card: str, fname: str):
     # Very small HTML wrapper to render markdown in a browser without extra deps
     try:
         import markdown
+
         html = markdown.markdown(card)
     except Exception:
         # Minimal conversion: wrap markdown in <pre> as fallback
         html = "<pre>" + card.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;") + "</pre>"
 
     with open(html_path, "w", encoding="utf-8") as f:
-        f.write(f"<html><head><meta charset=\"utf-8\"><title>Model Card</title></head><body>{html}</body></html>")
+        f.write(f'<html><head><meta charset="utf-8"><title>Model Card</title></head><body>{html}</body></html>')
 
 
 def _generate_markdown_card(metadata: dict, report: str, features: list) -> str:
@@ -106,14 +107,14 @@ def retrain_if_needed():
         "xgboost_version": getattr(xgb, "__version__", "unknown"),
         "sklearn_version": getattr(sklearn, "__version__", "unknown"),
         "n_train": int(X_train.shape[0]),
-        "n_test": int(X_test.shape[0])
+        "n_test": int(X_test.shape[0]),
     }
 
     # Persist model artifacts
     os.makedirs(MODELS_DIR, exist_ok=True)
 
     # Versioned filenames (use UTC timestamp)
-    version_ts = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    version_ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
     model_versioned = os.path.join(MODELS_DIR, f"credit_risk_model_v{version_ts}.pkl")
     scaler_versioned = os.path.join(MODELS_DIR, f"scaler_v{version_ts}.pkl")
     features_versioned = os.path.join(MODELS_DIR, f"feature_names_v{version_ts}.json")
@@ -149,7 +150,7 @@ def retrain_if_needed():
                     "min": float(col_values.min()),
                     "max": float(col_values.max()),
                     "mean": float(col_values.mean()),
-                    "std": float(col_values.std(ddof=0))
+                    "std": float(col_values.std(ddof=0)),
                 }
 
             stats_path = os.path.join(MODELS_DIR, "feature_statistics.json")
@@ -176,7 +177,7 @@ def retrain_if_needed():
         model_card.model_details = {
             "name": "Credit Risk XGBoost",
             "version": metadata["timestamp"],
-            "type": "xgboost.XGBClassifier"
+            "type": "xgboost.XGBClassifier",
         }
         model_card.model_parameters = {"xgboost_version": metadata["xgboost_version"]}
         model_card.model_eval = {"auc": metadata["auc"], "classification_report": class_report}
@@ -189,7 +190,10 @@ def retrain_if_needed():
         # Fallback: simple markdown + html files
         md = _generate_markdown_card(metadata, class_report, feature_names)
         _write_model_card_markdown(md, card_name)
-        exported = {"markdown": os.path.join(MODEL_CARDS_DIR, card_name + ".md"), "html": os.path.join(MODEL_CARDS_DIR, card_name + ".html")}
+        exported = {
+            "markdown": os.path.join(MODEL_CARDS_DIR, card_name + ".md"),
+            "html": os.path.join(MODEL_CARDS_DIR, card_name + ".html"),
+        }
 
     # Update manifest.json with the new version entry
     manifest_path = os.path.join(MODELS_DIR, "manifest.json")
@@ -208,7 +212,7 @@ def retrain_if_needed():
         "model": model_versioned,
         "scaler": scaler_versioned,
         "features": features_versioned,
-        "card": exported
+        "card": exported,
     }
 
     manifest.append(manifest_entry)
@@ -221,12 +225,8 @@ def retrain_if_needed():
         "status": metadata["status"],
         "auc": metadata["auc"],
         "threshold": THRESHOLD_AUC,
-        "artifacts": {
-            "model": MODEL_PATH,
-            "scaler": SCALER_PATH,
-            "features": FEATURES_PATH
-        },
-        "model_card": exported
+        "artifacts": {"model": MODEL_PATH, "scaler": SCALER_PATH, "features": FEATURES_PATH},
+        "model_card": exported,
     }
 
     return result

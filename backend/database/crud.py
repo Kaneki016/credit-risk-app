@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 # ==================== Loan Applications ====================
 
+
 def create_loan_application(db: Session, application_data: Dict[str, Any]) -> models.LoanApplication:
     """Create a new loan application."""
     db_application = models.LoanApplication(**application_data)
@@ -30,10 +31,7 @@ def get_loan_application(db: Session, application_id: int) -> Optional[models.Lo
 
 
 def get_loan_applications(
-    db: Session, 
-    skip: int = 0, 
-    limit: int = 100,
-    status: Optional[str] = None
+    db: Session, skip: int = 0, limit: int = 100, status: Optional[str] = None
 ) -> List[models.LoanApplication]:
     """Get list of loan applications."""
     query = db.query(models.LoanApplication)
@@ -42,11 +40,7 @@ def get_loan_applications(
     return query.offset(skip).limit(limit).all()
 
 
-def update_loan_application(
-    db: Session, 
-    application_id: int, 
-    update_data: Dict[str, Any]
-) -> Optional[models.LoanApplication]:
+def update_loan_application(db: Session, application_id: int, update_data: Dict[str, Any]) -> Optional[models.LoanApplication]:
     """Update a loan application."""
     db_application = get_loan_application(db, application_id)
     if db_application:
@@ -58,6 +52,7 @@ def update_loan_application(
 
 
 # ==================== Predictions ====================
+
 
 def create_prediction(db: Session, prediction_data: Dict[str, Any]) -> models.Prediction:
     """Create a new prediction record."""
@@ -74,11 +69,7 @@ def get_prediction(db: Session, prediction_id: int) -> Optional[models.Predictio
 
 
 def get_predictions(
-    db: Session,
-    skip: int = 0,
-    limit: int = 100,
-    model_type: Optional[str] = None,
-    application_id: Optional[int] = None
+    db: Session, skip: int = 0, limit: int = 100, model_type: Optional[str] = None, application_id: Optional[int] = None
 ) -> List[models.Prediction]:
     """Get list of predictions."""
     query = db.query(models.Prediction)
@@ -89,11 +80,7 @@ def get_predictions(
     return query.order_by(models.Prediction.created_at.desc()).offset(skip).limit(limit).all()
 
 
-def update_prediction_feedback(
-    db: Session,
-    prediction_id: int,
-    actual_outcome: int
-) -> Optional[models.Prediction]:
+def update_prediction_feedback(db: Session, prediction_id: int, actual_outcome: int) -> Optional[models.Prediction]:
     """Update prediction with actual outcome for model improvement."""
     db_prediction = get_prediction(db, prediction_id)
     if db_prediction:
@@ -105,6 +92,7 @@ def update_prediction_feedback(
 
 
 # ==================== Feature Engineering ====================
+
 
 def create_feature_engineering(db: Session, fe_data: Dict[str, Any]) -> models.FeatureEngineering:
     """Create a feature engineering record."""
@@ -120,18 +108,19 @@ def get_feature_engineering(db: Session, fe_id: int) -> Optional[models.FeatureE
     return db.query(models.FeatureEngineering).filter(models.FeatureEngineering.id == fe_id).first()
 
 
-def get_feature_engineering_history(
-    db: Session,
-    skip: int = 0,
-    limit: int = 50
-) -> List[models.FeatureEngineering]:
+def get_feature_engineering_history(db: Session, skip: int = 0, limit: int = 50) -> List[models.FeatureEngineering]:
     """Get feature engineering history."""
-    return db.query(models.FeatureEngineering).order_by(
-        models.FeatureEngineering.created_at.desc()
-    ).offset(skip).limit(limit).all()
+    return (
+        db.query(models.FeatureEngineering)
+        .order_by(models.FeatureEngineering.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 # ==================== Mitigation Plans ====================
+
 
 def create_mitigation_plan(db: Session, plan_data: Dict[str, Any]) -> models.MitigationPlan:
     """Create a mitigation plan."""
@@ -148,10 +137,7 @@ def get_mitigation_plan(db: Session, plan_id: int) -> Optional[models.Mitigation
 
 
 def get_mitigation_plans(
-    db: Session,
-    skip: int = 0,
-    limit: int = 100,
-    prediction_id: Optional[int] = None
+    db: Session, skip: int = 0, limit: int = 100, prediction_id: Optional[int] = None
 ) -> List[models.MitigationPlan]:
     """Get list of mitigation plans."""
     query = db.query(models.MitigationPlan)
@@ -161,10 +147,7 @@ def get_mitigation_plans(
 
 
 def update_mitigation_plan_status(
-    db: Session,
-    plan_id: int,
-    implemented: bool,
-    effectiveness_score: Optional[float] = None
+    db: Session, plan_id: int, implemented: bool, effectiveness_score: Optional[float] = None
 ) -> Optional[models.MitigationPlan]:
     """Update mitigation plan implementation status."""
     db_plan = get_mitigation_plan(db, plan_id)
@@ -181,6 +164,7 @@ def update_mitigation_plan_status(
 
 # ==================== Audit Logs ====================
 
+
 def create_audit_log(db: Session, log_data: Dict[str, Any]) -> models.AuditLog:
     """Create an audit log entry."""
     db_log = models.AuditLog(**log_data)
@@ -191,11 +175,7 @@ def create_audit_log(db: Session, log_data: Dict[str, Any]) -> models.AuditLog:
 
 
 def get_audit_logs(
-    db: Session,
-    skip: int = 0,
-    limit: int = 100,
-    event_type: Optional[str] = None,
-    status: Optional[str] = None
+    db: Session, skip: int = 0, limit: int = 100, event_type: Optional[str] = None, status: Optional[str] = None
 ) -> List[models.AuditLog]:
     """Get audit logs."""
     query = db.query(models.AuditLog)
@@ -208,6 +188,7 @@ def get_audit_logs(
 
 # ==================== Model Metrics ====================
 
+
 def create_model_metrics(db: Session, metrics_data: Dict[str, Any]) -> models.ModelMetrics:
     """Create model metrics record."""
     db_metrics = models.ModelMetrics(**metrics_data)
@@ -217,11 +198,7 @@ def create_model_metrics(db: Session, metrics_data: Dict[str, Any]) -> models.Mo
     return db_metrics
 
 
-def get_model_metrics(
-    db: Session,
-    model_type: Optional[str] = None,
-    limit: int = 10
-) -> List[models.ModelMetrics]:
+def get_model_metrics(db: Session, model_type: Optional[str] = None, limit: int = 10) -> List[models.ModelMetrics]:
     """Get model metrics history."""
     query = db.query(models.ModelMetrics)
     if model_type:
@@ -231,47 +208,36 @@ def get_model_metrics(
 
 def get_latest_model_metrics(db: Session, model_type: str) -> Optional[models.ModelMetrics]:
     """Get latest metrics for a specific model type."""
-    return db.query(models.ModelMetrics).filter(
-        models.ModelMetrics.model_type == model_type
-    ).order_by(models.ModelMetrics.evaluation_date.desc()).first()
+    return (
+        db.query(models.ModelMetrics)
+        .filter(models.ModelMetrics.model_type == model_type)
+        .order_by(models.ModelMetrics.evaluation_date.desc())
+        .first()
+    )
 
 
 # ==================== Statistics ====================
 
+
 def get_prediction_statistics(db: Session) -> Dict[str, Any]:
     """Get overall prediction statistics."""
     total = db.query(models.Prediction).count()
-    high_risk = db.query(models.Prediction).filter(
-        models.Prediction.risk_level.like('%High Risk%')
-    ).count()
-    low_risk = db.query(models.Prediction).filter(
-        models.Prediction.risk_level.like('%Low Risk%')
-    ).count()
-    
+    high_risk = db.query(models.Prediction).filter(models.Prediction.risk_level.like("%High Risk%")).count()
+    low_risk = db.query(models.Prediction).filter(models.Prediction.risk_level.like("%Low Risk%")).count()
+
     return {
         "total_predictions": total,
         "high_risk_count": high_risk,
         "low_risk_count": low_risk,
-        "high_risk_percentage": (high_risk / total * 100) if total > 0 else 0
+        "high_risk_percentage": (high_risk / total * 100) if total > 0 else 0,
     }
 
 
 def get_application_statistics(db: Session) -> Dict[str, Any]:
     """Get loan application statistics."""
     total = db.query(models.LoanApplication).count()
-    pending = db.query(models.LoanApplication).filter(
-        models.LoanApplication.application_status == 'pending'
-    ).count()
-    approved = db.query(models.LoanApplication).filter(
-        models.LoanApplication.application_status == 'approved'
-    ).count()
-    rejected = db.query(models.LoanApplication).filter(
-        models.LoanApplication.application_status == 'rejected'
-    ).count()
-    
-    return {
-        "total_applications": total,
-        "pending": pending,
-        "approved": approved,
-        "rejected": rejected
-    }
+    pending = db.query(models.LoanApplication).filter(models.LoanApplication.application_status == "pending").count()
+    approved = db.query(models.LoanApplication).filter(models.LoanApplication.application_status == "approved").count()
+    rejected = db.query(models.LoanApplication).filter(models.LoanApplication.application_status == "rejected").count()
+
+    return {"total_applications": total, "pending": pending, "approved": approved, "rejected": rejected}

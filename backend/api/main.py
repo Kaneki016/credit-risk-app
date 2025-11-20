@@ -32,12 +32,13 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(
     title="Credit Risk Prediction API",
     version="2.0.0",
-    description="AI-powered credit risk prediction with XGBoost ML model, SHAP explainability, and AI-generated insights."
+    description="AI-powered credit risk prediction with XGBoost ML model, SHAP explainability, and AI-generated insights.",
 )
 
 # Add rate limiter to app state
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 # Initialize database and models on startup
 @app.on_event("startup")
@@ -56,6 +57,7 @@ async def startup_event():
 
     # Model initialization
     ModelManager.load_models()
+
 
 # Allow cross-origin requests from local frontend (development)
 origins = [
@@ -117,6 +119,7 @@ app.include_router(chatbot_router, tags=["chatbot"], include_in_schema=False)
 @limiter.limit("5/minute")
 def root(request: Request):
     return {"message": "Credit Risk Prediction API is running. Visit /docs for documentation."}
+
 
 @app.get("/health")
 def health_check():

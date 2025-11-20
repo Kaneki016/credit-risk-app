@@ -17,10 +17,7 @@ logger = logging.getLogger(__name__)
 # Supports both PostgreSQL and SQLite
 # PostgreSQL: postgresql://user:password@host:port/database
 # SQLite: sqlite:///./database.db
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "sqlite:///./credit_risk.db"  # Default to SQLite for easier setup
-)
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./credit_risk.db")  # Default to SQLite for easier setup
 
 # Create SQLAlchemy engine
 # Supports both SQLite and PostgreSQL (if psycopg2 is installed)
@@ -29,7 +26,7 @@ engine = create_engine(
     pool_pre_ping=True,  # Verify connections before using
     pool_size=10 if "postgresql" in DATABASE_URL else 5,  # Smaller pool for SQLite
     max_overflow=20 if "postgresql" in DATABASE_URL else 10,
-    echo=False  # Set to True for SQL query logging
+    echo=False,  # Set to True for SQL query logging
 )
 
 # Create SessionLocal class
@@ -69,6 +66,7 @@ def check_connection():
     """
     try:
         from sqlalchemy import text
+
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         logger.info("Database connection successful")

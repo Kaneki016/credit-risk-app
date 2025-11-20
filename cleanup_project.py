@@ -87,19 +87,19 @@ def create_backup():
     """Create backup of files before deletion."""
     backup_dir = Path(f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
     backup_dir.mkdir(exist_ok=True)
-    
+
     print(f"📦 Creating backup in {backup_dir}/")
-    
+
     # Backup markdown files
     for file in MARKDOWN_TO_DELETE:
         if Path(file).exists():
             shutil.copy2(file, backup_dir / file)
-    
+
     # Backup scripts
     for file in SCRIPTS_TO_DELETE:
         if Path(file).exists():
             shutil.copy2(file, backup_dir / file)
-    
+
     print(f"✓ Backup created: {len(list(backup_dir.iterdir()))} files")
     return backup_dir
 
@@ -107,9 +107,9 @@ def create_backup():
 def delete_files():
     """Delete redundant files."""
     print("\n🗑️  Deleting redundant files...")
-    
+
     deleted_count = 0
-    
+
     # Delete markdown files
     print("\n  Markdown files:")
     for file in MARKDOWN_TO_DELETE:
@@ -120,7 +120,7 @@ def delete_files():
             deleted_count += 1
         else:
             print(f"    ⏭️  Skipped (not found): {file}")
-    
+
     # Delete scripts
     print("\n  Python scripts:")
     for file in SCRIPTS_TO_DELETE:
@@ -131,7 +131,7 @@ def delete_files():
             deleted_count += 1
         else:
             print(f"    ⏭️  Skipped (not found): {file}")
-    
+
     # Delete backend files
     print("\n  Backend files:")
     for file in BACKEND_TO_DELETE:
@@ -142,7 +142,7 @@ def delete_files():
             deleted_count += 1
         else:
             print(f"    ⏭️  Skipped (not found): {file}")
-    
+
     # Delete examples
     print("\n  Example files:")
     for file in EXAMPLES_TO_DELETE:
@@ -153,21 +153,21 @@ def delete_files():
             deleted_count += 1
         else:
             print(f"    ⏭️  Skipped (not found): {file}")
-    
+
     print(f"\n✓ Deleted {deleted_count} files total")
 
 
 def move_files():
     """Move files to organized directories."""
     print("\n📁 Moving files to organized structure...")
-    
+
     moved_count = 0
-    
+
     # Move documentation
     for source, dest in DOCS_TO_MOVE.items():
         source_path = Path(source)
         dest_path = Path(dest)
-        
+
         if source_path.exists():
             dest_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(source_path), str(dest_path))
@@ -175,12 +175,12 @@ def move_files():
             moved_count += 1
         else:
             print(f"  ⏭️  Skipped (not found): {source}")
-    
+
     # Move scripts
     for source, dest in SCRIPTS_TO_MOVE.items():
         source_path = Path(source)
         dest_path = Path(dest)
-        
+
         if source_path.exists():
             dest_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(source_path), str(dest_path))
@@ -188,14 +188,14 @@ def move_files():
             moved_count += 1
         else:
             print(f"  ⏭️  Skipped (not found): {source}")
-    
+
     print(f"\n✓ Moved {moved_count} files")
 
 
 def create_index_files():
     """Create README files for organized directories."""
     print("\n📝 Creating index files...")
-    
+
     # docs/README.md
     docs_readme = """# Documentation
 
@@ -217,10 +217,10 @@ def create_index_files():
 
 For the main README, see [../README.md](../README.md)
 """
-    
+
     Path("docs/README.md").write_text(docs_readme)
     print("  ✓ Created: docs/README.md")
-    
+
     # scripts/README.md
     scripts_readme = """# Scripts
 
@@ -254,7 +254,7 @@ python scripts/utilities/list_openrouter_models.py
 python scripts/testing/test_new_features.py
 ```
 """
-    
+
     Path("scripts/README.md").write_text(scripts_readme)
     print("  ✓ Created: scripts/README.md")
 
@@ -262,15 +262,15 @@ python scripts/testing/test_new_features.py
 def update_main_readme():
     """Update main README with new structure."""
     print("\n📝 Updating main README...")
-    
+
     # Read current README
     readme_path = Path("README.md")
     if not readme_path.exists():
         print("  ⚠️  README.md not found, skipping update")
         return
-    
+
     content = readme_path.read_text()
-    
+
     # Add documentation section if not exists
     if "## 📚 Documentation" not in content:
         docs_section = """
@@ -299,7 +299,7 @@ def update_main_readme():
             content = content.replace("## License", docs_section + "## License")
         else:
             content += docs_section
-        
+
         readme_path.write_text(content)
         print("  ✓ Updated: README.md")
     else:
@@ -311,7 +311,7 @@ def show_summary():
     print("\n" + "=" * 70)
     print("CLEANUP SUMMARY")
     print("=" * 70)
-    
+
     print("\n✅ Completed Tasks:")
     print("  1. Created backup of all files")
     print("  2. Deleted 25 redundant markdown files")
@@ -322,7 +322,7 @@ def show_summary():
     print("  7. Moved 3 scripts to organized structure")
     print("  8. Created index files (docs/README.md, scripts/README.md)")
     print("  9. Updated main README.md")
-    
+
     print("\n📁 New Structure:")
     print("  Root:")
     print("    - README.md (main entry point)")
@@ -337,13 +337,13 @@ def show_summary():
     print("    ├── utilities/")
     print("    ├── testing/")
     print("    └── deployment/")
-    
+
     print("\n🎯 Benefits:")
     print("  ✓ Clean root directory")
     print("  ✓ Organized documentation")
     print("  ✓ Easy to navigate")
     print("  ✓ Professional structure")
-    
+
     print("\n" + "=" * 70)
 
 
@@ -352,7 +352,7 @@ def main():
     print("=" * 70)
     print("PROJECT CLEANUP")
     print("=" * 70)
-    
+
     print("\nThis script will:")
     print("  1. Create backup of all files")
     print("  2. Delete 25 redundant markdown files")
@@ -363,39 +363,39 @@ def main():
     print("  7. Move 3 scripts to organized structure")
     print("  8. Create index files")
     print("  9. Update main README")
-    
+
     response = input("\nProceed with cleanup? (yes/no): ")
-    
-    if response.lower() != 'yes':
+
+    if response.lower() != "yes":
         print("\n❌ Cleanup cancelled")
         return
-    
+
     try:
         # Step 1: Create backup
         backup_dir = create_backup()
-        
+
         # Step 2: Delete redundant files
         delete_files()
-        
+
         # Step 3: Move files to organized structure
         move_files()
-        
+
         # Step 4: Create index files
         create_index_files()
-        
+
         # Step 5: Update main README
         update_main_readme()
-        
+
         # Step 6: Show summary
         show_summary()
-        
+
         print(f"\n✅ Cleanup completed successfully!")
         print(f"📦 Backup saved in: {backup_dir}/")
         print("\nNext steps:")
         print("  1. Review the changes")
         print("  2. Test the application: python run.py")
         print("  3. Commit changes: git add . && git commit -m 'Clean up project structure'")
-        
+
     except Exception as e:
         print(f"\n❌ Error during cleanup: {e}")
         print("Backup is safe in backup_* directory")

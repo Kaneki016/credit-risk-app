@@ -31,7 +31,7 @@ class LoanApplication(BaseModel):
                     "home_ownership": "RENT",
                     "loan_intent": "PERSONAL",
                     "loan_grade": "A",
-                    "default_on_file": "N"
+                    "default_on_file": "N",
                 }
             ]
         }

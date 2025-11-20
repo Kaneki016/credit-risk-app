@@ -17,27 +17,20 @@ class APIRequestCounter:
     """
     Tracks API requests to LLM providers.
     """
-    
+
     def __init__(self):
         self.requests = defaultdict(int)  # provider -> count
         self.session_start = datetime.now()
         self.request_log = []
         self.log_file = "logs/api_requests.log"
-        
+
         # Ensure logs directory exists
         os.makedirs("logs", exist_ok=True)
-    
-    def count_request(
-        self, 
-        provider: str, 
-        model: str, 
-        endpoint: str,
-        success: bool = True,
-        tokens: int = 0
-    ):
+
+    def count_request(self, provider: str, model: str, endpoint: str, success: bool = True, tokens: int = 0):
         """
         Count an API request.
-        
+
         Args:
             provider: API provider (OpenRouter, Gemini, etc.)
             model: Model used
@@ -47,7 +40,7 @@ class APIRequestCounter:
         """
         key = f"{provider}:{model}"
         self.requests[key] += 1
-        
+
         # Log the request
         log_entry = {
             "timestamp": datetime.now().isoformat(),
@@ -56,42 +49,42 @@ class APIRequestCounter:
             "endpoint": endpoint,
             "success": success,
             "tokens": tokens,
-            "session_count": self.requests[key]
+            "session_count": self.requests[key],
         }
-        
+
         self.request_log.append(log_entry)
-        
+
         # Write to log file
         try:
             with open(self.log_file, "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
         except Exception as e:
             logger.warning(f"Failed to write to API log: {e}")
-        
+
         # Log to console
         logger.info(
             f"🔔 LLM API Call #{self.requests[key]} | "
             f"Provider: {provider} | Model: {model} | "
             f"Endpoint: {endpoint} | Success: {success}"
         )
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """Get statistics about API usage."""
         total_requests = sum(self.requests.values())
         session_duration = (datetime.now() - self.session_start).total_seconds()
-        
+
         return {
             "total_requests": total_requests,
             "requests_by_provider": dict(self.requests),
             "session_duration_seconds": session_duration,
             "session_start": self.session_start.isoformat(),
-            "requests_per_minute": (total_requests / session_duration * 60) if session_duration > 0 else 0
+            "requests_per_minute": (total_requests / session_duration * 60) if session_duration > 0 else 0,
         }
-    
+
     def get_recent_requests(self, limit: int = 10) -> list:
         """Get recent API requests."""
         return self.request_log[-limit:]
-    
+
     def reset(self):
         """Reset counters (useful for testing)."""
         self.requests.clear()
@@ -112,16 +105,10 @@ def get_api_counter() -> APIRequestCounter:
     return _counter
 
 
-def count_llm_request(
-    provider: str,
-    model: str,
-    endpoint: str,
-    success: bool = True,
-    tokens: int = 0
-):
+def count_llm_request(provider: str, model: str, endpoint: str, success: bool = True, tokens: int = 0):
     """
     Convenience function to count an LLM request.
-    
+
     Args:
         provider: API provider name
         model: Model name

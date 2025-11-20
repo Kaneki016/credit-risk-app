@@ -8,14 +8,17 @@ from backend.utils.ai_client import get_ai_client
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+
 class ChatMessage(BaseModel):
     role: str
     content: str
+
 
 class ChatRequest(BaseModel):
     query: str = Field(..., description="The user's query string")
     history: Optional[List[ChatMessage]] = []
     context: Optional[Dict[str, Any]] = None
+
 
 @router.post("/chatbot/query")
 async def chatbot_query(request: ChatRequest):
@@ -24,13 +27,13 @@ async def chatbot_query(request: ChatRequest):
     """
     try:
         ai_client = get_ai_client()
-        
+
         if not ai_client.is_available():
             return {
                 "response": "I apologize, but I am currently offline (API key not configured). Please check the system configuration.",
-                "error": "no_api_key"
+                "error": "no_api_key",
             }
-            
+
         # Construct prompt with history
         system_prompt = """You are the dedicated AI Assistant for the Credit Risk Prediction System.
         
@@ -52,40 +55,37 @@ async def chatbot_query(request: ChatRequest):
         CONTEXT:
         The user is interacting with the web dashboard of the Credit Risk Prediction System.
         """
-        
+
         # Build conversation context
         messages_text = ""
         if request.history:
-            for msg in request.history[-5:]: # Keep last 5 messages for context
+            for msg in request.history[-5:]:  # Keep last 5 messages for context
                 messages_text += f"{msg.role}: {msg.content}\n"
-        
+
         messages_text += f"user: {request.query}\n"
-        
+
         if request.context:
             messages_text += f"\nContext: {request.context}\n"
-            
+
         prompt = f"""
         Conversation history:
         {messages_text}
         
         Please provide a helpful response to the user's last message, adhering strictly to your role as a Credit Risk Assistant.
         """
-        
+
         # Call AI
         result = await ai_client.generate_with_retry(prompt, system_prompt)
-        
+
         if result.get("error"):
             logger.warning(f"Chatbot error: {result.get('error')}")
             return {
                 "response": "I encountered an error processing your request. Please try again later.",
-                "error": result.get("error")
+                "error": result.get("error"),
             }
-            
-        return {
-            "response": result.get("text", "I'm not sure how to respond to that."),
-            "raw": result.get("raw")
-        }
-        
+
+        return {"response": result.get("text", "I'm not sure how to respond to that."), "raw": result.get("raw")}
+
     except Exception as e:
         logger.error(f"Chatbot exception: {e}")
         raise HTTPException(status_code=500, detail=str(e))

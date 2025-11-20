@@ -1,0 +1,2183 @@
+backend\api\clear_database_endpoint.py:23:1: W293 blank line contains whitespace
+    """
+    Clear all data from the database.
+    
+    WARNING: This will delete ALL data including:
+    - Predictions
+    - Loan Applications
+    - Feature Engineering records
+    - Mitigation Plans
+    - Audit Logs
+    - Model Metrics
+    
+    Args:
+        confirm: Must be True to proceed with deletion
+        
+    Returns:
+        Summary of deleted records
+    """
+^
+backend\api\clear_database_endpoint.py:31:1: W293 blank line contains whitespace
+    """
+    Clear all data from the database.
+    
+    WARNING: This will delete ALL data including:
+    - Predictions
+    - Loan Applications
+    - Feature Engineering records
+    - Mitigation Plans
+    - Audit Logs
+    - Model Metrics
+    
+    Args:
+        confirm: Must be True to proceed with deletion
+        
+    Returns:
+        Summary of deleted records
+    """
+^
+backend\api\clear_database_endpoint.py:34:1: W293 blank line contains whitespace
+    """
+    Clear all data from the database.
+    
+    WARNING: This will delete ALL data including:
+    - Predictions
+    - Loan Applications
+    - Feature Engineering records
+    - Mitigation Plans
+    - Audit Logs
+    - Model Metrics
+    
+    Args:
+        confirm: Must be True to proceed with deletion
+        
+    Returns:
+        Summary of deleted records
+    """
+^
+backend\api\clear_database_endpoint.py:43:1: W293 blank line contains whitespace
+    
+^
+backend\api\clear_database_endpoint.py:46:1: W293 blank line contains whitespace
+        
+^
+backend\api\clear_database_endpoint.py:56:1: W293 blank line contains whitespace
+        
+^
+backend\api\clear_database_endpoint.py:64:1: W293 blank line contains whitespace
+        
+^
+backend\api\clear_database_endpoint.py:66:1: W293 blank line contains whitespace
+        
+^
+backend\api\clear_database_endpoint.py:68:1: W293 blank line contains whitespace
+        
+^
+backend\api\clear_database_endpoint.py:75:1: W293 blank line contains whitespace
+        
+^
+backend\api\main.py:3:1: F401 'os' imported but unused
+import os
+^
+backend\api\main.py:43:1: E302 expected 2 blank lines, found 1
+@app.on_event("startup")
+^
+backend\api\main.py:121:1: E302 expected 2 blank lines, found 1
+@app.get("/health")
+^
+backend\api\routes\chatbot.py:1:1: F401 'fastapi.Body' imported but unused
+from fastapi import APIRouter, HTTPException, Body
+^
+backend\api\routes\chatbot.py:11:1: E302 expected 2 blank lines, found 1
+class ChatMessage(BaseModel):
+^
+backend\api\routes\chatbot.py:15:1: E302 expected 2 blank lines, found 1
+class ChatRequest(BaseModel):
+^
+backend\api\routes\chatbot.py:20:1: E302 expected 2 blank lines, found 1
+@router.post("/chatbot/query")
+^
+backend\api\routes\chatbot.py:27:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\chatbot.py:33:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\chatbot.py:36:1: W293 blank line contains whitespace
+        system_prompt = """You are the dedicated AI Assistant for the Credit Risk Prediction System.
+        
+        Your SOLE purpose is to assist users with this specific application.
+        
+        SYSTEM CAPABILITIES:
+        1. Predict Credit Risk: Analyze loan applications using XGBoost to predict default probability.
+        2. Explain Decisions: Use SHAP values to explain why a loan was approved or rejected.
+        3. Retrain Models: Learn from new historical data (CSV imports) to improve accuracy.
+        4. Manage Data: Import/Export loan data and view database statistics.
+        
+        STRICT GUIDELINES:
+        - ONLY answer questions related to credit risk, banking, loan assessment, or this specific software.
+        - If a user asks about general topics (e.g., "Who is the president?", "Write a poem", "Python code"), politely REFUSE.
+        - Say: "I can only assist with credit risk assessment and navigating this application."
+        - Be professional, concise, and financial-focused.
+        - Do not hallucinate features that don't exist (e.g., we don't have image recognition).
+        
+        CONTEXT:
+        The user is interacting with the web dashboard of the Credit Risk Prediction System.
+        """
+^
+backend\api\routes\chatbot.py:38:1: W293 blank line contains whitespace
+        system_prompt = """You are the dedicated AI Assistant for the Credit Risk Prediction System.
+        
+        Your SOLE purpose is to assist users with this specific application.
+        
+        SYSTEM CAPABILITIES:
+        1. Predict Credit Risk: Analyze loan applications using XGBoost to predict default probability.
+        2. Explain Decisions: Use SHAP values to explain why a loan was approved or rejected.
+        3. Retrain Models: Learn from new historical data (CSV imports) to improve accuracy.
+        4. Manage Data: Import/Export loan data and view database statistics.
+        
+        STRICT GUIDELINES:
+        - ONLY answer questions related to credit risk, banking, loan assessment, or this specific software.
+        - If a user asks about general topics (e.g., "Who is the president?", "Write a poem", "Python code"), politely REFUSE.
+        - Say: "I can only assist with credit risk assessment and navigating this application."
+        - Be professional, concise, and financial-focused.
+        - Do not hallucinate features that don't exist (e.g., we don't have image recognition).
+        
+        CONTEXT:
+        The user is interacting with the web dashboard of the Credit Risk Prediction System.
+        """
+^
+backend\api\routes\chatbot.py:44:1: W293 blank line contains whitespace
+        system_prompt = """You are the dedicated AI Assistant for the Credit Risk Prediction System.
+        
+        Your SOLE purpose is to assist users with this specific application.
+        
+        SYSTEM CAPABILITIES:
+        1. Predict Credit Risk: Analyze loan applications using XGBoost to predict default probability.
+        2. Explain Decisions: Use SHAP values to explain why a loan was approved or rejected.
+        3. Retrain Models: Learn from new historical data (CSV imports) to improve accuracy.
+        4. Manage Data: Import/Export loan data and view database statistics.
+        
+        STRICT GUIDELINES:
+        - ONLY answer questions related to credit risk, banking, loan assessment, or this specific software.
+        - If a user asks about general topics (e.g., "Who is the president?", "Write a poem", "Python code"), politely REFUSE.
+        - Say: "I can only assist with credit risk assessment and navigating this application."
+        - Be professional, concise, and financial-focused.
+        - Do not hallucinate features that don't exist (e.g., we don't have image recognition).
+        
+        CONTEXT:
+        The user is interacting with the web dashboard of the Credit Risk Prediction System.
+        """
+^
+backend\api\routes\chatbot.py:51:1: W293 blank line contains whitespace
+        system_prompt = """You are the dedicated AI Assistant for the Credit Risk Prediction System.
+        
+        Your SOLE purpose is to assist users with this specific application.
+        
+        SYSTEM CAPABILITIES:
+        1. Predict Credit Risk: Analyze loan applications using XGBoost to predict default probability.
+        2. Explain Decisions: Use SHAP values to explain why a loan was approved or rejected.
+        3. Retrain Models: Learn from new historical data (CSV imports) to improve accuracy.
+        4. Manage Data: Import/Export loan data and view database statistics.
+        
+        STRICT GUIDELINES:
+        - ONLY answer questions related to credit risk, banking, loan assessment, or this specific software.
+        - If a user asks about general topics (e.g., "Who is the president?", "Write a poem", "Python code"), politely REFUSE.
+        - Say: "I can only assist with credit risk assessment and navigating this application."
+        - Be professional, concise, and financial-focused.
+        - Do not hallucinate features that don't exist (e.g., we don't have image recognition).
+        
+        CONTEXT:
+        The user is interacting with the web dashboard of the Credit Risk Prediction System.
+        """
+^
+backend\api\routes\chatbot.py:55:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\chatbot.py:59:45: E261 at least two spaces before inline comment
+            for msg in request.history[-5:]: # Keep last 5 messages for context
+                                            ^
+backend\api\routes\chatbot.py:61:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\chatbot.py:63:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\chatbot.py:66:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\chatbot.py:70:1: W293 blank line contains whitespace
+        prompt = f"""
+        Conversation history:
+        {messages_text}
+        
+        Please provide a helpful response to the user's last message, adhering strictly to your role as a Credit Risk Assistant.
+        """
+^
+backend\api\routes\chatbot.py:73:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\chatbot.py:76:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\chatbot.py:83:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\chatbot.py:88:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\data_management.py:1:1: F401 'fastapi.BackgroundTasks' imported but unused
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, BackgroundTasks
+^
+backend\api\routes\data_management.py:6:1: F401 'typing.Dict' imported but unused
+from typing import Dict, Any, List
+^
+backend\api\routes\data_management.py:6:1: F401 'typing.Any' imported but unused
+from typing import Dict, Any, List
+^
+backend\api\routes\data_management.py:6:1: F401 'typing.List' imported but unused
+from typing import Dict, Any, List
+^
+backend\api\routes\data_management.py:7:1: F401 'json' imported but unused
+import json
+^
+backend\api\routes\data_management.py:9:1: F401 'backend.database.models' imported but unused
+from backend.database import get_db, crud, models
+^
+backend\api\routes\data_management.py:14:1: E302 expected 2 blank lines, found 1
+@router.post("/db/import_csv")
+^
+backend\api\routes\data_management.py:25:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\data_management.py:29:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\data_management.py:31:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\data_management.py:34:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\data_management.py:36:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\data_management.py:39:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\data_management.py:55:53: E261 at least two spaces before inline comment
+                    "application_status": "approved" # Assume historical data is processed
+                                                    ^
+backend\api\routes\data_management.py:57:1: W293 blank line contains whitespace
+                
+^
+backend\api\routes\data_management.py:60:1: W293 blank line contains whitespace
+                
+^
+backend\api\routes\data_management.py:64:1: W293 blank line contains whitespace
+                    
+^
+backend\api\routes\data_management.py:66:1: W293 blank line contains whitespace
+                
+^
+backend\api\routes\data_management.py:71:61: E261 at least two spaces before inline comment
+                    loan_status = row.get('loan_status_num') # Try numeric
+                                                            ^
+backend\api\routes\data_management.py:72:1: W293 blank line contains whitespace
+                    
+^
+backend\api\routes\data_management.py:75:1: W293 blank line contains whitespace
+                    
+^
+backend\api\routes\data_management.py:79:52: E261 at least two spaces before inline comment
+                        "input_features": app_data, # Store features for retraining
+                                                   ^
+backend\api\routes\data_management.py:81:52: E261 at least two spaces before inline comment
+                        "probability_default": 0.0, # Unknown
+                                                   ^
+backend\api\routes\data_management.py:82:61: E261 at least two spaces before inline comment
+                        "binary_prediction": actual_outcome, # Assume perfect prediction for history? Or just store actual.
+                                                            ^
+backend\api\routes\data_management.py:88:1: W293 blank line contains whitespace
+                
+^
+backend\api\routes\data_management.py:90:1: W293 blank line contains whitespace
+                
+^
+backend\api\routes\data_management.py:94:1: W293 blank line contains whitespace
+                
+^
+backend\api\routes\data_management.py:101:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\model.py:9:105: W291 trailing whitespace
+# Global instances (will be managed by main app state or dependency injection in a cleaner architecture, 
+                                                                                                        ^
+backend\api\routes\model.py:14:48: W291 trailing whitespace
+# BUT, `reload_model` updates the global state. 
+                                               ^
+backend\api\routes\model.py:20:1: E302 expected 2 blank lines, found 1
+class ModelManager:
+^
+backend\api\routes\model.py:55:29: W291 trailing whitespace
+# ModelManager.load_models() 
+                            ^
+backend\api\routes\model.py:57:1: E302 expected 2 blank lines, found 1
+@router.get("/health")
+^
+backend\api\routes\model.py:70:1: E302 expected 2 blank lines, found 1
+@router.post("/reload_model")
+^
+backend\api\routes\prediction.py:1:1: F401 'fastapi.Depends' imported but unused
+from fastapi import APIRouter, HTTPException, Depends
+^
+backend\api\routes\prediction.py:21:40: W291 trailing whitespace
+    # We need to find the project root. 
+                                       ^
+backend\api\routes\prediction.py:35:1: E302 expected 2 blank lines, found 1
+@router.post("/predict_risk", response_model=Dict[str, Any])
+^
+backend\api\routes\prediction.py:40:1: W293 blank line contains whitespace
+    """
+    Accepts complete loan application data and returns a credit risk prediction, probability,
+    SHAP explanation, and AI-generated advice.
+    
+    Note: For CSV uploads and partial data, use /predict_risk_dynamic or /predict_risk_batch instead.
+    """
+^
+backend\api\routes\prediction.py:46:29: W291 trailing whitespace
+            status_code=503, 
+                            ^
+backend\api\routes\prediction.py:65:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:75:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:78:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:81:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:100:29: W291 trailing whitespace
+            status_code=500, 
+                            ^
+backend\api\routes\prediction.py:114:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:119:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:135:1: E302 expected 2 blank lines, found 1
+@router.post("/predict_risk_dynamic", response_model=Dict[str, Any])
+^
+backend\api\routes\prediction.py:146:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:148:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:150:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:153:28: W291 trailing whitespace
+            raw_input_dict, 
+                           ^
+backend\api\routes\prediction.py:157:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:159:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:161:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:166:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:171:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:173:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\prediction.py:180:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:183:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:189:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:192:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:200:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:202:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:221:1: E302 expected 2 blank lines, found 1
+@router.post("/predict_risk_batch", response_model=Dict[str, Any])
+^
+backend\api\routes\prediction.py:222:1: C901 'predict_risk_batch' is too complex (11)
+async def predict_risk_batch(applications: List[DynamicLoanApplication], include_explanations: bool = False):
+^
+backend\api\routes\prediction.py:232:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:234:1: W293 blank line contains whitespace
+    
+^
+backend\api\routes\prediction.py:238:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\prediction.py:244:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\prediction.py:254:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\prediction.py:263:1: W293 blank line contains whitespace
+                    
+^
+backend\api\routes\prediction.py:268:1: W293 blank line contains whitespace
+                    
+^
+backend\api\routes\prediction.py:270:1: W293 blank line contains whitespace
+                    
+^
+backend\api\routes\prediction.py:276:1: W293 blank line contains whitespace
+                    
+^
+backend\api\routes\prediction.py:280:1: W293 blank line contains whitespace
+                    
+^
+backend\api\routes\prediction.py:284:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\prediction.py:286:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\prediction.py:294:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\prediction.py:297:1: E302 expected 2 blank lines, found 1
+def _check_drift(data: Dict[str, Any]) -> List[str]:
+^
+backend\api\routes\prediction.py:310:1: W293 blank line contains whitespace
+                
+^
+backend\api\routes\retraining.py:1:1: F401 'fastapi.Depends' imported but unused
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File
+^
+backend\api\routes\retraining.py:2:1: F401 'typing.Dict' imported but unused
+from typing import Dict, Any
+^
+backend\api\routes\retraining.py:2:1: F401 'typing.Any' imported but unused
+from typing import Dict, Any
+^
+backend\api\routes\retraining.py:14:1: E302 expected 2 blank lines, found 1
+@router.get("/db/retraining/status")
+^
+backend\api\routes\retraining.py:25:1: E302 expected 2 blank lines, found 1
+@router.post("/db/retraining/start")
+^
+backend\api\routes\retraining.py:26:28: E261 at least two spaces before inline comment
+@router.post("/db/retrain") # Alias for frontend compatibility
+                           ^
+backend\api\routes\retraining.py:41:33: W291 trailing whitespace
+                status_code=400, 
+                                ^
+backend\api\routes\retraining.py:44:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\retraining.py:47:35: W291 trailing whitespace
+            retrain_from_database, 
+                                  ^
+backend\api\routes\retraining.py:48:37: W291 trailing whitespace
+            min_samples=min_samples, 
+                                    ^
+backend\api\routes\retraining.py:49:51: W291 trailing whitespace
+            min_feedback_ratio=min_feedback_ratio, 
+                                                  ^
+backend\api\routes\retraining.py:52:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\retraining.py:60:1: E302 expected 2 blank lines, found 1
+@router.post("/train/flexible")
+^
+backend\api\routes\retraining.py:70:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\retraining.py:76:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\retraining.py:79:1: W293 blank line contains whitespace
+            
+^
+backend\api\routes\retraining.py:82:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\retraining.py:86:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\retraining.py:88:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\retraining.py:91:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\retraining.py:93:1: W293 blank line contains whitespace
+        
+^
+backend\api\routes\retraining.py:97:1: W391 blank line at end of file
+
+^
+backend\core\api_config.py:18:1: W293 blank line contains whitespace
+    
+^
+backend\core\api_config.py:23:1: W293 blank line contains whitespace
+        
+^
+backend\core\api_config.py:27:1: W293 blank line contains whitespace
+        
+^
+backend\core\api_config.py:30:1: W293 blank line contains whitespace
+        
+^
+backend\core\api_config.py:33:1: W293 blank line contains whitespace
+    
+^
+backend\core\api_config.py:36:24: E226 missing whitespace around arithmetic operator
+        logger.info("="*70)
+                       ^
+backend\core\api_config.py:38:24: E226 missing whitespace around arithmetic operator
+        logger.info("="*70)
+                       ^
+backend\core\api_config.py:41:1: W293 blank line contains whitespace
+        
+^
+backend\core\api_config.py:46:1: W293 blank line contains whitespace
+        
+^
+backend\core\api_config.py:51:1: W293 blank line contains whitespace
+        
+^
+backend\core\api_config.py:58:1: W293 blank line contains whitespace
+        
+^
+backend\core\api_config.py:59:24: E226 missing whitespace around arithmetic operator
+        logger.info("="*70)
+                       ^
+backend\core\api_config.py:60:1: W293 blank line contains whitespace
+    
+^
+backend\core\api_config.py:64:1: W293 blank line contains whitespace
+    
+^
+backend\core\api_config.py:68:1: W293 blank line contains whitespace
+    
+^
+backend\core\api_config.py:72:1: W293 blank line contains whitespace
+    
+^
+backend\core\api_config.py:76:1: W293 blank line contains whitespace
+    
+^
+backend\core\config.py:16:1: F401 'os' imported but unused
+import os
+^
+backend\core\config.py:16:1: E402 module level import not at top of file
+import os
+^
+backend\core\config.py:17:1: E402 module level import not at top of file
+from pathlib import Path
+^
+backend\core\schemas.py:38:6: W292 no newline at end of file
+    }     ^
+backend\database\crud.py:33:17: W291 trailing whitespace
+    db: Session, 
+                ^
+backend\database\crud.py:34:19: W291 trailing whitespace
+    skip: int = 0, 
+                  ^
+backend\database\crud.py:46:17: W291 trailing whitespace
+    db: Session, 
+                ^
+backend\database\crud.py:47:25: W291 trailing whitespace
+    application_id: int, 
+                        ^
+backend\database\crud.py:250:1: W293 blank line contains whitespace
+    
+^
+backend\database\crud.py:271:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:13:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:15:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:17:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:23:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:30:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:34:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:38:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:46:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:48:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:50:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:53:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:56:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:61:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:65:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:72:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:76:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:84:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:86:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:88:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:91:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:95:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:99:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:107:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:109:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:111:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:114:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:118:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:126:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:129:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:138:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:140:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:142:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:146:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:151:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:154:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:158:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:165:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:167:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:169:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:173:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:180:1: W293 blank line contains whitespace
+    
+^
+backend\database\models.py:186:1: W293 blank line contains whitespace
+    
+^
+backend\models\dynamic_predictor.py:21:1: W293 blank line contains whitespace
+    
+^
+backend\models\dynamic_predictor.py:22:23: W291 trailing whitespace
+    def __init__(self, 
+                      ^
+backend\models\dynamic_predictor.py:27:1: W293 blank line contains whitespace
+        """
+        Initialize the dynamic predictor.
+        
+        Args:
+            stats_path: Path to feature statistics JSON
+            historical_data_path: Path to historical data CSV for imputation
+        """
+^
+backend\models\dynamic_predictor.py:34:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:44:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:48:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:50:1: W293 blank line contains whitespace
+    
+^
+backend\models\dynamic_predictor.py:51:22: W291 trailing whitespace
+    def predict(self, 
+                     ^
+backend\models\dynamic_predictor.py:52:44: W291 trailing whitespace
+                input_data: Dict[str, Any], 
+                                           ^
+backend\models\dynamic_predictor.py:57:1: W293 blank line contains whitespace
+        """
+        Make a prediction with dynamic input handling.
+        
+        Args:
+            input_data: Dictionary with partial or complete loan application data
+            flag_threshold: Threshold for high risk classification
+            return_imputation_log: Whether to return imputation details
+            
+        Returns:
+            Tuple of (risk_level, probability, binary_prediction, [imputation_log])
+        """
+^
+backend\models\dynamic_predictor.py:62:1: W293 blank line contains whitespace
+        """
+        Make a prediction with dynamic input handling.
+        
+        Args:
+            input_data: Dictionary with partial or complete loan application data
+            flag_threshold: Threshold for high risk classification
+            return_imputation_log: Whether to return imputation details
+            
+        Returns:
+            Tuple of (risk_level, probability, binary_prediction, [imputation_log])
+        """
+^
+backend\models\dynamic_predictor.py:68:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:71:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:74:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:77:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:82:1: W293 blank line contains whitespace
+    
+^
+backend\models\dynamic_predictor.py:86:1: W293 blank line contains whitespace
+        """
+        Get SHAP values with dynamic input handling.
+        
+        Args:
+            input_data: Dictionary with partial or complete loan application data
+            
+        Returns:
+            Tuple of (shap_values, expected_value, features_df, imputed_data)
+        """
+^
+backend\models\dynamic_predictor.py:89:1: W293 blank line contains whitespace
+        """
+        Get SHAP values with dynamic input handling.
+        
+        Args:
+            input_data: Dictionary with partial or complete loan application data
+            
+        Returns:
+            Tuple of (shap_values, expected_value, features_df, imputed_data)
+        """
+^
+backend\models\dynamic_predictor.py:97:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:100:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:102:1: W293 blank line contains whitespace
+    
+^
+backend\models\dynamic_predictor.py:106:1: W293 blank line contains whitespace
+        """
+        Get feature importance scores for the prediction.
+        
+        Args:
+            input_data: Dictionary with loan application data
+            
+        Returns:
+            Dictionary mapping feature names to importance scores
+        """
+^
+backend\models\dynamic_predictor.py:109:1: W293 blank line contains whitespace
+        """
+        Get feature importance scores for the prediction.
+        
+        Args:
+            input_data: Dictionary with loan application data
+            
+        Returns:
+            Dictionary mapping feature names to importance scores
+        """
+^
+backend\models\dynamic_predictor.py:114:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:120:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:127:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:130:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:132:1: W293 blank line contains whitespace
+    
+^
+backend\models\dynamic_predictor.py:136:1: W293 blank line contains whitespace
+        """
+        Validate input data and return validation status and warnings.
+        
+        Args:
+            input_data: Dictionary with loan application data
+            
+        Returns:
+            Tuple of (is_valid, warnings_list)
+        """
+^
+backend\models\dynamic_predictor.py:139:1: W293 blank line contains whitespace
+        """
+        Validate input data and return validation status and warnings.
+        
+        Args:
+            input_data: Dictionary with loan application data
+            
+        Returns:
+            Tuple of (is_valid, warnings_list)
+        """
+^
+backend\models\dynamic_predictor.py:144:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:149:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:153:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:156:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:161:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:165:1: W293 blank line contains whitespace
+        
+^
+backend\models\dynamic_predictor.py:167:77: W291 trailing whitespace
+        numeric_fields = ['person_income', 'person_emp_length', 'loan_amnt', 
+                                                                            ^
+backend\models\dynamic_predictor.py:168:26: E128 continuation line under-indented for visual indent
+                         'loan_int_rate', 'cb_person_cred_hist_length']
+                         ^
+backend\models\dynamic_predictor.py:172:1: W293 blank line contains whitespace
+        
+^
+backend\models\predictor.py:3:1: F401 'numpy as np' imported but unused
+import numpy as np
+^
+backend\models\predictor.py:4:1: F401 'typing.Optional' imported but unused
+from typing import Dict, Union, Tuple, Optional
+^
+backend\models\predictor.py:8:1: F401 'pathlib.Path' imported but unused
+from pathlib import Path
+^
+backend\models\predictor.py:13:1: E302 expected 2 blank lines, found 1
+class CreditRiskPredictor:
+^
+backend\models\predictor.py:21:5: C901 'CreditRiskPredictor._load_model' is too complex (28)
+    def _load_model(self) -> None:
+    ^
+backend\models\predictor.py:26:13: F811 redefinition of unused 'Path' from line 8
+            from pathlib import Path
+            ^
+backend\models\predictor.py:29:1: W293 blank line contains whitespace
+            
+^
+backend\models\predictor.py:43:1: W293 blank line contains whitespace
+                        
+^
+backend\models\predictor.py:104:1: W293 blank line contains whitespace
+            
+^
+backend\models\predictor.py:115:1: W293 blank line contains whitespace
+            
+^
+backend\models\predictor.py:126:1: W293 blank line contains whitespace
+        """
+        Preprocess the input features for prediction.
+        
+        Args:
+            input_dict: Dictionary containing the raw input features
+            
+        Returns:
+            Preprocessed features as a DataFrame
+        """
+^
+backend\models\predictor.py:129:1: W293 blank line contains whitespace
+        """
+        Preprocess the input features for prediction.
+        
+        Args:
+            input_dict: Dictionary containing the raw input features
+            
+        Returns:
+            Preprocessed features as a DataFrame
+        """
+^
+backend\models\predictor.py:136:1: W293 blank line contains whitespace
+        
+^
+backend\models\predictor.py:144:1: W293 blank line contains whitespace
+        """
+        Make a prediction and return the risk level, probability, and binary prediction.
+        
+        Args:
+            input_dict: Dictionary containing the input features
+            flag_threshold: Threshold for high risk classification
+            
+        Returns:
+            Tuple containing (risk_level, probability, binary_prediction)
+        """
+^
+backend\models\predictor.py:148:1: W293 blank line contains whitespace
+        """
+        Make a prediction and return the risk level, probability, and binary prediction.
+        
+        Args:
+            input_dict: Dictionary containing the input features
+            flag_threshold: Threshold for high risk classification
+            
+        Returns:
+            Tuple containing (risk_level, probability, binary_prediction)
+        """
+^
+backend\models\predictor.py:154:1: W293 blank line contains whitespace
+        
+^
+backend\models\predictor.py:157:1: W293 blank line contains whitespace
+        
+^
+backend\models\predictor.py:161:69: W291 trailing whitespace
+            raw_proba = self.model.predict_proba(scaled_features)[0] 
+                                                                    ^
+backend\models\predictor.py:162:1: W293 blank line contains whitespace
+            
+^
+backend\models\predictor.py:175:1: W293 blank line contains whitespace
+                
+^
+backend\models\predictor.py:180:1: W293 blank line contains whitespace
+        
+^
+backend\models\predictor.py:190:13: F841 local variable 'risk_class' is assigned to but never used
+            risk_class = "risk-low"
+            ^
+backend\models\predictor.py:191:1: W293 blank line contains whitespace
+        
+^
+backend\models\predictor.py:197:1: W293 blank line contains whitespace
+        """
+        Get SHAP values for the prediction.
+        
+        Args:
+            input_dict: Dictionary containing the input features
+            
+        Returns:
+            Tuple of (shap_values, expected_value, features_df)
+        """
+^
+backend\models\predictor.py:200:1: W293 blank line contains whitespace
+        """
+        Get SHAP values for the prediction.
+        
+        Args:
+            input_dict: Dictionary containing the input features
+            
+        Returns:
+            Tuple of (shap_values, expected_value, features_df)
+        """
+^
+backend\models\predictor.py:205:1: W293 blank line contains whitespace
+        
+^
+backend\models\predictor.py:209:1: W293 blank line contains whitespace
+        
+^
+backend\models\predictor.py:214:1: W293 blank line contains whitespace
+        
+^
+backend\models\predictor.py:215:53: W292 no newline at end of file
+        return shap_values, expected_value, df_input                                                    ^
+backend\models\training.py:52:1: W191 indentation contains tabs
+	json.dump(X.columns.tolist(), f)
+^
+backend\services\database_retraining.py:8:1: F401 'numpy as np' imported but unused
+import numpy as np
+^
+backend\services\database_retraining.py:20:1: F401 'backend.database.models.Prediction' imported but unused
+from backend.database.models import Prediction, ModelMetrics
+^
+backend\services\database_retraining.py:20:1: F401 'backend.database.models.ModelMetrics' imported but unused
+from backend.database.models import Prediction, ModelMetrics
+^
+backend\services\database_retraining.py:29:1: W293 blank line contains whitespace
+    
+^
+backend\services\database_retraining.py:33:1: W293 blank line contains whitespace
+        """
+        Initialize retrainer.
+        
+        Args:
+            min_samples: Minimum number of samples needed for retraining
+            min_feedback_ratio: Minimum ratio of samples with feedback
+        """
+^
+backend\services\database_retraining.py:42:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:46:1: W293 blank line contains whitespace
+    
+^
+backend\services\database_retraining.py:50:1: W293 blank line contains whitespace
+        """
+        Check if enough data is available for retraining.
+        
+        Args:
+            db: Database session
+            
+        Returns:
+            Dictionary with readiness status and statistics
+        """
+^
+backend\services\database_retraining.py:53:1: W293 blank line contains whitespace
+        """
+        Check if enough data is available for retraining.
+        
+        Args:
+            db: Database session
+            
+        Returns:
+            Dictionary with readiness status and statistics
+        """
+^
+backend\services\database_retraining.py:60:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:63:39: W291 trailing whitespace
+            p for p in all_predictions 
+                                      ^
+backend\services\database_retraining.py:67:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:70:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:76:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:87:1: W293 blank line contains whitespace
+    
+^
+backend\services\database_retraining.py:91:1: W293 blank line contains whitespace
+        """
+        Extract training data from database predictions with feedback.
+        
+        Args:
+            db: Database session
+            
+        Returns:
+            Tuple of (features_df, labels_series)
+        """
+^
+backend\services\database_retraining.py:94:1: W293 blank line contains whitespace
+        """
+        Extract training data from database predictions with feedback.
+        
+        Args:
+            db: Database session
+            
+        Returns:
+            Tuple of (features_df, labels_series)
+        """
+^
+backend\services\database_retraining.py:101:35: W291 trailing whitespace
+            p for p in predictions 
+                                  ^
+backend\services\database_retraining.py:104:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:107:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:109:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:113:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:118:1: W293 blank line contains whitespace
+                
+^
+backend\services\database_retraining.py:122:1: W293 blank line contains whitespace
+                
+^
+backend\services\database_retraining.py:126:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:130:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:134:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:136:1: W293 blank line contains whitespace
+    
+^
+backend\services\database_retraining.py:140:1: W293 blank line contains whitespace
+        """
+        Prepare features for training (handle categorical variables).
+        
+        Args:
+            df: Raw features DataFrame
+            
+        Returns:
+            Processed features DataFrame
+        """
+^
+backend\services\database_retraining.py:143:1: W293 blank line contains whitespace
+        """
+        Prepare features for training (handle categorical variables).
+        
+        Args:
+            df: Raw features DataFrame
+            
+        Returns:
+            Processed features DataFrame
+        """
+^
+backend\services\database_retraining.py:148:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:154:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:160:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:164:75: W291 trailing whitespace
+            'loan_intent': ['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE', 
+                                                                          ^
+backend\services\database_retraining.py:165:28: E128 continuation line under-indented for visual indent
+                           'HOMEIMPROVEMENT', 'DEBTCONSOLIDATION'],
+                           ^
+backend\services\database_retraining.py:169:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:175:1: W293 blank line contains whitespace
+                
+^
+backend\services\database_retraining.py:180:1: W293 blank line contains whitespace
+                
+^
+backend\services\database_retraining.py:183:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:192:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:195:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:197:1: W293 blank line contains whitespace
+    
+^
+backend\services\database_retraining.py:199:14: W291 trailing whitespace
+        self, 
+             ^
+backend\services\database_retraining.py:206:1: W293 blank line contains whitespace
+        """
+        Retrain model using database data.
+        
+        Args:
+            db: Database session
+            test_size: Proportion of data for testing
+            save_model: Whether to save the retrained model
+            
+        Returns:
+            Dictionary with retraining results and metrics
+        """
+^
+backend\services\database_retraining.py:211:1: W293 blank line contains whitespace
+        """
+        Retrain model using database data.
+        
+        Args:
+            db: Database session
+            test_size: Proportion of data for testing
+            save_model: Whether to save the retrained model
+            
+        Returns:
+            Dictionary with retraining results and metrics
+        """
+^
+backend\services\database_retraining.py:216:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:225:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:228:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:231:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:236:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:239:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:243:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:248:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:257:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:259:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:263:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:276:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:278:20: E128 continuation line under-indented for visual indent
+                   f"AUC-ROC={metrics['auc_roc']:.3f}")
+                   ^
+backend\services\database_retraining.py:279:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:284:1: W293 blank line contains whitespace
+            
+^
+backend\services\database_retraining.py:288:1: W293 blank line contains whitespace
+            
+^
+backend\services\database_retraining.py:292:1: W293 blank line contains whitespace
+            
+^
+backend\services\database_retraining.py:295:1: W293 blank line contains whitespace
+            
+^
+backend\services\database_retraining.py:297:1: W293 blank line contains whitespace
+            
+^
+backend\services\database_retraining.py:300:1: W293 blank line contains whitespace
+            
+^
+backend\services\database_retraining.py:303:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:313:1: W293 blank line contains whitespace
+    
+^
+backend\services\database_retraining.py:315:14: W291 trailing whitespace
+        self, 
+             ^
+backend\services\database_retraining.py:316:22: W291 trailing whitespace
+        version: str, 
+                     ^
+backend\services\database_retraining.py:317:25: W291 trailing whitespace
+        model_path: str, 
+                        ^
+backend\services\database_retraining.py:318:26: W291 trailing whitespace
+        scaler_path: str, 
+                         ^
+backend\services\database_retraining.py:324:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:331:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:342:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:346:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:348:1: W293 blank line contains whitespace
+    
+^
+backend\services\database_retraining.py:364:26: F541 f-string is missing placeholders
+                'notes': f'Retrained from database data. Source: database_retraining'
+                         ^
+backend\services\database_retraining.py:366:1: W293 blank line contains whitespace
+            
+^
+backend\services\database_retraining.py:369:1: W293 blank line contains whitespace
+            
+^
+backend\services\database_retraining.py:372:1: W293 blank line contains whitespace
+    
+^
+backend\services\database_retraining.py:376:1: W293 blank line contains whitespace
+        """
+        Export training data from database to CSV file.
+        
+        Args:
+            db: Database session
+            output_path: Optional output file path
+            
+        Returns:
+            Path to exported file
+        """
+^
+backend\services\database_retraining.py:380:1: W293 blank line contains whitespace
+        """
+        Export training data from database to CSV file.
+        
+        Args:
+            db: Database session
+            output_path: Optional output file path
+            
+        Returns:
+            Path to exported file
+        """
+^
+backend\services\database_retraining.py:386:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:390:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:395:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:399:1: W293 blank line contains whitespace
+        
+^
+backend\services\database_retraining.py:410:1: W293 blank line contains whitespace
+    """
+    Convenience function to retrain model from database.
+    
+    Args:
+        min_samples: Minimum samples required
+        min_feedback_ratio: Minimum feedback ratio required
+        test_size: Test set proportion
+        
+    Returns:
+        Retraining results
+    """
+^
+backend\services\database_retraining.py:415:1: W293 blank line contains whitespace
+    """
+    Convenience function to retrain model from database.
+    
+    Args:
+        min_samples: Minimum samples required
+        min_feedback_ratio: Minimum feedback ratio required
+        test_size: Test set proportion
+        
+    Returns:
+        Retraining results
+    """
+^
+backend\services\database_retraining.py:431:1: W293 blank line contains whitespace
+    """
+    Check if model can be retrained from database.
+    
+    Returns:
+        Status information
+    """
+^
+backend\services\explanation_service.py:4:1: F401 'numpy as np' imported but unused
+import numpy as np
+^
+backend\services\explanation_service.py:5:1: F401 'typing.Optional' imported but unused
+from typing import Dict, Any, Optional
+^
+backend\services\explanation_service.py:14:1: E302 expected 2 blank lines, found 1
+async def generate_llm_explanation(
+^
+backend\services\explanation_service.py:46:1: W293 blank line contains whitespace
+    
+^
+backend\services\explanation_service.py:49:1: W293 blank line contains whitespace
+    
+^
+backend\services\explanation_service.py:57:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:70:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:73:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:97:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:112:1: C901 '_generate_fallback_explanation' is too complex (33)
+def _generate_fallback_explanation(input_data: Dict[str, Any], shap_expl: Dict[str, float], risk_level: str) -> str:
+^
+backend\services\explanation_service.py:117:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:124:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:132:9: F841 local variable 'age' is assigned to but never used
+        age = n("person_age")
+        ^
+backend\services\explanation_service.py:133:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:137:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:141:81: E226 missing whitespace around arithmetic operator
+                concerns.append(f"the requested loan amount represents {loan_pct*100:.0f}% of annual income, which is significantly high")
+                                                                                ^
+backend\services\explanation_service.py:148:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:152:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:155:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:164:1: W293 blank line contains whitespace
+                
+^
+backend\services\explanation_service.py:167:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:169:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:172:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:176:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:183:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:185:68: E226 missing whitespace around arithmetic operator
+                concerns.append(f"loan-to-income ratio of {loan_pct*100:.0f}%")
+                                                                   ^
+backend\services\explanation_service.py:188:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:195:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:197:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:200:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:206:82: E226 missing whitespace around arithmetic operator
+                strengths.append(f"conservative loan-to-income ratio of {loan_pct*100:.0f}%")
+                                                                                 ^
+backend\services\explanation_service.py:211:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:215:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:218:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:221:1: W293 blank line contains whitespace
+            
+^
+backend\services\explanation_service.py:223:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:226:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:228:1: W293 blank line contains whitespace
+        
+^
+backend\services\explanation_service.py:239:1: C901 '_build_rule_based_remediation' is too complex (18)
+def _build_rule_based_remediation(input_data: Dict[str, Any], shap_expl: Dict[str, float], risk_level: str) -> str:
+^
+backend\services\explanation_service.py:268:65: E226 missing whitespace around arithmetic operator
+            suggestions.append(f"Requested loan equals {loan_pct*100:.0f}% of income — consider reducing the loan to ~${suggested:,} (≈30% of income) or offering a longer term.")
+                                                                ^
+backend\services\flexible_training.py:7:1: F401 'numpy as np' imported but unused
+import numpy as np
+^
+backend\services\flexible_training.py:17:1: F401 'typing.List' imported but unused
+from typing import Dict, List, Optional, Tuple, Any
+^
+backend\services\flexible_training.py:27:1: W293 blank line contains whitespace
+    
+^
+backend\services\flexible_training.py:31:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:41:56: W291 trailing whitespace
+                "person_home_ownership", "loan_intent", 
+                                                       ^
+backend\services\flexible_training.py:45:1: W293 blank line contains whitespace
+    
+^
+backend\services\flexible_training.py:49:1: W293 blank line contains whitespace
+        """
+        Automatically detect column types and target variable.
+        
+        Args:
+            df: Input dataframe
+            
+        Returns:
+            Dictionary with detected columns
+        """
+^
+backend\services\flexible_training.py:52:1: W293 blank line contains whitespace
+        """
+        Automatically detect column types and target variable.
+        
+        Args:
+            df: Input dataframe
+            
+        Returns:
+            Dictionary with detected columns
+        """
+^
+backend\services\flexible_training.py:57:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:64:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:72:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:78:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:81:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:85:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:95:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:97:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:104:1: W293 blank line contains whitespace
+    
+^
+backend\services\flexible_training.py:112:1: W293 blank line contains whitespace
+        """
+        Preprocess data with flexible column handling.
+        
+        Args:
+            df: Input dataframe
+            column_mapping: Optional custom column mapping
+            
+        Returns:
+            Tuple of (features_df, target_series, preprocessing_info)
+        """
+^
+backend\services\flexible_training.py:116:1: W293 blank line contains whitespace
+        """
+        Preprocess data with flexible column handling.
+        
+        Args:
+            df: Input dataframe
+            column_mapping: Optional custom column mapping
+            
+        Returns:
+            Tuple of (features_df, target_series, preprocessing_info)
+        """
+^
+backend\services\flexible_training.py:123:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:127:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:130:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:144:1: W293 blank line contains whitespace
+            
+^
+backend\services\flexible_training.py:148:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:150:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:153:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:158:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:164:1: W293 blank line contains whitespace
+                
+^
+backend\services\flexible_training.py:168:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:177:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:179:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:181:1: W293 blank line contains whitespace
+    
+^
+backend\services\flexible_training.py:192:1: W293 blank line contains whitespace
+        """
+        Train a model from CSV file with flexible column handling.
+        
+        Args:
+            csv_path: Path to CSV file
+            column_mapping: Optional custom column mapping
+            test_size: Proportion of data for testing
+            random_state: Random seed
+            model_params: Optional XGBoost parameters
+            
+        Returns:
+            Training results and metrics
+        """
+^
+backend\services\flexible_training.py:199:1: W293 blank line contains whitespace
+        """
+        Train a model from CSV file with flexible column handling.
+        
+        Args:
+            csv_path: Path to CSV file
+            column_mapping: Optional custom column mapping
+            test_size: Proportion of data for testing
+            random_state: Random seed
+            model_params: Optional XGBoost parameters
+            
+        Returns:
+            Training results and metrics
+        """
+^
+backend\services\flexible_training.py:204:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:208:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:211:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:216:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:221:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:231:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:235:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:239:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:247:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:249:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:256:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:261:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:264:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:267:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:270:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:290:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:293:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:296:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:304:1: W293 blank line contains whitespace
+    
+^
+backend\services\flexible_training.py:315:1: W293 blank line contains whitespace
+        """
+        Train a model directly from a DataFrame.
+        
+        Args:
+            df: Input dataframe
+            column_mapping: Optional custom column mapping
+            test_size: Proportion of data for testing
+            random_state: Random seed
+            model_params: Optional XGBoost parameters
+            
+        Returns:
+            Training results and metrics
+        """
+^
+backend\services\flexible_training.py:322:1: W293 blank line contains whitespace
+        """
+        Train a model directly from a DataFrame.
+        
+        Args:
+            df: Input dataframe
+            column_mapping: Optional custom column mapping
+            test_size: Proportion of data for testing
+            random_state: Random seed
+            model_params: Optional XGBoost parameters
+            
+        Returns:
+            Training results and metrics
+        """
+^
+backend\services\flexible_training.py:326:21: F541 f-string is missing placeholders
+        logger.info(f"Starting flexible model training from DataFrame")
+                    ^
+backend\services\flexible_training.py:328:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:332:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:340:1: W293 blank line contains whitespace
+        
+^
+backend\services\flexible_training.py:343:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:23:1: W293 blank line contains whitespace
+    
+^
+backend\services\imputation.py:32:1: W293 blank line contains whitespace
+    
+^
+backend\services\imputation.py:38:1: W293 blank line contains whitespace
+    
+^
+backend\services\imputation.py:58:1: W293 blank line contains whitespace
+    
+^
+backend\services\imputation.py:75:1: W293 blank line contains whitespace
+    
+^
+backend\services\imputation.py:80:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:89:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:98:1: W293 blank line contains whitespace
+    
+^
+backend\services\imputation.py:114:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:122:1: W293 blank line contains whitespace
+    
+^
+backend\services\imputation.py:123:5: C901 'FeatureImputer.impute' is too complex (12)
+    def impute(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    ^
+backend\services\imputation.py:126:1: W293 blank line contains whitespace
+        """
+        Impute missing values using intelligent strategies.
+        
+        Strategy priority:
+        1. Derive from other fields if possible
+        2. Use historical median/mode
+        3. Use safe domain-specific defaults
+        """
+^
+backend\services\imputation.py:134:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:141:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:152:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:167:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:175:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:185:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:189:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:198:1: W293 blank line contains whitespace
+    
+^
+backend\services\imputation.py:208:75: W291 trailing whitespace
+            'loan_intent': ['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE', 
+                                                                          ^
+backend\services\imputation.py:209:28: E128 continuation line under-indented for visual indent
+                           'HOMEIMPROVEMENT', 'DEBTCONSOLIDATION'],
+                           ^
+backend\services\imputation.py:213:1: W293 blank line contains whitespace
+    
+^
+backend\services\imputation.py:219:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:224:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:229:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:232:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:235:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:238:1: W293 blank line contains whitespace
+        
+^
+backend\services\imputation.py:240:1: W293 blank line contains whitespace
+    
+^
+backend\services\retraining.py:49:9: F541 f-string is missing placeholders
+        f"# Model Card - Credit Risk Model",
+        ^
+backend\services\retraining.py:75:1: C901 'retrain_if_needed' is too complex (13)
+def retrain_if_needed():
+^
+backend\services\retraining.py:134:13: F841 local variable 'X_train_raw' is assigned to but never used
+            X_train_raw = X_train.copy()
+            ^
+backend\services\retraining.py:232:18: W292 no newline at end of file
+    return result                 ^
+backend\utils\ai_client.py:23:1: W293 blank line contains whitespace
+    
+^
+backend\utils\ai_client.py:28:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:32:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:39:1: W293 blank line contains whitespace
+    
+^
+backend\utils\ai_client.py:48:1: W293 blank line contains whitespace
+        """
+        Generate AI response with automatic retry on network errors.
+        
+        Args:
+            prompt: User prompt
+            system_prompt: System instruction
+            max_retries: Maximum retry attempts (defaults to self.max_retries)
+            
+        Returns:
+            Dict with 'text', 'raw', and 'error' keys
+        """
+^
+backend\utils\ai_client.py:53:1: W293 blank line contains whitespace
+        """
+        Generate AI response with automatic retry on network errors.
+        
+        Args:
+            prompt: User prompt
+            system_prompt: System instruction
+            max_retries: Maximum retry attempts (defaults to self.max_retries)
+            
+        Returns:
+            Dict with 'text', 'raw', and 'error' keys
+        """
+^
+backend\utils\ai_client.py:59:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:67:1: W293 blank line contains whitespace
+                
+^
+backend\utils\ai_client.py:69:1: W293 blank line contains whitespace
+                
+^
+backend\utils\ai_client.py:78:1: W293 blank line contains whitespace
+                
+^
+backend\utils\ai_client.py:83:1: W293 blank line contains whitespace
+                
+^
+backend\utils\ai_client.py:85:1: W293 blank line contains whitespace
+                
+^
+backend\utils\ai_client.py:90:1: W293 blank line contains whitespace
+                
+^
+backend\utils\ai_client.py:95:1: W293 blank line contains whitespace
+                
+^
+backend\utils\ai_client.py:100:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:104:1: W293 blank line contains whitespace
+    
+^
+backend\utils\ai_client.py:111:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:114:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:120:1: W293 blank line contains whitespace
+    
+^
+backend\utils\ai_client.py:128:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:136:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:141:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:148:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:152:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:159:1: W293 blank line contains whitespace
+    
+^
+backend\utils\ai_client.py:167:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:170:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:174:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:179:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:183:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:191:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:196:1: W293 blank line contains whitespace
+    
+^
+backend\utils\ai_client.py:206:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:208:127: W291 trailing whitespace
+        fallback_text = """Our credit risk assessment model has analyzed this application based on multiple financial factors. 
+The decision considers income level, loan amount, credit history, employment stability, and other relevant metrics. 
+
+Please refer to the SHAP values provided for a detailed breakdown of how each factor contributed to this decision. 
+The feature importance scores show which aspects of the application had the most significant impact on the risk assessment.
+
+Note: AI-powered natural language explanation is temporarily unavailable. A detailed rule-based explanation has been provided instead."""
+                                                                                                                              ^
+backend\utils\ai_client.py:209:116: W291 trailing whitespace
+        fallback_text = """Our credit risk assessment model has analyzed this application based on multiple financial factors. 
+The decision considers income level, loan amount, credit history, employment stability, and other relevant metrics. 
+
+Please refer to the SHAP values provided for a detailed breakdown of how each factor contributed to this decision. 
+The feature importance scores show which aspects of the application had the most significant impact on the risk assessment.
+
+Note: AI-powered natural language explanation is temporarily unavailable. A detailed rule-based explanation has been provided instead."""
+                                                                                                                   ^
+backend\utils\ai_client.py:211:115: W291 trailing whitespace
+        fallback_text = """Our credit risk assessment model has analyzed this application based on multiple financial factors. 
+The decision considers income level, loan amount, credit history, employment stability, and other relevant metrics. 
+
+Please refer to the SHAP values provided for a detailed breakdown of how each factor contributed to this decision. 
+The feature importance scores show which aspects of the application had the most significant impact on the risk assessment.
+
+Note: AI-powered natural language explanation is temporarily unavailable. A detailed rule-based explanation has been provided instead."""
+                                                                                                                  ^
+backend\utils\ai_client.py:215:1: W293 blank line contains whitespace
+        
+^
+backend\utils\ai_client.py:222:1: W293 blank line contains whitespace
+    
+^
+backend\utils\api_counter.py:20:1: W293 blank line contains whitespace
+    
+^
+backend\utils\api_counter.py:26:1: W293 blank line contains whitespace
+        
+^
+backend\utils\api_counter.py:29:1: W293 blank line contains whitespace
+    
+^
+backend\utils\api_counter.py:31:14: W291 trailing whitespace
+        self, 
+             ^
+backend\utils\api_counter.py:32:23: W291 trailing whitespace
+        provider: str, 
+                      ^
+backend\utils\api_counter.py:33:20: W291 trailing whitespace
+        model: str, 
+                   ^
+backend\utils\api_counter.py:40:1: W293 blank line contains whitespace
+        """
+        Count an API request.
+        
+        Args:
+            provider: API provider (OpenRouter, Gemini, etc.)
+            model: Model used
+            endpoint: Which endpoint made the call
+            success: Whether the request succeeded
+            tokens: Estimated tokens used (if available)
+        """
+^
+backend\utils\api_counter.py:50:1: W293 blank line contains whitespace
+        
+^
+backend\utils\api_counter.py:61:1: W293 blank line contains whitespace
+        
+^
+backend\utils\api_counter.py:63:1: W293 blank line contains whitespace
+        
+^
+backend\utils\api_counter.py:70:1: W293 blank line contains whitespace
+        
+^
+backend\utils\api_counter.py:77:1: W293 blank line contains whitespace
+    
+^
+backend\utils\api_counter.py:82:1: W293 blank line contains whitespace
+        
+^
+backend\utils\api_counter.py:90:1: W293 blank line contains whitespace
+    
+^
+backend\utils\api_counter.py:94:1: W293 blank line contains whitespace
+    
+^
+backend\utils\api_counter.py:124:1: W293 blank line contains whitespace
+    """
+    Convenience function to count an LLM request.
+    
+    Args:
+        provider: API provider name
+        model: Model name
+        endpoint: Endpoint that made the call
+        success: Whether request succeeded
+        tokens: Estimated tokens used
+    """
+^
+6     C901 'predict_risk_batch' is too complex (11)
+4     E128 continuation line under-indented for visual indent
+7     E226 missing whitespace around arithmetic operator
+7     E261 at least two spaces before inline comment
+18    E302 expected 2 blank lines, found 1
+2     E402 module level import not at top of file
+23    F401 'os' imported but unused
+3     F541 f-string is missing placeholders
+1     F811 redefinition of unused 'Path' from line 8
+3     F841 local variable 'risk_class' is assigned to but never used
+1     W191 indentation contains tabs
+36    W291 trailing whitespace
+3     W292 no newline at end of file
+435   W293 blank line contains whitespace
+1     W391 blank line at end of file
+550
