@@ -314,7 +314,6 @@ Edit `backend/core/config.py` to customize:
 - [Database Setup](docs/DATABASE_RETRAINING_GUIDE.md)
 
 ### Deployment
-- [Docker Deployment](docker-compose.yml)
 - [Deployment Scripts](scripts/README.md)
 - [PostgreSQL Setup](docs/POSTGRESQL_INTEGRATION_GUIDE.md)
 
@@ -324,7 +323,7 @@ Edit `backend/core/config.py` to customize:
 
 ### Quick Deploy
 ```bash
-docker-compose up -d
+python run.py
 ```
 
 ### Build and Run
@@ -338,7 +337,7 @@ docker run -p 8000:8000 -p 5173:5173 credit-risk-app
 
 ### Environment Variables
 ```bash
-docker-compose up -d --env-file .env
+python run.py
 ```
 
 ---
