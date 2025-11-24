@@ -52,6 +52,7 @@ urllib3==2.5.0
 uvicorn==0.38.0
 xgboost==3.1.1
 openpyxl==3.1.5
+psycopg[binary]
 # google-generativeai==0.8.3  # Legacy - replaced by OpenRouter
 sqlalchemy>=2.0.0
 alembic>=1.13.0

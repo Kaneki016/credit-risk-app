@@ -9,11 +9,70 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from backend.api.routes.model import ModelManager
 from backend.core.schemas import LoanApplication
-from backend.services.explanation_service import generate_llm_explanation
 from backend.services.imputation import DynamicLoanApplication
+from backend.utils.ai_client import get_ai_client
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+# Helper function for generating LLM explanations
+async def generate_llm_explanation(
+    input_data: Dict[str, Any],
+    shap_explanation: Dict[str, float],
+    risk_level: str,
+) -> Dict[str, Any]:
+    """Generate AI-powered explanation for credit risk decision."""
+    try:
+        shap_series = pd.Series(shap_explanation).sort_values(key=abs, ascending=False).head(5)
+        
+        prompt = f"""
+        You are an expert Credit Risk Analyst. Explain the decision for this loan application
+        in a concise, single paragraph suitable for a bank client.
+
+        The predicted outcome is: {risk_level}.
+
+        The top 5 most impactful features (SHAP values) contributing to this decision are:
+        {shap_series.to_dict()}
+
+        The raw applicant data is: {input_data}
+
+        Focus on summarizing *why* the loan was approved or rejected based on these factors.
+        """
+        
+        system_prompt = "You are a friendly, expert financial analyst explaining complex risk to a non-expert."
+        
+        ai_client = get_ai_client()
+        
+        if not ai_client.is_available():
+            return {
+                "text": "AI explanation unavailable. Decision based on credit risk model analysis.",
+                "remediation_suggestion": None,
+                "error": "no_api_key"
+            }
+        
+        result = await ai_client.generate_with_retry(prompt, system_prompt)
+        
+        if result.get("error"):
+            return {
+                "text": "AI explanation temporarily unavailable. Decision based on credit risk model analysis.",
+                "remediation_suggestion": None,
+                "error": result.get("error")
+            }
+        
+        return {
+            "text": result.get("text", ""),
+            "remediation_suggestion": None,  # Can be enhanced later
+            "raw": result.get("raw", "")
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating LLM explanation: {e}")
+        return {
+            "text": "AI explanation unavailable due to error. Decision based on credit risk model analysis.",
+            "remediation_suggestion": None,
+            "error": str(e)
+        }
 
 # Load feature statistics for drift detection
 FEATURE_STATS = {}

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # Supports both PostgreSQL and SQLite
 # PostgreSQL: postgresql://user:password@host:port/database
 # SQLite: sqlite:///./database.db
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./credit_risk.db")  # Default to SQLite for easier setup
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Create SQLAlchemy engine
 # Supports both SQLite and PostgreSQL (if psycopg2 is installed)

@@ -20,8 +20,8 @@ CICD_FILES = [
 
 # Unused backend files
 UNUSED_BACKEND = [
-    "backend/services/explanation_service.py",  # Functionality moved to ai_client.py
-    "backend/services/retraining.py",  # Replaced by database_retraining.py
+    # Note: explanation_service.py already removed/doesn't exist
+    # Note: retraining.py might still be used, keeping it for now
 ]
 
 # Docs files to remove (CI/CD related)
@@ -403,7 +403,7 @@ def show_summary():
     print("\n✅ Completed Tasks:")
     print("  1. Created comprehensive backup")
     print("  2. Removed all CI/CD files (.github, Dockerfile, docker-compose)")
-    print("  3. Removed unused backend files (7 files)")
+    print("  3. Removed legacy backend files (5 Gemini files)")
     print("  4. Removed unused documentation (4 files)")
     print("  5. Removed redundant markdown files (28 files)")
     print("  6. Removed redundant scripts (8 files)")
@@ -415,12 +415,12 @@ def show_summary():
     
     print("\n📊 Statistics:")
     print(f"  CI/CD files removed: {len(CICD_FILES)}")
-    print(f"  Backend files removed: {len(UNUSED_BACKEND) + len(LEGACY_BACKEND)}")
+    print(f"  Backend files removed: {len(LEGACY_BACKEND)}")
     print(f"  Doc files removed: {len(UNUSED_DOCS)}")
     print(f"  Markdown files removed: {len(REDUNDANT_MARKDOWN)}")
     print(f"  Scripts removed: {len(REDUNDANT_SCRIPTS)}")
     print(f"  Examples removed: {len(OUTDATED_EXAMPLES)}")
-    print(f"  Total files removed: ~50+")
+    print(f"  Total files removed: ~48+")
     
     print("\n📁 New Clean Structure:")
     print("  Root:")
@@ -463,7 +463,7 @@ def main():
     
     print("\nThis script will:")
     print("  1. Remove all CI/CD files (.github, Dockerfile, docker-compose)")
-    print("  2. Remove unused backend files (7 files)")
+    print("  2. Remove legacy backend files (5 Gemini files)")
     print("  3. Remove unused documentation (4 files)")
     print("  4. Remove redundant markdown files (28 files)")
     print("  5. Remove redundant scripts (8 files)")
@@ -472,7 +472,7 @@ def main():
     print("  8. Move 3 scripts to organized structure")
     print("  9. Create index files")
     print(" 10. Update main README")
-    print("\n  Total: ~50+ files will be removed/moved")
+    print("\n  Total: ~48+ files will be removed/moved")
     
     response = input("\nProceed with final cleanup? (yes/no): ")
     
