@@ -128,7 +128,7 @@ class DatabaseRetrainer:
 
     def prepare_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Prepare features for training (handle categorical variables).
+        Prepare features for training (handle categorical variables dynamically).
 
         Args:
             df: Raw features DataFrame
@@ -138,47 +138,44 @@ class DatabaseRetrainer:
         """
         df_processed = df.copy()
 
-        # Map column names to match expected format
-        column_mapping = {"person_home_ownership": "home_ownership", "cb_person_default_on_file": "default_on_file"}
+        # 1. Identify columns types
+        numeric_features = []
+        categorical_features = []
 
-        # Rename columns if needed
-        for old_name, new_name in column_mapping.items():
-            if old_name in df_processed.columns and new_name not in df_processed.columns:
-                df_processed[new_name] = df_processed[old_name]
-                df_processed = df_processed.drop(columns=[old_name])
-
-        # Handle categorical variables
-        categorical_cols = {
-            "home_ownership": ["RENT", "OWN", "MORTGAGE", "OTHER"],
-            "loan_intent": ["PERSONAL", "EDUCATION", "MEDICAL", "VENTURE", "HOMEIMPROVEMENT", "DEBTCONSOLIDATION"],
-            "loan_grade": ["A", "B", "C", "D", "E", "F", "G"],
-            "default_on_file": ["Y", "N"],
-        }
-
-        # One-hot encode categorical variables
-        for col, categories in categorical_cols.items():
-            if col in df_processed.columns:
-                # Convert to string and uppercase
-                df_processed[col] = df_processed[col].astype(str).str.upper()
-
-                # Create one-hot encoded columns
-                for category in categories:
-                    new_col = f"{col}_{category}"
-                    df_processed[new_col] = (df_processed[col] == category).astype(int)
-
-                # Drop original column
-                df_processed = df_processed.drop(columns=[col])
-
-        # Ensure all columns are numeric
         for col in df_processed.columns:
-            if df_processed[col].dtype == "object":
-                try:
-                    df_processed[col] = pd.to_numeric(df_processed[col], errors="coerce")
-                except Exception:
-                    logger.warning(f"Could not convert column {col} to numeric, dropping it")
-                    df_processed = df_processed.drop(columns=[col])
+            # Check if numeric
+            if pd.api.types.is_numeric_dtype(df_processed[col]):
+                # Check if it's actually categorical (few unique values, e.g. < 10)
+                # But be careful with small datasets.
+                # For now, treat as numeric if it is numeric.
+                numeric_features.append(col)
+            else:
+                categorical_features.append(col)
 
-        # Fill any NaN values with 0
+        logger.info(f"Dynamic feature detection: {len(numeric_features)} numeric, {len(categorical_features)} categorical")
+
+        # 2. Process Numeric
+        for col in numeric_features:
+            # Handle missing values with median
+            df_processed[col] = df_processed[col].fillna(df_processed[col].median())
+
+        # 3. Process Categorical
+        for col in categorical_features:
+            # Fill missing
+            df_processed[col] = df_processed[col].fillna("UNKNOWN").astype(str).str.upper()
+
+            # One-hot encode
+            # We use get_dummies
+            dummies = pd.get_dummies(df_processed[col], prefix=col, drop_first=False)
+            df_processed = pd.concat([df_processed, dummies], axis=1)
+            
+            # Drop original column
+            df_processed = df_processed.drop(columns=[col])
+
+        # Ensure all columns are numeric now
+        # (get_dummies creates numeric, original numerics are numeric)
+        
+        # Fill any remaining NaNs (e.g. if median was NaN because all empty)
         df_processed = df_processed.fillna(0)
 
         return df_processed
@@ -293,6 +290,9 @@ class DatabaseRetrainer:
         if os.path.exists(manifest_path):
             with open(manifest_path, "r") as f:
                 manifest = json.load(f)
+                # Handle case where manifest is a dict (legacy format)
+                if isinstance(manifest, dict):
+                    manifest = [manifest]
         else:
             manifest = []
 

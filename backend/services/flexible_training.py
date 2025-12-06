@@ -272,7 +272,16 @@ class FlexibleModelTrainer:
 
         # Update manifest
         manifest_path = self.models_dir / "manifest.json"
-        manifest = {
+        
+        if manifest_path.exists():
+            with open(manifest_path, "r") as f:
+                manifest = json.load(f)
+                if isinstance(manifest, dict):
+                    manifest = [manifest]
+        else:
+            manifest = []
+
+        new_entry = {
             "model_path": str(model_path),
             "scaler_path": str(scaler_path),
             "feature_names_path": str(features_path),
@@ -289,6 +298,8 @@ class FlexibleModelTrainer:
                 "model_params": model_params,
             },
         }
+        
+        manifest.append(new_entry)
 
         with open(manifest_path, "w") as f:
             json.dump(manifest, f, indent=2)

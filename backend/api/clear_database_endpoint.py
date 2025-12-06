@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 @router.delete("/db/clear")
-def clear_database(confirm: bool = False, db: Session = Depends(get_db)):
+def clear_database(confirm: bool = False, drop_tables: bool = False, db: Session = Depends(get_db)):
     """
     Clear all data from the database.
 
@@ -30,6 +30,7 @@ def clear_database(confirm: bool = False, db: Session = Depends(get_db)):
 
     Args:
         confirm: Must be True to proceed with deletion
+        drop_tables: If True, will drop and recreate all tables (schema reset)
 
     Returns:
         Summary of deleted records
@@ -38,16 +39,33 @@ def clear_database(confirm: bool = False, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Must set confirm=true to clear database")
 
     try:
+        if drop_tables:
+            logger.warning("⚠️  DROPPING ALL TABLES - This is a destructive operation!")
+            
+            # Use CRUD function to drop tables
+            from backend.database import crud
+            crud.drop_loan_application_table(db)
+            
+            logger.info("✅ All tables dropped.")
+            return {
+                "status": "success",
+                "message": "All tables dropped successfully",
+                "action": "schema_reset"
+            }
+
         logger.warning("⚠️  DATABASE CLEAR REQUESTED - Deleting all data...")
 
+        from sqlalchemy import func
+
         # Count records before deletion
+        # Use func.count(id) to avoid selecting columns that might not exist in the dynamic schema
         counts_before = {
-            "predictions": db.query(models.Prediction).count(),
-            "loan_applications": db.query(models.LoanApplication).count(),
-            "feature_engineering": db.query(models.FeatureEngineering).count(),
-            "mitigation_plans": db.query(models.MitigationPlan).count(),
-            "audit_logs": db.query(models.AuditLog).count(),
-            "model_metrics": db.query(models.ModelMetrics).count(),
+            "predictions": db.query(func.count(models.Prediction.id)).scalar(),
+            "loan_applications": db.query(func.count(models.LoanApplication.id)).scalar(),
+            "feature_engineering": db.query(func.count(models.FeatureEngineering.id)).scalar(),
+            "mitigation_plans": db.query(func.count(models.MitigationPlan.id)).scalar(),
+            "audit_logs": db.query(func.count(models.AuditLog.id)).scalar(),
+            "model_metrics": db.query(func.count(models.ModelMetrics.id)).scalar(),
         }
 
         # Delete all records (order matters due to foreign keys)

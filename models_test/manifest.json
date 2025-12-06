@@ -1,0 +1,19 @@
+[
+  {
+    "model_path": "some/path",
+    "metrics": {
+      "accuracy": 0.9
+    }
+  },
+  {
+    "version": "v1",
+    "model": "path/to/model",
+    "scaler": "path/to/scaler",
+    "features": "path/to/features",
+    "metrics": {
+      "accuracy": 0.95
+    },
+    "timestamp": "2025-12-02T23:06:36.069019",
+    "source": "database_retraining"
+  }
+]
