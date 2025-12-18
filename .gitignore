@@ -111,7 +111,7 @@ datasets/
 !requirements.txt      # Keep requirements.txt
 
 # Model Artifacts
-models/
+models/*
 *.pkl
 *.pickle
 *.joblib
@@ -123,6 +123,13 @@ models/
 *.pb
 *.tflite
 *.safetensors
+
+# Always keep these core runtime model files
+!models/credit_risk_model.pkl
+!models/feature_names.json
+!models/feature_statistics.json
+!models/manifest.json
+!models/scaler.pkl
 
 # Model Documentation
 model_cards/
