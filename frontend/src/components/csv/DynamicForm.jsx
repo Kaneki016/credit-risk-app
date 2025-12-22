@@ -50,17 +50,24 @@ const COLUMN_MAPPINGS = {
   'employment_length': 'person_emp_length',
   'emp_length': 'person_emp_length',
   'loan_amount': 'loan_amnt',
+  'loan': 'loan_amnt',  // Added: short form
   'amount': 'loan_amnt',
   'interest_rate': 'loan_int_rate',
   'rate': 'loan_int_rate',
+  'int_rate': 'loan_int_rate',
   'credit_history': 'cb_person_cred_hist_length',
   'credit_hist_length': 'cb_person_cred_hist_length',
+  'credit': 'cb_person_cred_hist_length',
   'home': 'home_ownership',
   'ownership': 'home_ownership',
   'intent': 'loan_intent',
   'purpose': 'loan_intent',
   'grade': 'loan_grade',
-  'default': 'default_on_file'
+  'default': 'default_on_file',
+  'defa': 'default_on_file',  // Added: short form
+  'default_on_file': 'default_on_file',
+  'percent_income': 'loan_percent_income',
+  'loan_percent': 'loan_percent_income'
 }
 
 export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
@@ -71,6 +78,7 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
   const [processingBatch, setProcessingBatch] = useState(false)
   const [showMappings, setShowMappings] = useState(false)
   const [activeTab, setActiveTab] = useState('form')
+  const [dbColumns, setDbColumns] = useState([])  // Store database columns
 
   // Setup React Hook Form
   const {
@@ -100,6 +108,26 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
     }
   })
 
+  // Fetch database schema on mount
+  useEffect(() => {
+    const fetchSchema = async () => {
+      try {
+        const response = await axios.get(`${ENDPOINTS.GET_SCHEMA}/loan_applications`)
+        if (response.data && response.data.columns) {
+          // Filter out metadata columns that shouldn't be mapped from CSV
+          const excludeColumns = ['id', 'created_at', 'updated_at', 'application_status', 'notes']
+          const validColumns = response.data.columns.filter(col => !excludeColumns.includes(col))
+          setDbColumns(validColumns)
+        }
+      } catch (err) {
+        console.warn('Failed to fetch database schema, using fallback mapping:', err)
+        // Fallback to known columns from FIELD_METADATA
+        setDbColumns(Object.keys(FIELD_METADATA))
+      }
+    }
+    fetchSchema()
+  }, [])
+
   // Detect and map CSV columns to form fields
   useEffect(() => {
     if (!csvData) {
@@ -112,30 +140,67 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
     const mapped = []
     const unmapped = []
 
-    // Try to map each column
+    // Helper function for fuzzy matching
+    const fuzzyMatch = (csvCol, dbCol) => {
+      const csvNorm = csvCol.toLowerCase().replace(/[_\s-]/g, '')
+      const dbNorm = dbCol.toLowerCase().replace(/[_\s-]/g, '')
+      
+      // Exact match
+      if (csvNorm === dbNorm) return true
+      
+      // Contains match (e.g., "loan" matches "loan_amnt")
+      if (csvNorm.includes(dbNorm) || dbNorm.includes(csvNorm)) return true
+      
+      // Check if CSV column matches any part of DB column
+      const csvParts = csvNorm.split(/[_\s-]/)
+      const dbParts = dbNorm.split(/[_\s-]/)
+      
+      // If any part matches, consider it a match
+      return csvParts.some(part => dbParts.includes(part) && part.length > 2)
+    }
+
+    // Try to map each CSV column
     columns.forEach(col => {
       const normalized = col.toLowerCase().replace(/[_\s-]/g, '')
       let mappedField = null
 
-      // Direct match
-      if (FIELD_METADATA[col]) {
+      // 1. Direct match with database columns
+      if (dbColumns.includes(col)) {
         mappedField = col
       }
-      // Try normalized match
+      // 2. Direct match with FIELD_METADATA
+      else if (FIELD_METADATA[col]) {
+        mappedField = col
+      }
+      // 3. Normalized match with FIELD_METADATA
       else if (FIELD_METADATA[normalized]) {
         mappedField = normalized
       }
-      // Try common mappings
+      // 4. Try COLUMN_MAPPINGS (pattern matching)
       else {
         for (const [pattern, field] of Object.entries(COLUMN_MAPPINGS)) {
-          if (normalized.includes(pattern.replace(/_/g, ''))) {
+          const patternNorm = pattern.toLowerCase().replace(/[_\s-]/g, '')
+          if (normalized.includes(patternNorm) || patternNorm.includes(normalized)) {
             mappedField = field
             break
           }
         }
       }
+      
+      // 5. Fuzzy match with database columns
+      if (!mappedField && dbColumns.length > 0) {
+        for (const dbCol of dbColumns) {
+          if (fuzzyMatch(col, dbCol)) {
+            mappedField = dbCol
+            break
+          }
+        }
+      }
 
-      if (mappedField) {
+      if (mappedField && FIELD_METADATA[mappedField]) {
+        mapped.push({ csvColumn: col, formField: mappedField })
+      } else if (mappedField && dbColumns.includes(mappedField)) {
+        // Map to DB column even if not in FIELD_METADATA (for dynamic columns)
         mapped.push({ csvColumn: col, formField: mappedField })
       } else {
         unmapped.push(col)
@@ -145,10 +210,10 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
     setDetectedFields(mapped)
 
     // Load first row data
-    if (data.length > 0) {
+    if (data.length > 0 && mapped.length > 0) {
       loadRowData(0, mapped, data)
     }
-  }, [csvData, reset])
+  }, [csvData, reset, dbColumns])
 
   const loadRowData = (index, fields, data) => {
     const row = data[index]
@@ -159,10 +224,35 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
       if (value !== null && value !== undefined && value !== '') {
         // Convert types if necessary
         const meta = FIELD_METADATA[formField]
-        if (meta.type === 'number') {
-          newFormData[formField] = parseFloat(value) || 0
+        if (meta) {
+          if (meta.type === 'number') {
+            newFormData[formField] = parseFloat(value) || 0
+          } else if (meta.type === 'select') {
+            // Handle select fields - convert numeric values to string if needed
+            const strValue = String(value).trim().toUpperCase()
+            // For default_on_file, convert 0/1 to N/Y
+            if (formField === 'default_on_file') {
+              if (strValue === '0' || strValue === 'FALSE' || strValue === 'NO') {
+                newFormData[formField] = 'N'
+              } else if (strValue === '1' || strValue === 'TRUE' || strValue === 'YES') {
+                newFormData[formField] = 'Y'
+              } else if (meta.options.includes(strValue)) {
+                newFormData[formField] = strValue
+              }
+            } else if (meta.options.includes(strValue)) {
+              newFormData[formField] = strValue
+            }
+          } else {
+            newFormData[formField] = value
+          }
         } else {
-          newFormData[formField] = value
+          // For fields not in FIELD_METADATA (dynamic columns), try to infer type
+          const numValue = parseFloat(value)
+          if (!isNaN(numValue) && isFinite(value)) {
+            newFormData[formField] = numValue
+          } else {
+            newFormData[formField] = value
+          }
         }
       }
     })
@@ -202,10 +292,37 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
         const value = row[csvColumn]
         if (value !== null && value !== undefined && value !== '') {
           const meta = FIELD_METADATA[formField]
-          if (meta.type === 'number') {
-            rowData[formField] = parseFloat(value) || 0
+          if (meta) {
+            if (meta.type === 'number') {
+              rowData[formField] = parseFloat(value) || 0
+            } else if (meta.type === 'select') {
+              // Handle select fields
+              const strValue = String(value).trim().toUpperCase()
+              if (formField === 'default_on_file') {
+                // Convert 0/1 to N/Y
+                if (strValue === '0' || strValue === 'FALSE' || strValue === 'NO') {
+                  rowData[formField] = 'N'
+                } else if (strValue === '1' || strValue === 'TRUE' || strValue === 'YES') {
+                  rowData[formField] = 'Y'
+                } else if (meta.options.includes(strValue)) {
+                  rowData[formField] = strValue
+                }
+              } else if (meta.options.includes(strValue)) {
+                rowData[formField] = strValue
+              } else {
+                rowData[formField] = value
+              }
+            } else {
+              rowData[formField] = value
+            }
           } else {
-            rowData[formField] = value
+            // For dynamic columns, infer type
+            const numValue = parseFloat(value)
+            if (!isNaN(numValue) && isFinite(value)) {
+              rowData[formField] = numValue
+            } else {
+              rowData[formField] = value
+            }
           }
         }
       })
@@ -280,6 +397,12 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
       groupedFields[category].includes(formField)
     )
   }
+  
+  // Get unmapped fields (not in any category) - these are dynamic columns
+  const getUncategorizedFields = () => {
+    const allCategorized = Object.values(groupedFields).flat()
+    return detectedFields.filter(({ formField }) => !allCategorized.includes(formField))
+  }
 
   return (
     <motion.div
@@ -325,9 +448,16 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                 <div key={i} className="field-mapping">
                   <span className="csv-col">{csvColumn}</span>
                   <span className="arrow">→</span>
-                  <span className="form-field">{FIELD_METADATA[formField]?.label || formField}</span>
+                  <span className="form-field">
+                    {FIELD_METADATA[formField]?.label || formField.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </span>
                 </div>
               ))}
+              {detectedFields.length === 0 && (
+                <div className="field-mapping warning">
+                  <span>No fields could be automatically mapped. Please check your CSV column names.</span>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -390,7 +520,27 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                 <div className="form-grid-compact">
                   {getFieldsByCategory('personal').map(({ formField }) => {
                     const meta = FIELD_METADATA[formField]
-                    if (!meta) return null
+                    if (!meta) {
+                      // Handle dynamic fields not in FIELD_METADATA
+                      return (
+                        <label key={formField} className="form-field-compact">
+                          <span className="field-label-compact">
+                            {formField.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </span>
+                          <Controller
+                            name={formField}
+                            control={control}
+                            render={({ field }) => (
+                              <input
+                                {...field}
+                                type="text"
+                                placeholder={formField}
+                              />
+                            )}
+                          />
+                        </label>
+                      )
+                    }
 
                     return (
                       <label key={formField} className="form-field-compact">
@@ -429,7 +579,27 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                 <div className="form-grid-compact">
                   {getFieldsByCategory('loan').map(({ formField }) => {
                     const meta = FIELD_METADATA[formField]
-                    if (!meta) return null
+                    if (!meta) {
+                      // Handle dynamic fields not in FIELD_METADATA
+                      return (
+                        <label key={formField} className="form-field-compact">
+                          <span className="field-label-compact">
+                            {formField.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </span>
+                          <Controller
+                            name={formField}
+                            control={control}
+                            render={({ field }) => (
+                              <input
+                                {...field}
+                                type="text"
+                                placeholder={formField}
+                              />
+                            )}
+                          />
+                        </label>
+                      )
+                    }
 
                     return (
                       <label key={formField} className="form-field-compact">
@@ -477,7 +647,27 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                 <div className="form-grid-compact">
                   {getFieldsByCategory('other').map(({ formField }) => {
                     const meta = FIELD_METADATA[formField]
-                    if (!meta) return null
+                    if (!meta) {
+                      // Handle dynamic fields not in FIELD_METADATA
+                      return (
+                        <label key={formField} className="form-field-compact">
+                          <span className="field-label-compact">
+                            {formField.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </span>
+                          <Controller
+                            name={formField}
+                            control={control}
+                            render={({ field }) => (
+                              <input
+                                {...field}
+                                type="text"
+                                placeholder={formField}
+                              />
+                            )}
+                          />
+                        </label>
+                      )
+                    }
 
                     return (
                       <label key={formField} className="form-field-compact">
@@ -498,6 +688,34 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                       </label>
                     )
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* Uncategorized/Dynamic Fields */}
+            {getUncategorizedFields().length > 0 && (
+              <div className="field-category">
+                <h4 className="category-title">📊 Additional Fields</h4>
+                <div className="form-grid-compact">
+                  {getUncategorizedFields().map(({ formField }) => (
+                    <label key={formField} className="form-field-compact">
+                      <span className="field-label-compact">
+                        {formField.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </span>
+                      <Controller
+                        name={formField}
+                        control={control}
+                        render={({ field }) => (
+                          <input
+                            {...field}
+                            type="text"
+                            placeholder={formField}
+                          />
+                        )}
+                      />
+                      {errors[formField] && <span className="error-text">{errors[formField].message}</span>}
+                    </label>
+                  ))}
                 </div>
               </div>
             )}

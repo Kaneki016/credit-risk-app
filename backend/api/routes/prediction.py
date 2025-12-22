@@ -77,14 +77,11 @@ async def generate_llm_explanation(
 # Load feature statistics for drift detection
 FEATURE_STATS = {}
 try:
-    # Use absolute path to ensure it works regardless of working directory
-    # We need to find the project root.
-    # Assuming this file is in backend/api/routes/prediction.py
-    # Project root is ../../../
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.abspath(os.path.join(script_dir, "../../../"))
-    stats_path = os.path.join(project_root, "models", "feature_statistics.json")
-    if os.path.exists(stats_path):
+    from pathlib import Path
+    from backend.core.config import PROJECT_ROOT
+    
+    stats_path = PROJECT_ROOT / "models" / "feature_statistics.json"
+    if stats_path.exists():
         with open(stats_path, "r", encoding="utf-8") as sf:
             FEATURE_STATS = json.load(sf)
         logger.info(f"Loaded feature statistics from: {stats_path}")

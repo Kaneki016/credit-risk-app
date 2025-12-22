@@ -1,5 +1,37 @@
 /* Chatbot Styles */
 
+/* Global rule to ensure all text in chatbot is selectable */
+.chat-window * {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  /* Prevent touch gestures from interfering with text selection */
+  touch-action: pan-y !important;
+  /* Ensure pointer events don't block text selection */
+  -webkit-touch-callout: default !important;
+}
+
+/* Exceptions for interactive elements that shouldn't interfere */
+.chat-button,
+.chat-close,
+.chat-send {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  cursor: pointer;
+}
+
+/* Allow text selection on quick action button labels */
+.quick-action-btn {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  cursor: pointer;
+}
+
 .chat-button {
   position: fixed;
   bottom: 2rem;
@@ -39,6 +71,11 @@
   flex-direction: column;
   z-index: 999;
   overflow: hidden;
+  /* Force text selection to always be enabled */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
 /* Header */
@@ -72,12 +109,20 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .chat-title p {
   margin: 0;
   font-size: 0.75rem;
   opacity: 0.9;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .chat-close {
@@ -104,11 +149,26 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  /* Force text selection to always be enabled */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
 .chat-message {
   display: flex;
   animation: slideIn 0.3s ease;
+  /* Ensure text selection is always enabled, even after animations */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  /* Prevent touch gestures from interfering */
+  touch-action: pan-y !important;
+  -webkit-touch-callout: default !important;
+  /* Ensure selection works even during/after animations */
+  pointer-events: auto !important;
 }
 
 @keyframes slideIn {
@@ -135,6 +195,13 @@
   padding: 0.75rem 1rem;
   border-radius: 12px;
   position: relative;
+  /* Force text selection to always be enabled */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  /* Prevent any pointer events from blocking text selection */
+  pointer-events: auto;
 }
 
 .chat-message.user .message-content {
@@ -155,12 +222,25 @@
   word-wrap: break-word;
   line-height: 1.5;
   font-size: 0.9rem;
+  /* Force text selection to always be enabled */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  /* Ensure cursor shows as text selection cursor */
+  cursor: text;
 }
 
 .message-time {
   font-size: 0.7rem;
   opacity: 0.7;
   margin-top: 0.5rem;
+  /* Force text selection to always be enabled */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  cursor: text;
 }
 
 .chat-message.user .message-time {
@@ -174,6 +254,10 @@
   background: rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   font-size: 0.85rem;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .data-row {
@@ -185,11 +269,19 @@
 .data-key {
   font-weight: 600;
   color: #667eea;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .data-value {
   color: #2c3e50;
   word-break: break-word;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 /* Typing Indicator */
@@ -245,6 +337,11 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  /* Allow text selection on button labels */
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 .quick-action-btn:hover {
@@ -273,6 +370,11 @@
   resize: none;
   max-height: 100px;
   overflow-y: auto;
+  /* Input field should allow text selection for editing */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
 .chat-input:focus {

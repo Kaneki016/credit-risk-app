@@ -1,6 +1,17 @@
-# credit_model.py
+"""
+Train XGBoost model for credit risk.
+
+This script trains an XGBoost classifier for credit risk prediction.
+It handles data preprocessing, model training, and saves the trained model artifacts.
+
+Fixes applied:
+- Split the dataset before fitting the scaler to avoid data leakage.
+- Save the scaler fitted on training data and the full feature list.
+"""
+
 import json
 import os
+from pathlib import Path
 
 import joblib
 import pandas as pd
@@ -9,16 +20,17 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 
-"""
-Train XGBoost model for credit risk.
-
-Fixes applied:
-- Split the dataset before fitting the scaler to avoid data leakage.
-- Save the scaler fitted on training data and the full feature list.
-"""
+# Get project root (3 levels up from this file: backend/models/training.py -> project root)
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
+MODELS_DIR = PROJECT_ROOT / "models"
 
 # Load dataset
-df = pd.read_csv("F:\\credit-risk-app\\data\\credit_risk_dataset.csv")
+dataset_path = DATA_DIR / "credit_risk_dataset.csv"
+if not dataset_path.exists():
+    raise FileNotFoundError(f"Dataset not found at {dataset_path}. Please ensure the data file exists.")
+
+df = pd.read_csv(dataset_path)
 
 # Target variable
 y = df["loan_status"]
@@ -45,9 +57,15 @@ print(classification_report(y_test, y_pred))
 print("AUC:", roc_auc_score(y_test, model.predict_proba(X_test_scaled)[:, 1]))
 
 # Save model and metadata into the canonical `models/` directory
-os.makedirs("models", exist_ok=True)
-joblib.dump(model, os.path.join("models", "credit_risk_model.pkl"))
-joblib.dump(scaler, os.path.join("models", "scaler.pkl"))
+MODELS_DIR.mkdir(exist_ok=True)
+joblib.dump(model, MODELS_DIR / "credit_risk_model.pkl")
+joblib.dump(scaler, MODELS_DIR / "scaler.pkl")
+
 # Persist the full feature list (from the encoded dataframe) as JSON for consistency
-with open(os.path.join("models", "feature_names.json"), "w", encoding="utf-8") as f:
-	json.dump(X.columns.tolist(), f)
+with open(MODELS_DIR / "feature_names.json", "w", encoding="utf-8") as f:
+    json.dump(X.columns.tolist(), f)
+
+print(f"\n✅ Model training complete!")
+print(f"   Model saved to: {MODELS_DIR / 'credit_risk_model.pkl'}")
+print(f"   Scaler saved to: {MODELS_DIR / 'scaler.pkl'}")
+print(f"   Features saved to: {MODELS_DIR / 'feature_names.json'}")

@@ -399,3 +399,69 @@ select:focus {
     text-align: center;
   }
 }
+
+/* Model State Styles */
+.model-state-section {
+  margin-bottom: 2rem;
+}
+
+.state-item, .status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.state-label, .status-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.state-value, .status-value {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.state-value.success, .status-value.success {
+  color: #2e7d32;
+}
+
+.state-value.error, .status-value.error {
+  color: #c53030;
+}
+
+/* Checkbox styling fix - ensure it fills when checked */
+.checkbox-group {
+  position: relative;
+}
+
+.checkbox-group input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid #c53030;
+  border-radius: 0.25rem;
+  background-color: #fff;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.checkbox-group input[type="checkbox"]:checked {
+  background-color: #c53030;
+  border-color: #c53030;
+}
+
+.checkbox-group input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: bold;
+  line-height: 1;
+}

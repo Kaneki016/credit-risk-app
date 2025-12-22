@@ -84,5 +84,81 @@
     },
     "timestamp": "2025-12-02T23:38:53.527039",
     "source": "database_retraining"
+  },
+  {
+    "version": "v20251222T205012Z",
+    "model": "models\\credit_risk_model_v20251222T205012Z.pkl",
+    "scaler": "models\\scaler_v20251222T205012Z.pkl",
+    "features": "models\\feature_names_v20251222T205012Z.json",
+    "metrics": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "auc_roc": 1.0,
+      "total_predictions": 400,
+      "correct_predictions": 400,
+      "false_positives": 0,
+      "false_negatives": 0
+    },
+    "timestamp": "2025-12-22T20:50:12.456362",
+    "source": "database_retraining"
+  },
+  {
+    "version": "v20251222T205016Z",
+    "model": "models\\credit_risk_model_v20251222T205016Z.pkl",
+    "scaler": "models\\scaler_v20251222T205016Z.pkl",
+    "features": "models\\feature_names_v20251222T205016Z.json",
+    "metrics": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "auc_roc": 1.0,
+      "total_predictions": 400,
+      "correct_predictions": 400,
+      "false_positives": 0,
+      "false_negatives": 0
+    },
+    "timestamp": "2025-12-22T20:50:16.838983",
+    "source": "database_retraining"
+  },
+  {
+    "version": "v20251222T205845Z",
+    "model": "models\\credit_risk_model_v20251222T205845Z.pkl",
+    "scaler": "models\\scaler_v20251222T205845Z.pkl",
+    "features": "models\\feature_names_v20251222T205845Z.json",
+    "metrics": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "auc_roc": 1.0,
+      "total_predictions": 2000,
+      "correct_predictions": 2000,
+      "false_positives": 0,
+      "false_negatives": 0
+    },
+    "timestamp": "2025-12-22T20:58:45.111407",
+    "source": "database_retraining"
+  },
+  {
+    "version": "v20251222T211242Z",
+    "model": "models\\credit_risk_model_v20251222T211242Z.pkl",
+    "scaler": "models\\scaler_v20251222T211242Z.pkl",
+    "features": "models\\feature_names_v20251222T211242Z.json",
+    "metrics": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "auc_roc": 1.0,
+      "total_predictions": 2000,
+      "correct_predictions": 2000,
+      "false_positives": 0,
+      "false_negatives": 0
+    },
+    "timestamp": "2025-12-22T21:12:42.988410",
+    "source": "database_retraining"
   }
 ]

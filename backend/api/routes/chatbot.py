@@ -85,7 +85,13 @@ async def chatbot_query(request: ChatRequest):
                 "error": result.get("error"),
             }
 
-        return {"response": result.get("text", "I'm not sure how to respond to that."), "raw": result.get("raw")}
+        # Clean up response text
+        response_text = result.get("text", "I'm not sure how to respond to that.")
+        # Remove common formatting artifacts
+        if response_text:
+            response_text = response_text.replace("<s>", "").replace("</s>", "").strip()
+        
+        return {"response": response_text, "raw": result.get("raw")}
 
     except Exception as e:
         logger.error(f"Chatbot exception: {e}")

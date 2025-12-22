@@ -16,19 +16,45 @@ export default function Chatbot() {
   const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Use requestAnimationFrame to ensure DOM is updated before scrolling
+    // This prevents interference with text selection
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    })
   }
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
+  // Ensure text selection is always enabled after any state update
+  useEffect(() => {
+    if (isOpen) {
+      // Force enable text selection on all message elements
+      const enableTextSelection = () => {
+        const messageElements = document.querySelectorAll('.chat-message, .message-content, .message-text')
+        messageElements.forEach((el) => {
+          if (el instanceof HTMLElement) {
+            el.style.userSelect = 'text'
+            el.style.webkitUserSelect = 'text'
+            el.style.mozUserSelect = 'text'
+            el.style.msUserSelect = 'text'
+          }
+        })
+      }
+      
+      // Run immediately and after a short delay to catch any delayed renders
+      enableTextSelection()
+      const timeout = setTimeout(enableTextSelection, 100)
+      return () => clearTimeout(timeout)
+    }
+  }, [messages, isOpen, loading])
+
   // Quick action buttons
   const quickActions = [
     { label: '📊 Database Stats', query: 'show database statistics' },
     { label: '🔍 Recent Predictions', query: 'show recent predictions' },
     { label: '📈 Model Performance', query: 'show model performance' },
-    { label: '🔔 API Usage', query: 'show api usage' },
     { label: '❓ Help', query: 'how do I use this system?' }
   ]
 
@@ -45,32 +71,73 @@ export default function Chatbot() {
       timestamp: new Date()
     }
 
+    // Add user message immediately
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setLoading(true)
 
     try {
+      // Get current messages (before adding user message) for history
+      const currentMessages = messages
+        .filter(msg => msg.type === 'user' || msg.type === 'bot')
+        .slice(-10) // Keep last 10 messages for context
+        .map(msg => ({
+          role: msg.type === 'user' ? 'user' : 'assistant',
+          content: msg.text
+        }))
+
       // Call chatbot API
       const response = await fetch(ENDPOINTS.CHATBOT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: messageText })
+        body: JSON.stringify({ 
+          query: messageText,
+          history: currentMessages,
+          context: null
+        })
       })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: response.statusText }))
+        throw new Error(errorData.detail || `HTTP ${response.status}`)
+      }
 
       const data = await response.json()
 
+      // Handle error response from API
+      if (data.error) {
+        const errorMessage = {
+          type: 'bot',
+          text: data.response || `Error: ${data.error}. ${data.error === 'no_api_key' ? 'Please configure an AI API key in the environment variables.' : 'Please try again later.'}`,
+          timestamp: new Date()
+        }
+        setMessages(prev => [...prev, errorMessage])
+        return
+      }
+
+      // Clean up response text (remove any XML-like tags or formatting artifacts)
+      let responseText = data.response || 'I received your message but could not generate a response.'
+      
+      // Remove common formatting artifacts from AI responses
+      responseText = responseText
+        .replace(/<s>/g, '')  // Remove start tags
+        .replace(/<\/s>/g, '') // Remove end tags
+        .replace(/^\s+|\s+$/g, '') // Trim whitespace
+        .replace(/\n{3,}/g, '\n\n') // Normalize multiple newlines
+
       const botMessage = {
         type: 'bot',
-        text: data.response,
+        text: responseText,
         data: data.data,
         timestamp: new Date()
       }
 
       setMessages(prev => [...prev, botMessage])
     } catch (error) {
+      console.error('Chatbot error:', error)
       const errorMessage = {
         type: 'bot',
-        text: 'Sorry, I encountered an error. Please make sure the backend is running.',
+        text: `Sorry, I encountered an error: ${error.message || 'Unknown error'}. Please make sure the backend is running and try again.`,
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
@@ -124,6 +191,16 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
+            style={{ 
+              userSelect: 'text',
+              WebkitUserSelect: 'text',
+              MozUserSelect: 'text',
+              msUserSelect: 'text',
+              touchAction: 'pan-y'
+            }}
+            // Prevent drag from interfering with text selection
+            drag={false}
+            dragConstraints={false}
           >
             {/* Header */}
             <div className="chat-header">
@@ -148,6 +225,17 @@ export default function Chatbot() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
+                  style={{ 
+                    userSelect: 'text',
+                    WebkitUserSelect: 'text',
+                    MozUserSelect: 'text',
+                    msUserSelect: 'text',
+                    // Prevent Framer Motion from interfering with text selection
+                    touchAction: 'pan-y'
+                  }}
+                  // Prevent drag gestures from interfering with text selection
+                  drag={false}
+                  dragConstraints={false}
                 >
                   <div className="message-content">
                     <div className="message-text">{message.text}</div>
@@ -167,6 +255,14 @@ export default function Chatbot() {
                   className="chat-message bot"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
+                  style={{ 
+                    userSelect: 'text',
+                    WebkitUserSelect: 'text',
+                    MozUserSelect: 'text',
+                    msUserSelect: 'text',
+                    touchAction: 'pan-y'
+                  }}
+                  drag={false}
                 >
                   <div className="message-content">
                     <div className="typing-indicator">

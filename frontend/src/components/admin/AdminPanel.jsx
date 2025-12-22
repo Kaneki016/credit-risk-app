@@ -15,6 +15,10 @@ export default function AdminPanel() {
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const [dropTables, setDropTables] = useState(false)
   const [retrainStatus, setRetrainStatus] = useState(false)
+  const [modelState, setModelState] = useState(null)
+  const [apiStatus, setApiStatus] = useState(null)
+  const [loadingModelState, setLoadingModelState] = useState(false)
+  const [loadingApiStatus, setLoadingApiStatus] = useState(false)
 
   // Mapping State
   const [dbColumns, setDbColumns] = useState([])
@@ -30,6 +34,50 @@ export default function AdminPanel() {
       setRetrainStatus(data.retraining)
     } catch (err) {
       console.error('Failed to check retrain status:', err)
+    }
+  }
+
+  // Fetch model state
+  const fetchModelState = async () => {
+    setLoadingModelState(true)
+    try {
+      const response = await fetch(ENDPOINTS.MODEL_STATE)
+      if (response.ok) {
+        const data = await response.json()
+        setModelState(data)
+      } else {
+        setModelState({ error: 'Failed to fetch model state' })
+      }
+    } catch (err) {
+      console.error('Failed to fetch model state:', err)
+      setModelState({ error: err.message })
+    } finally {
+      setLoadingModelState(false)
+    }
+  }
+
+  // Check API status
+  const checkApiStatus = async () => {
+    setLoadingApiStatus(true)
+    try {
+      const [apiResponse, modelResponse] = await Promise.all([
+        fetch(ENDPOINTS.API_HEALTH),
+        fetch(ENDPOINTS.MODEL_HEALTH)
+      ])
+      
+      const apiData = apiResponse.ok ? await apiResponse.json() : { status: 'error' }
+      const modelData = modelResponse.ok ? await modelResponse.json() : { status: 'error' }
+      
+      setApiStatus({
+        api: apiData,
+        model: modelData,
+        timestamp: new Date().toISOString()
+      })
+    } catch (err) {
+      console.error('Failed to check API status:', err)
+      setApiStatus({ error: err.message })
+    } finally {
+      setLoadingApiStatus(false)
     }
   }
 
@@ -201,7 +249,16 @@ export default function AdminPanel() {
   // Load retrain status on mount
   React.useEffect(() => {
     checkRetrainStatus()
+    fetchModelState()
+    checkApiStatus()
   }, [])
+
+  // Refresh model state when retrain tab is active
+  React.useEffect(() => {
+    if (activeTab === 'retrain') {
+      fetchModelState()
+    }
+  }, [activeTab])
 
   return (
     <div className="admin-panel">
@@ -226,7 +283,11 @@ export default function AdminPanel() {
         </button>
         <button
           className={`tab ${activeTab === 'status' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('status'); checkRetrainStatus(); }}
+          onClick={() => { 
+            setActiveTab('status')
+            checkRetrainStatus()
+            checkApiStatus()
+          }}
         >
           📊 Status
         </button>
@@ -348,6 +409,86 @@ export default function AdminPanel() {
                 Manually trigger a retraining session using the current data in the database.
               </p>
 
+              {/* Model State Display */}
+              <div className="model-state-section" style={{ marginBottom: '2rem', padding: '1.5rem', background: '#f7fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h4 style={{ margin: 0, color: '#2d3748' }}>📊 Model State</h4>
+                  <button 
+                    onClick={fetchModelState} 
+                    disabled={loadingModelState}
+                    className="btn-secondary"
+                    style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                  >
+                    {loadingModelState ? '⏳ Loading...' : '🔄 Refresh'}
+                  </button>
+                </div>
+                
+                {modelState && !modelState.error ? (
+                  <div className="model-state-details">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                      <div className="state-item">
+                        <span className="state-label">Predictor:</span>
+                        <span className={`state-value ${modelState.predictor_loaded ? 'success' : 'error'}`}>
+                          {modelState.predictor_loaded ? '✅ Loaded' : '❌ Not Loaded'}
+                        </span>
+                      </div>
+                      <div className="state-item">
+                        <span className="state-label">Dynamic Predictor:</span>
+                        <span className={`state-value ${modelState.dynamic_predictor_loaded ? 'success' : 'error'}`}>
+                          {modelState.dynamic_predictor_loaded ? '✅ Loaded' : '❌ Not Loaded'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {modelState.predictor_info && (
+                      <div style={{ marginTop: '1rem', padding: '1rem', background: '#fff', borderRadius: '0.375rem' }}>
+                        <h5 style={{ margin: '0 0 0.75rem 0', fontSize: '0.875rem', fontWeight: 600 }}>Predictor Details:</h5>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem', fontSize: '0.875rem' }}>
+                          <div>
+                            <span style={{ color: '#718096' }}>Model:</span>
+                            <span style={{ marginLeft: '0.5rem', fontWeight: 600 }}>
+                              {modelState.predictor_info.has_model ? '✅' : '❌'}
+                            </span>
+                          </div>
+                          <div>
+                            <span style={{ color: '#718096' }}>Scaler:</span>
+                            <span style={{ marginLeft: '0.5rem', fontWeight: 600 }}>
+                              {modelState.predictor_info.has_scaler ? '✅' : '❌'}
+                            </span>
+                          </div>
+                          <div>
+                            <span style={{ color: '#718096' }}>Features:</span>
+                            <span style={{ marginLeft: '0.5rem', fontWeight: 600 }}>
+                              {modelState.predictor_info.feature_count || 0}
+                            </span>
+                          </div>
+                        </div>
+                        {modelState.predictor_info.load_error && (
+                          <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#fed7d7', borderRadius: '0.375rem', fontSize: '0.875rem', color: '#c53030' }}>
+                            ⚠️ Error: {modelState.predictor_info.load_error}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {modelState.manifest && (
+                      <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#e6fffa', borderRadius: '0.375rem', fontSize: '0.875rem' }}>
+                        <strong>Latest Model:</strong>{' '}
+                        {modelState.manifest.timestamp || modelState.manifest.version || 'Unknown date'}
+                      </div>
+                    )}
+                  </div>
+                ) : modelState?.error ? (
+                  <div style={{ padding: '1rem', background: '#fed7d7', borderRadius: '0.375rem', color: '#c53030' }}>
+                    ❌ {modelState.error}
+                  </div>
+                ) : (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: '#718096' }}>
+                    Click Refresh to load model state
+                  </div>
+                )}
+              </div>
+
               <button
                 className="btn-primary"
                 onClick={handleRetrain}
@@ -388,9 +529,10 @@ export default function AdminPanel() {
               className="admin-section"
             >
               <h3>System Status</h3>
-              <p className="section-description">Check the current status of the retraining system.</p>
+              <p className="section-description">Check the current status of the retraining system and API.</p>
 
-              <div className={`status-card ${retrainStatus ? 'ready' : 'not-ready'}`}>
+              {/* Retraining Status */}
+              <div className={`status-card ${retrainStatus ? 'ready' : 'not-ready'}`} style={{ marginBottom: '1.5rem' }}>
                 <div>
                   <h4>{retrainStatus ? '✅ Ready to Train' : '⚠️ Not Ready'}</h4>
                   <p style={{ color: '#4a5568' }}>
@@ -402,6 +544,71 @@ export default function AdminPanel() {
                 <button onClick={checkRetrainStatus} className="btn-secondary">
                   Refresh Status
                 </button>
+              </div>
+
+              {/* API Status */}
+              <div className="status-card" style={{ background: '#f7fafc', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h4 style={{ margin: 0 }}>🌐 System API Status</h4>
+                  <button 
+                    onClick={checkApiStatus} 
+                    disabled={loadingApiStatus}
+                    className="btn-secondary"
+                  >
+                    {loadingApiStatus ? '⏳ Loading...' : '🔄 Refresh'}
+                  </button>
+                </div>
+                
+                {apiStatus && !apiStatus.error ? (
+                  <div className="api-status-details">
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                      <div className="status-item">
+                        <span className="status-label">API Server:</span>
+                        <span className={`status-value ${apiStatus.api?.status === 'ok' ? 'success' : 'error'}`}>
+                          {apiStatus.api?.status === 'ok' ? '✅ Online' : '❌ Offline'}
+                        </span>
+                      </div>
+                      <div className="status-item">
+                        <span className="status-label">Model Service:</span>
+                        <span className={`status-value ${apiStatus.model?.status === 'ok' ? 'success' : 'error'}`}>
+                          {apiStatus.model?.status === 'ok' ? '✅ Ready' : '❌ Not Ready'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {apiStatus.api?.status === 'ok' && (
+                      <div style={{ padding: '0.75rem', background: '#fff', borderRadius: '0.375rem', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                        <strong>API:</strong> {apiStatus.api.message || 'Running'}
+                      </div>
+                    )}
+                    
+                    {apiStatus.model?.status === 'ok' && (
+                      <div style={{ padding: '0.75rem', background: '#fff', borderRadius: '0.375rem', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                        <strong>Model:</strong> {apiStatus.model.message || 'Ready'}
+                      </div>
+                    )}
+                    
+                    {apiStatus.model?.load_error && (
+                      <div style={{ padding: '0.75rem', background: '#fed7d7', borderRadius: '0.375rem', fontSize: '0.875rem', color: '#c53030', marginTop: '0.5rem' }}>
+                        ⚠️ Model Error: {apiStatus.model.load_error}
+                      </div>
+                    )}
+                    
+                    {apiStatus.timestamp && (
+                      <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#718096', textAlign: 'right' }}>
+                        Last checked: {new Date(apiStatus.timestamp).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+                ) : apiStatus?.error ? (
+                  <div style={{ padding: '1rem', background: '#fed7d7', borderRadius: '0.375rem', color: '#c53030' }}>
+                    ❌ {apiStatus.error}
+                  </div>
+                ) : (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: '#718096' }}>
+                    Click Refresh to check API status
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -457,7 +664,6 @@ export default function AdminPanel() {
                           type="checkbox"
                           checked={dropTables}
                           onChange={(e) => setDropTables(e.target.checked)}
-                          style={{ width: '1.2rem', height: '1.2rem', accentColor: '#c53030', cursor: 'pointer' }}
                         />
                         <span style={{ fontWeight: 600, color: '#c53030' }}>Also drop tables (Reset Schema)</span>
                       </label>

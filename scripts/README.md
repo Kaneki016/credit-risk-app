@@ -7,9 +7,10 @@
 ## Testing
 - [test_new_features.py](testing/test_new_features.py) - Test new features (Clear DB + Flexible Training)
 
-## Deployment
-- [deploy.sh](deployment/deploy.sh) - Linux/Mac deployment script
-- [deploy.ps1](deployment/deploy.ps1) - Windows deployment script
+## Development
+- [dev_start.ps1](dev_start.ps1) - Start development servers (Windows)
+- [setup_database.py](setup_database.py) - Initialize database
+- [import_and_retrain.py](import_and_retrain.py) - Import data and retrain model
 
 ---
 

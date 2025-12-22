@@ -265,6 +265,7 @@ backup_*/
 downloads/
 temp/
 tmp/
+temp_uploads/
 
 # Documentation Build
 docs/_build/

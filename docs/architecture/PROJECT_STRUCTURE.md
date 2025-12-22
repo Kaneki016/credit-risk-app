@@ -8,14 +8,15 @@ Clean, organized project structure after comprehensive cleanup.
 ```
 credit-risk-app/
 │
-├── 📁 .github/                    # GitHub Actions & CI/CD
-│   └── workflows/
-│       ├── ci.yml                 # Continuous integration
-│       └── test.yml               # Automated testing
-│
 ├── 📁 backend/                    # Backend Python application
 │   ├── api/                       # FastAPI routes
 │   │   ├── routes/               # Route modules
+│   │   │   ├── chatbot.py        # Chatbot endpoints
+│   │   │   ├── data_management.py # Data import/export
+│   │   │   ├── model.py          # Model management
+│   │   │   ├── prediction.py     # Prediction endpoints
+│   │   │   └── retraining.py     # Retraining endpoints
+│   │   ├── clear_database_endpoint.py # Database clearing
 │   │   ├── __init__.py
 │   │   └── main.py               # FastAPI app instance
 │   ├── core/                     # Core configuration
@@ -32,25 +33,20 @@ credit-risk-app/
 │   │   ├── predictor.py          # Main predictor
 │   │   ├── dynamic_predictor.py  # Dynamic input handler
 │   │   ├── training.py           # Model training
-│   │   ├── gemini_base.py        # Gemini AI base
-│   │   ├── gemini_predictor.py   # AI predictor
-│   │   ├── gemini_feature_engineer.py
-│   │   ├── gemini_mitigation_guide.py
 │   │   └── __init__.py
 │   ├── services/                 # Business logic
 │   │   ├── imputation.py         # Data imputation
-│   │   ├── retraining.py         # Model retraining
-│   │   ├── database_retraining.py
+│   │   ├── database_retraining.py # Database-based retraining
+│   │   ├── flexible_training.py  # Flexible training service
 │   │   └── __init__.py
 │   ├── utils/                    # Utility functions
+│   │   ├── ai_client.py          # AI client (OpenRouter integration)
+│   │   ├── api_counter.py        # API call counter
 │   │   └── __init__.py
 │   └── __init__.py
 │
 ├── 📁 frontend/                   # React frontend application
 │   ├── dist/                     # Build output (gitignored)
-│   ├── docs/                     # Frontend documentation
-│   │   ├── CSV_FEATURE_GUIDE.md
-│   │   └── UI_GUIDE.md
 │   ├── node_modules/             # Dependencies (gitignored)
 │   ├── public/                   # Static assets
 │   │   └── sample_data.csv
@@ -79,36 +75,42 @@ credit-risk-app/
 │   └── __init__.py
 │
 ├── 📁 scripts/                    # Utility scripts
-│   ├── deploy.ps1                # Windows deployment
-│   ├── deploy.sh                 # Linux/Mac deployment
+│   ├── testing/                  # Test scripts
+│   │   ├── test_clear_db.py
+│   │   ├── test_csv_optimization.py
+│   │   ├── test_new_features.py
+│   │   ├── test_reserved_keywords.py
+│   │   ├── test_schema_columns.py
+│   │   └── test_schema_refactor.py
+│   ├── utilities/               # Utility scripts
+│   │   ├── list_openrouter_models.py
+│   │   └── monitor_api_calls.py
 │   ├── dev_start.ps1             # Start dev servers
+│   ├── import_and_retrain.py     # Import and retrain script
+│   ├── inspect_database.py       # Database inspection
 │   ├── install_database.ps1      # Database setup
 │   ├── install_excel_support.ps1 # Excel support
+│   ├── quick_db_check.py         # Quick DB check
 │   ├── setup_database.py         # DB initialization
 │   └── README.md                 # Scripts documentation
 │
 ├── 📁 docs/                       # Project documentation
 │   ├── api/                      # API documentation
-│   │   ├── DYNAMIC_INPUT_GUIDE.md
-│   │   └── GETTING_STARTED_DYNAMIC.md
+│   │   └── API_QUICK_REFERENCE.md
+│   ├── architecture/             # Architecture docs
+│   │   └── PROJECT_STRUCTURE.md
 │   ├── features/                 # Feature guides
-│   │   ├── CSV_FEATURE_SUMMARY.md
-│   │   ├── CSV_QUICKSTART.md
-│   │   └── DYNAMIC_INPUT_SUMMARY.md
-│   ├── guides/                   # How-to guides
-│   │   ├── FRONTEND_MIGRATION.md
-│   │   └── UI_IMPROVEMENTS.md
-│   ├── CLEANUP_SUMMARY.md        # Cleanup documentation
-│   ├── PROJECT_CLEANUP_PLAN.md   # Cleanup plan
-│   ├── TEST_CLEANUP_SUMMARY.md   # Test cleanup
-│   └── [other docs...]
+│   │   ├── ADMIN_PANEL_GUIDE.md
+│   │   ├── CHATBOT_GUIDE.md
+│   │   └── NEW_FEATURES_GUIDE.md
+│   ├── getting-started/          # Getting started guides
+│   │   └── GETTING_STARTED.md
+│   ├── README.md                 # Documentation index
+│   └── SYSTEM_OVERVIEW.md        # System overview and functionality
 │
 ├── 📁 examples/                   # Example scripts
 │   ├── dynamic_input_examples.py
-│   ├── test_database_retraining.py
-│   ├── test_feature_engineering.py
-│   ├── test_gemini_predictor.py
-│   └── test_mitigation_guide.py
+│   └── test_database_retraining.py
 │
 ├── 📁 data/                       # Training data (gitignored)
 │   ├── credit_risk_dataset.csv
@@ -129,18 +131,16 @@ credit-risk-app/
 ├── 📁 logs/                       # Application logs (gitignored)
 │   └── app.log
 │
-├── 📄 .dockerignore               # Docker ignore patterns
 ├── 📄 .env                        # Environment variables (gitignored)
 ├── 📄 .gitignore                  # Git ignore patterns
-├── 📄 docker-compose.yml          # Docker composition
-├── 📄 Dockerfile                  # Docker image definition
+├── 📄 alembic.ini                 # Alembic configuration
 ├── 📄 env.example                 # Environment template
-├── 📄 LICENSE                     # MIT License
+├── 📄 LICENSE                     # License file
+├── 📄 pyproject.toml              # Python project configuration
 ├── 📄 pytest.ini                  # Pytest configuration
 ├── 📄 README.md                   # Project documentation
 ├── 📄 requirements.txt            # Python dependencies
-├── 📄 run.py                      # Main entry point
-└── 📄 PROJECT_STRUCTURE.md        # This file
+└── 📄 run.py                      # Main entry point
 ```
 
 ## Key Directories
@@ -175,8 +175,8 @@ Utility scripts for development and deployment.
 
 **Key Files:**
 - `dev_start.ps1` - Start development servers
-- `deploy.ps1` / `deploy.sh` - Deployment automation
 - `setup_database.py` - Database initialization
+- `import_and_retrain.py` - Import data and retrain model
 
 ### Documentation (`docs/`)
 Comprehensive project documentation.
@@ -191,8 +191,8 @@ Comprehensive project documentation.
 ### Configuration
 - `.env` - Environment variables (create from `env.example`)
 - `pytest.ini` - Test configuration
-- `docker-compose.yml` - Container orchestration
-- `Dockerfile` - Container image
+- `pyproject.toml` - Python project configuration (Black, isort, mypy)
+- `alembic.ini` - Database migration configuration
 
 ### Documentation
 - `README.md` - Main project documentation
@@ -205,7 +205,6 @@ Comprehensive project documentation.
 
 ### Ignore Files
 - `.gitignore` - Git ignore patterns
-- `.dockerignore` - Docker ignore patterns
 
 ## File Counts
 
@@ -238,13 +237,9 @@ pytest -m unit                   # Unit tests only
 pytest -m "not requires_api"     # Skip API tests
 ```
 
-### Deployment
+### Database Setup
 ```bash
-# Windows
-.\scripts\deploy.ps1
-
-# Linux/Mac
-./scripts/deploy.sh
+python scripts/setup_database.py
 ```
 
 ## Notes

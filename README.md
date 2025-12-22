@@ -1,8 +1,8 @@
 # 🏦 Credit Risk Prediction System
 
-> AI-powered credit risk assessment with explainable predictions and intelligent automation
+> AI-powered credit risk assessment with explainable predictions, intelligent automation, and comprehensive data management
 
-A modern full-stack application for loan default risk prediction featuring traditional ML (XGBoost), SHAP explainability, and CSV batch processing with AI-generated insights.
+A modern full-stack application for loan default risk prediction featuring XGBoost machine learning, SHAP explainability, CSV batch processing, dynamic schema management, and AI-generated insights.
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
@@ -11,29 +11,62 @@ A modern full-stack application for loan default risk prediction featuring tradi
 
 ---
 
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [System Overview](#-system-overview)
+- [Usage Guide](#-usage-guide)
+- [API Documentation](#-api-documentation)
+- [Project Structure](#-project-structure)
+- [Configuration](#-configuration)
+- [Testing](#-testing)
+- [Development](#-development)
+- [Documentation](#-documentation)
+- [Support](#-support)
+
+---
+
 ## ✨ Features
 
-### 🎯 ML Prediction Model
-- **XGBoost Classifier** - Fast, accurate predictions with SHAP explanations
-- **AI-Powered Insights** - Natural language explanations and risk mitigation advice
-- **Explainable AI** - SHAP values show which features drive each decision
+### 🎯 Core Prediction Engine
+- **XGBoost Classifier** - High-performance gradient boosting model for accurate risk assessment
+- **Dynamic Input Handling** - Accepts partial data with intelligent imputation using historical statistics
+- **Multiple Prediction Modes** - Single predictions, batch processing, and CSV upload support
+- **Risk Classification** - Three-tier risk levels: Low Risk 🟢, Borderline Risk 🟠, High Risk 🔴
 
-### 📊 Smart Data Handling
-- **CSV Upload** - Batch process loan applications from CSV files
-- **Dynamic Input** - Accepts partial data with intelligent imputation
-- **Auto Field Detection** - Automatically maps CSV columns to model features
-- **Row Navigation** - Navigate through CSV rows or batch process all at once
+### 📊 Data Management
+- **CSV Batch Processing** - Upload and process multiple loan applications simultaneously
+- **Dynamic Schema** - Automatically adapts to new CSV column structures
+- **Intelligent Field Mapping** - Fuzzy matching and auto-detection of CSV columns to database fields
+- **Row Navigation** - Process CSV rows individually or batch process all at once
+- **Data Import/Export** - Import historical data for retraining, export predictions
 
 ### 🤖 AI-Powered Features
-- **SHAP Explanations** - Visual and textual explanations of predictions
-- **Risk Mitigation Advice** - AI-generated recommendations to reduce default risk
-- **Natural Language Insights** - Human-readable reasoning for predictions
+- **SHAP Explainability** - Visual and numerical explanations showing feature importance
+- **AI-Generated Insights** - Natural language explanations of predictions (OpenRouter/Gemini)
+- **Risk Mitigation Advice** - Actionable recommendations to reduce default risk
+- **Chatbot Assistant** - Interactive AI assistant for database queries and system guidance
 
-### 🔧 Developer Tools
-- **REST API** - Comprehensive FastAPI backend
-- **Modern UI** - React frontend with Vite and Framer Motion
-- **Model Retraining** - Automated retraining with feedback loop
-- **Logging & Monitoring** - Comprehensive logging and model cards
+### 🔧 Model Management
+- **Flexible Training** - Train models with any CSV structure, automatic feature detection
+- **Model Retraining** - Automated retraining pipeline with feedback loop
+- **Model State Monitoring** - Real-time model health and status tracking
+- **Model Reloading** - Hot-reload models without restarting the API
+- **Training History** - Track model versions, training dates, and performance metrics
+
+### 🛠️ Admin Panel
+- **Data Import** - Import CSV files with column mapping and schema management
+- **Model Training** - Train new models with custom parameters
+- **Database Management** - Clear data, view statistics, manage schema
+- **System Status** - Monitor API health, model state, and system metrics
+- **Status Dashboard** - Real-time monitoring of predictions, risk distribution, and feedback
+
+### 💬 Interactive Chatbot
+- **Database Queries** - Query database statistics and recent predictions
+- **Model Information** - Get model performance metrics and training status
+- **System Guidance** - Interactive help for using features
+- **Quick Actions** - One-click access to common queries
 
 ---
 
@@ -75,14 +108,15 @@ A modern full-stack application for loan default risk prediction featuring tradi
    cd ..
    ```
 
-4. **Configure environment** (Optional - for AI explanations)
+4. **Configure environment** (Optional - for AI features)
    ```bash
    # Copy example environment file
    cp env.example .env
    
-   # Edit .env and add your Gemini API key for AI-powered explanations
-   # Get key from: https://aistudio.google.com/app/apikey
-   # Note: AI explanations will use fallback logic if no API key is provided
+   # Edit .env and add your API key(s)
+   # OpenRouter (recommended) - Get key from: https://openrouter.ai/keys
+   # Gemini (fallback) - Get key from: https://aistudio.google.com/app/apikey
+   # Note: System works without API keys using rule-based fallbacks
    ```
 
 5. **Start the application**
@@ -103,34 +137,158 @@ A modern full-stack application for loan default risk prediction featuring tradi
    ```
 
 6. **Access the application**
-   - Frontend: http://localhost:5173
-   - API Docs: http://localhost:8000/docs
-   - API ReDoc: http://localhost:8000/redoc
+   - **Frontend**: http://localhost:5173
+   - **API Docs**: http://localhost:8000/docs
+   - **API ReDoc**: http://localhost:8000/redoc
 
 ---
 
-## 📖 Usage
+## 🎯 System Overview
+
+### What This System Does
+
+The Credit Risk Prediction System is a comprehensive solution for assessing loan default risk. It combines traditional machine learning with modern AI capabilities to provide:
+
+1. **Risk Assessment**: Predicts the probability of loan default using an XGBoost model trained on historical loan data
+2. **Explainability**: Uses SHAP values to show which factors contribute most to each prediction
+3. **AI Insights**: Generates human-readable explanations and actionable advice
+4. **Batch Processing**: Handles multiple loan applications efficiently via CSV upload
+5. **Data Management**: Imports historical data, manages database schema, and supports model retraining
+6. **Interactive Interface**: User-friendly web interface with admin panel and chatbot assistant
+
+### How It Works
+
+1. **Input**: User provides loan application data (complete or partial)
+2. **Imputation**: Missing values are intelligently filled using historical statistics
+3. **Prediction**: XGBoost model calculates default probability
+4. **Explanation**: SHAP values identify key contributing factors
+5. **AI Enhancement**: Optional AI generates natural language explanations
+6. **Output**: Risk level, probability, explanations, and mitigation advice
+
+---
+
+## 📖 Usage Guide
 
 ### Web Interface
 
-1. **CSV Upload**
-   - Upload CSV file with loan applications
-   - Navigate through rows one-by-one or batch process all
+#### Prediction View
+
+1. **Upload CSV File**
+   - Click "📊 Credit Risk CSV Analyzer" or drag-and-drop CSV file
+   - System automatically detects and maps columns
+   - View mapped fields in the form
+
+2. **Process Applications**
+   - **Single Row**: Navigate through rows using Previous/Next buttons
+   - **Batch Process**: Click "Process All Rows" to predict all applications
    - View predictions with SHAP explanations and AI insights
-   - Download results as CSV with all predictions
 
-### API Usage
+3. **View Results**
+   - Risk level (Low/Borderline/High)
+   - Default probability percentage
+   - SHAP feature importance visualization
+   - AI-generated explanation
+   - Risk mitigation suggestions
 
-#### Batch Prediction (CSV Data)
+4. **Download Results**
+   - Export predictions as CSV with all details
+
+#### Admin Panel
+
+1. **Import Data Tab**
+   - Upload CSV files for historical data import
+   - Map CSV columns to database fields
+   - Choose to replace or extend schema
+   - View import statistics
+
+2. **Train Model Tab**
+   - Upload training CSV (any structure)
+   - System auto-detects target column and features
+   - Train new model with custom parameters
+   - View model state and training metrics
+   - Reload model to activate changes
+
+3. **Status Tab**
+   - View database statistics
+   - Check API and model health
+   - Monitor system status
+   - View recent predictions
+
+### Chatbot Assistant
+
+Click the **💬** button in the bottom-right corner to open the chatbot:
+
+- **Quick Actions**: Database Stats, Recent Predictions, Model Performance, Help
+- **Natural Queries**: Ask questions like "show database statistics" or "how many predictions do I have?"
+- **System Guidance**: Get help on using features and understanding results
+
+---
+
+## 🔌 API Documentation
+
+### Core Endpoints
+
+#### Prediction Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/predict_risk` | POST | Single prediction (complete data required) |
+| `/api/v1/predict_risk_dynamic` | POST | Single prediction (partial data accepted, auto-imputation) |
+| `/api/v1/predict_risk_batch` | POST | Batch prediction for multiple applications |
+
+#### Model Management
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | API health check |
+| `/model/health` | GET | Model health check |
+| `/model/state` | GET | Detailed model state information |
+| `/model/reload` | POST | Reload model from disk |
+
+#### Data Management
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/db/import_csv` | POST | Import CSV data for retraining |
+| `/api/v1/db/schema/{table_name}` | GET | Get database table schema |
+| `/api/v1/db/clear` | DELETE | Clear all database data |
+
+#### Model Training
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/db/retrain` | POST | Retrain model from database |
+| `/api/v1/db/retraining/status` | GET | Get retraining status |
+
+#### Chatbot
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/chatbot/query` | POST | Query the AI chatbot |
+
+### Example API Calls
+
+#### Single Prediction (Dynamic Input)
 ```bash
-curl -X POST "http://localhost:8000/predict_risk_batch" \
+curl -X POST "http://localhost:8000/api/v1/predict_risk_dynamic" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "person_income": 50000,
+    "loan_amnt": 10000,
+    "loan_int_rate": 10.5,
+    "home_ownership": "RENT"
+  }'
+```
+
+#### Batch Prediction
+```bash
+curl -X POST "http://localhost:8000/api/v1/predict_risk_batch?include_explanations=false" \
   -H "Content-Type: application/json" \
   -d '[
     {
       "person_age": 30,
       "person_income": 50000,
-      "loan_amnt": 10000,
-      "loan_int_rate": 10.5
+      "loan_amnt": 10000
     },
     {
       "person_age": 25,
@@ -140,17 +298,7 @@ curl -X POST "http://localhost:8000/predict_risk_batch" \
   ]'
 ```
 
-#### Single Prediction (Partial Data Accepted)
-```bash
-curl -X POST "http://localhost:8000/predict_risk_dynamic" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "person_income": 50000,
-    "loan_amnt": 10000
-  }'
-```
-
-See [API Documentation](http://localhost:8000/docs) for complete endpoint reference.
+For complete API documentation, visit http://localhost:8000/docs when the server is running.
 
 ---
 
@@ -158,75 +306,99 @@ See [API Documentation](http://localhost:8000/docs) for complete endpoint refere
 
 ```
 credit-risk-app/
-├── 📁 backend/              # Python FastAPI application
-│   ├── api/                 # API routes and endpoints
-│   ├── core/                # Configuration and schemas
-│   ├── database/            # Database models and CRUD
-│   ├── models/              # ML models and predictors
-│   ├── services/            # Business logic
-│   └── utils/               # Utility functions
+├── 📁 backend/                    # Python FastAPI application
+│   ├── api/                       # API routes and endpoints
+│   │   ├── routes/                # Route modules
+│   │   │   ├── prediction.py      # Prediction endpoints
+│   │   │   ├── model.py           # Model management
+│   │   │   ├── data_management.py # Data import/export
+│   │   │   ├── retraining.py      # Model retraining
+│   │   │   └── chatbot.py         # Chatbot API
+│   │   └── main.py                # FastAPI app initialization
+│   ├── core/                      # Configuration and schemas
+│   ├── database/                  # Database models and CRUD
+│   ├── models/                    # ML models and predictors
+│   ├── services/                  # Business logic
+│   └── utils/                     # Utility functions
 │
-├── 📁 frontend/             # React application
+├── 📁 frontend/                   # React application
 │   ├── src/
-│   │   ├── components/      # React components
-│   │   ├── styles/          # CSS styles
-│   │   └── utils/           # Frontend utilities
-│   └── public/              # Static assets
+│   │   ├── components/             # React components
+│   │   │   ├── csv/               # CSV upload and processing
+│   │   │   ├── admin/             # Admin panel
+│   │   │   ├── chatbot/           # Chatbot interface
+│   │   │   ├── form/              # Form components
+│   │   │   └── results/           # Result display
+│   │   ├── styles/                # CSS stylesheets
+│   │   └── utils/                 # Frontend utilities
+│   └── public/                    # Static assets
 │
-├── 📁 tests/                # Test suite
-│   ├── backend/             # Backend tests
-│   └── test_*.py            # Unit tests
+├── 📁 tests/                      # Test suite
+│   ├── backend/                   # Backend tests
+│   └── test_*.py                  # Unit tests
 │
-├── 📁 scripts/              # Utility scripts
-│   ├── dev_start.ps1        # Start development servers
-│   ├── deploy.ps1/.sh       # Deployment scripts
-│   └── setup_database.py    # Database initialization
+├── 📁 scripts/                    # Utility scripts
+│   ├── dev_start.ps1              # Start development servers
+│   ├── setup_database.py          # Database initialization
+│   ├── testing/                   # Test utilities
+│   └── utilities/                 # Helper scripts
 │
-├── 📁 docs/                 # Documentation
-│   ├── api/                 # API documentation
-│   ├── features/            # Feature guides
-│   └── guides/              # How-to guides
+├── 📁 docs/                       # Documentation
+│   ├── api/                       # API documentation
+│   ├── features/                  # Feature guides
+│   ├── architecture/              # System architecture
+│   └── getting-started/           # Getting started guides
 │
-├── 📁 examples/             # Example scripts
-├── 📁 models/               # Trained models (gitignored)
-├── 📁 data/                 # Training data (gitignored)
-├── 📁 logs/                 # Application logs (gitignored)
+├── 📁 examples/                   # Example scripts
+├── 📁 models/                     # Trained models (gitignored)
+├── 📁 data/                       # Training data (gitignored)
 │
-├── 📄 run.py                # Main entry point
-├── 📄 requirements.txt      # Python dependencies
-├── 📄 pytest.ini            # Test configuration
-└── 📄 README.md             # This file
+├── 📄 run.py                      # Main entry point
+├── 📄 requirements.txt            # Python dependencies
+├── 📄 pytest.ini                  # Test configuration
+└── 📄 README.md                   # This file
 ```
 
-See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed structure documentation.
+See [docs/architecture/PROJECT_STRUCTURE.md](docs/architecture/PROJECT_STRUCTURE.md) for detailed structure documentation.
 
 ---
 
-## 🔌 API Endpoints
+## ⚙️ Configuration
 
-### Prediction Endpoints
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/predict_risk_dynamic` | POST | Single prediction (partial data accepted) |
-| `/predict_risk_batch` | POST | Batch prediction for CSV uploads |
+### Environment Variables
 
-### Model Management
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/trigger_retrain` | POST | Trigger model retraining |
-| `/reload_model` | POST | Reload model from disk |
-| `/health` | GET | Check API and model status |
+Create a `.env` file in the project root:
 
-### Database (Optional)
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/db/health` | GET | Check database connection |
-| `/db/predictions` | GET | Get prediction history |
-| `/db/predictions/{id}/feedback` | POST | Submit feedback |
-| `/db/retrain` | POST | Retrain from database |
-| `/db/statistics` | GET | Get database statistics |
+```bash
+# AI API Keys (Optional - for AI-powered explanations and chatbot)
+# OpenRouter (recommended) - Get key from: https://openrouter.ai/keys
+OPENROUTER_API_KEY=your-openrouter-key-here
+OPENROUTER_MODEL=mistralai/mistral-7b-instruct:free  # Optional, defaults to free model
 
-See [API Documentation](http://localhost:8000/docs) for interactive API explorer.
+# Gemini (legacy fallback) - Get key from: https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=your-gemini-key-here
+
+# Feature toggles
+ENABLE_SHAP_EXPLANATIONS=true  # Enable AI explanations in predictions
+ENABLE_CHATBOT=true            # Enable chatbot feature
+
+# Database (Optional - defaults to SQLite)
+DATABASE_URL=sqlite:///./credit_risk.db
+# Or PostgreSQL:
+# DATABASE_URL=postgresql://user:password@localhost:5432/credit_risk_db
+
+# API Configuration (Optional)
+API_HOST=0.0.0.0
+API_PORT=8000
+```
+
+### Model Configuration
+
+Edit `backend/core/config.py` to customize:
+- Risk thresholds
+- Model file paths
+- Logging settings
+- Feature statistics
 
 ---
 
@@ -248,9 +420,6 @@ pytest -m integration
 # Exclude slow tests
 pytest -m "not slow"
 
-# Exclude API tests (require running server)
-pytest -m "not requires_api"
-
 # Verbose output
 pytest -v
 ```
@@ -260,85 +429,7 @@ pytest -v
 pytest --cov=backend --cov-report=html
 ```
 
-See [Test Documentation](tests/README.md) for detailed testing guide.
-
----
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```bash
-# Gemini AI (Optional - for AI-powered explanations and advice)
-# If not provided, system will use rule-based fallback logic
-GEMINI_API_KEY=your-api-key-here
-
-# Database (Optional - defaults to SQLite)
-DATABASE_URL=sqlite:///./credit_risk.db
-# Or PostgreSQL:
-# DATABASE_URL=postgresql://user:password@localhost:5432/credit_risk_db
-
-# API Configuration
-API_HOST=0.0.0.0
-API_PORT=8000
-```
-
-### Model Configuration
-
-Edit `backend/core/config.py` to customize:
-- Risk thresholds
-- Model file paths
-- Logging settings
-- Webhook URLs
-
----
-
-## 📚 Documentation
-
-### Getting Started
-- [Quick Start Guide](GETTING_STARTED.md)
-- [CSV Upload Guide](docs/features/CSV_QUICKSTART.md)
-- [Project Structure](PROJECT_STRUCTURE.md)
-
-### Features
-- [Dynamic Input System](docs/api/DYNAMIC_INPUT_GUIDE.md)
-- [CSV Feature Guide](docs/features/CSV_FEATURE_SUMMARY.md)
-- [SHAP Explainability](docs/features/SHAP_GUIDE.md)
-
-### Development
-- [Test Documentation](tests/README.md)
-- [Scripts Documentation](scripts/README.md)
-- [CI/CD Guide](docs/CICD_GUIDE.md)
-- [Database Setup](docs/DATABASE_RETRAINING_GUIDE.md)
-
-### Deployment
-- [Deployment Scripts](scripts/README.md)
-- [PostgreSQL Setup](docs/POSTGRESQL_INTEGRATION_GUIDE.md)
-
----
-
-## 🐳 Docker Deployment
-
-### Quick Deploy
-```bash
-python run.py
-```
-
-### Build and Run
-```bash
-# Build image
-docker build -t credit-risk-app .
-
-# Run container
-docker run -p 8000:8000 -p 5173:5173 credit-risk-app
-```
-
-### Environment Variables
-```bash
-python run.py
-```
+See [tests/README.md](tests/README.md) for detailed testing guide.
 
 ---
 
@@ -350,14 +441,11 @@ python run.py
 # Start development servers (Windows)
 .\scripts\dev_start.ps1
 
-# Deploy (Windows)
-.\scripts\deploy.ps1
-
-# Deploy (Linux/Mac)
-./scripts/deploy.sh
-
 # Setup database
 python scripts/setup_database.py
+
+# Import data and retrain model
+python scripts/import_and_retrain.py
 
 # Install Excel support
 .\scripts\install_excel_support.ps1
@@ -378,27 +466,23 @@ mypy backend/
 
 ---
 
-## 🤝 Contributing
+## 📚 Documentation
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Getting Started
+- [Getting Started Guide](docs/getting-started/GETTING_STARTED.md) - Quick start for new users
+- [API Quick Reference](docs/api/API_QUICK_REFERENCE.md) - API endpoints and usage
 
-### Development Guidelines
-- Write tests for new features
-- Follow PEP 8 style guide
-- Update documentation
-- Add type hints
+### Features
+- [Admin Panel Guide](docs/features/ADMIN_PANEL_GUIDE.md) - Admin panel usage
+- [Chatbot Guide](docs/features/CHATBOT_GUIDE.md) - Chatbot commands and usage
+- [New Features Guide](docs/features/NEW_FEATURES_GUIDE.md) - Latest features and updates
 
----
+### Architecture
+- [Project Structure](docs/architecture/PROJECT_STRUCTURE.md) - System design and architecture
 
-## 📝 License
-
-This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
-
-See [LICENSE](LICENSE) file for details.
+### Development
+- [Test Documentation](tests/README.md) - Testing guide
+- [Scripts Documentation](scripts/README.md) - Utility scripts
 
 ---
 
@@ -433,6 +517,15 @@ pip install -r requirements.txt
 cd frontend && npm install
 ```
 
+**Issue: Model not loading**
+```bash
+# Check if model files exist
+ls models/
+
+# Train a new model via Admin Panel
+# Or check logs for specific errors
+```
+
 ### Getting Help
 
 - 📖 Check [Documentation](docs/)
@@ -442,13 +535,38 @@ cd frontend && npm install
 
 ---
 
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Write tests for new features
+- Follow PEP 8 style guide
+- Update documentation
+- Add type hints
+
+---
+
+## 📝 License
+
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.
+
+See [LICENSE](LICENSE) file for details.
+
+---
+
 ## 🙏 Acknowledgments
 
 - **XGBoost** - Machine learning framework
 - **FastAPI** - Modern Python web framework
 - **React** - Frontend library
 - **SHAP** - Model explainability
-- **Google Gemini** - AI-powered explanations (optional)
+- **OpenRouter** - AI API access
+- **Framer Motion** - Animation library
 
 ---
 
@@ -459,10 +577,11 @@ cd frontend && npm install
 - ✅ AI-powered SHAP explanations
 - ✅ Dynamic input system with imputation
 - ✅ Model retraining with feedback loop
+- ✅ Admin panel with data management
+- ✅ Chatbot assistant
 - ✅ Comprehensive testing
-- ✅ Docker deployment
-- 🚧 Advanced analytics dashboard (planned)
-- 🚧 Real-time monitoring (planned)
+- ✅ Dynamic schema management
+- ✅ Flexible model training
 
 ---
 
