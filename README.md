@@ -30,43 +30,42 @@ A modern full-stack application for loan default risk prediction featuring XGBoo
 ## ✨ Features
 
 ### 🎯 Core Prediction Engine
-- **XGBoost Classifier** - High-performance gradient boosting model for accurate risk assessment
-- **Dynamic Input Handling** - Accepts partial data with intelligent imputation using historical statistics
-- **Multiple Prediction Modes** - Single predictions, batch processing, and CSV upload support
-- **Risk Classification** - Three-tier risk levels: Low Risk 🟢, Borderline Risk 🟠, High Risk 🔴
+- **XGBoost Classifier**: High-performance gradient boosting model for credit default risk.
+- **Dynamic Input Handling**: Accepts flexible CSV schemas and partial data with intelligent imputation.
+- **Multiple Prediction Modes**: Single-row predictions and batch processing from uploaded CSVs.
+- **Risk Classification**: Three-tier risk levels (Low 🟢 / Medium 🟠 / High 🔴) with probabilities and binary decision.
+- **Prediction History Storage**: Every prediction (single + batch) is persisted for future retraining.
 
 ### 📊 Data Management
-- **CSV Batch Processing** - Upload and process multiple loan applications simultaneously
-- **Dynamic Schema** - Automatically adapts to new CSV column structures
-- **Intelligent Field Mapping** - Fuzzy matching and auto-detection of CSV columns to database fields
-- **Row Navigation** - Process CSV rows individually or batch process all at once
-- **Data Import/Export** - Import historical data for retraining, export predictions
+- **CSV Upload & Mapping**: Upload loan application CSV files and map columns to the dynamic schema.
+- **Dynamic Schema Support**: Backend feature mappers adapt to different column names and structures.
+- **Row Navigation**: Step through CSV rows for single predictions or process all rows in one batch.
+- **Admin Import**: Import historical / external data into the database to seed and enrich retraining data.
+- **Export Batch Results**: Download batch prediction outputs as CSV from the UI.
 
 ### 🤖 AI-Powered Features
-- **SHAP Explainability** - Visual and numerical explanations showing feature importance
-- **AI-Generated Insights** - Natural language explanations of predictions (OpenRouter/Gemini)
-- **Risk Mitigation Advice** - Actionable recommendations to reduce default risk
-- **Chatbot Assistant** - Interactive AI assistant for database queries and system guidance
+- **SHAP Explainability**: Per-prediction feature importance for transparent decision support.
+- **LLM Explanations (Single Predictions)**: Natural-language explanations and mitigation suggestions for single predictions via OpenRouter.
+- **Token-Efficient Batch Mode**: Batch processing skips LLM explanations by default to save API usage (can be enabled via API if needed).
+- **Robust AI Client**: Centralized OpenRouter client with retries and guardrails for empty/invalid responses.
 
-### 🔧 Model Management
-- **Flexible Training** - Train models with any CSV structure, automatic feature detection
-- **Model Retraining** - Automated retraining pipeline with feedback loop
-- **Model State Monitoring** - Real-time model health and status tracking
-- **Model Reloading** - Hot-reload models without restarting the API
-- **Training History** - Track model versions, training dates, and performance metrics
+### 🔧 Model Management & Retraining
+- **Prediction Storage for Learning**: All predictions are stored with features, outputs, and optional outcomes/feedback.
+- **Hybrid Retraining Data**: Retraining can combine original dataset (`credit_risk_dataset.csv`) with accumulated prediction data.
+- **Retraining Readiness Checks**: API exposes whether enough labeled data/feedback exists before training.
+- **Model Metrics & Manifest**: Each retraining run stores metrics and updates a manifest for version tracking.
+- **Model Health & Reload**: Endpoints to inspect model state (files, features, load status) and reload models after retraining.
 
 ### 🛠️ Admin Panel
-- **Data Import** - Import CSV files with column mapping and schema management
-- **Model Training** - Train new models with custom parameters
-- **Database Management** - Clear data, view statistics, manage schema
-- **System Status** - Monitor API health, model state, and system metrics
-- **Status Dashboard** - Real-time monitoring of predictions, risk distribution, and feedback
+- **Import Data Tab**: Upload CSVs, map columns, and import data into the database with clear progress feedback.
+- **Train Model Tab**: Manually trigger retraining using current database data (plus original dataset, if enabled).
+- **Status Tab**: View API and model health, plus basic system status used by operations.
+- **Manage Tab**: Safely clear or reset the database with detailed deletion summaries and schema-reset support.
 
 ### 💬 Interactive Chatbot
-- **Database Queries** - Query database statistics and recent predictions
-- **Model Information** - Get model performance metrics and training status
-- **System Guidance** - Interactive help for using features
-- **Quick Actions** - One-click access to common queries
+- **In-App Assistant**: Chatbot embedded in the UI to explain features and guide users.
+- **Usage Guidance**: Helps users understand prediction results, fields, and admin workflows.
+- **Lightweight by Design**: Focused on guidance rather than heavy database querying to keep behavior predictable.
 
 ---
 
@@ -147,23 +146,24 @@ A modern full-stack application for loan default risk prediction featuring XGBoo
 
 ### What This System Does
 
-The Credit Risk Prediction System is a comprehensive solution for assessing loan default risk. It combines traditional machine learning with modern AI capabilities to provide:
+The Credit Risk Prediction System is a full-stack solution for assessing loan default risk and continuously improving the model over time. It combines:
 
-1. **Risk Assessment**: Predicts the probability of loan default using an XGBoost model trained on historical loan data
-2. **Explainability**: Uses SHAP values to show which factors contribute most to each prediction
-3. **AI Insights**: Generates human-readable explanations and actionable advice
-4. **Batch Processing**: Handles multiple loan applications efficiently via CSV upload
-5. **Data Management**: Imports historical data, manages database schema, and supports model retraining
-6. **Interactive Interface**: User-friendly web interface with admin panel and chatbot assistant
+1. **Risk Assessment**: An XGBoost model predicts default probability and risk level for each loan application.
+2. **Explainability**: SHAP values highlight which features drove the decision for transparent, auditable results.
+3. **AI Insights**: An LLM (via OpenRouter) turns numeric outputs into human-readable explanations and risk mitigation advice for single predictions.
+4. **Batch Processing**: Efficiently runs predictions on entire CSV files and provides structured, downloadable results.
+5. **Data Management & Retraining**: Stores predictions in a database and can retrain using both the **original dataset** and **new, labeled predictions**.
+6. **Interactive Interface**: A React frontend with Admin Panel and chatbot makes the system accessible to non-technical users.
 
 ### How It Works
 
-1. **Input**: User provides loan application data (complete or partial)
-2. **Imputation**: Missing values are intelligently filled using historical statistics
-3. **Prediction**: XGBoost model calculates default probability
-4. **Explanation**: SHAP values identify key contributing factors
-5. **AI Enhancement**: Optional AI generates natural language explanations
-6. **Output**: Risk level, probability, explanations, and mitigation advice
+1. **Input**: User uploads a CSV or sends JSON with loan application data (complete or partial).
+2. **Preprocessing & Imputation**: The backend normalizes column names, validates inputs, and fills missing values using training statistics.
+3. **Prediction**: The XGBoost-based predictor calculates a probability of default, risk category, and binary decision.
+4. **Explainability**: SHAP values are computed to quantify each feature’s contribution to the prediction.
+5. **AI Enhancement (Single Predictions)**: An LLM generates a narrative explanation and suggested mitigation actions.
+6. **Storage & Feedback Loop**: Each prediction (features + outputs + optional real outcome) is saved to the database, making it available for future retraining.
+7. **Retraining**: When enough feedback is collected, the admin can trigger retraining, which merges original training data with new, real-world data to update the model.
 
 ---
 
@@ -174,53 +174,55 @@ The Credit Risk Prediction System is a comprehensive solution for assessing loan
 #### Prediction View
 
 1. **Upload CSV File**
-   - Click "📊 Credit Risk CSV Analyzer" or drag-and-drop CSV file
-   - System automatically detects and maps columns
-   - View mapped fields in the form
+   - Use the main upload area (e.g., “📊 Credit Risk CSV Analyzer”) to select a CSV file.
+   - The system analyzes column names and displays them in a dynamic form.
 
-2. **Process Applications**
-   - **Single Row**: Navigate through rows using Previous/Next buttons
-   - **Batch Process**: Click "Process All Rows" to predict all applications
-   - View predictions with SHAP explanations and AI insights
+2. **Single-Row Predictions**
+   - Navigate between rows using Previous/Next controls in the left panel.
+   - Adjust field values as needed and submit for a **single prediction**.
+   - The right panel shows:
+     - Risk level and default probability.
+     - Binary prediction (default / no default).
+     - SHAP-based feature importance.
+     - **AI explanation text** and suggested mitigation steps.
 
-3. **View Results**
-   - Risk level (Low/Borderline/High)
-   - Default probability percentage
-   - SHAP feature importance visualization
-   - AI-generated explanation
-   - Risk mitigation suggestions
-
-4. **Download Results**
-   - Export predictions as CSV with all details
+3. **Batch Processing**
+   - Choose the batch processing option to run predictions on all rows.
+   - The backend skips LLM explanations by default to save tokens, but still computes core risk outputs.
+   - The right panel switches to a **Batch Results** view with:
+     - Total, success, and error counts.
+     - A table of row-by-row risk level, probability, and prediction.
+     - A **Download CSV** button for exporting batch results.
 
 #### Admin Panel
 
 1. **Import Data Tab**
-   - Upload CSV files for historical data import
-   - Map CSV columns to database fields
-   - Choose to replace or extend schema
-   - View import statistics
+   - Upload CSV files containing historical or production-like data.
+   - Map CSV columns to database fields via the column mapping UI.
+   - Run the import and see how many rows were successfully stored.
+   - Imported data populates the database to support later retraining.
 
-2. **Train Model Tab**
-   - Upload training CSV (any structure)
-   - System auto-detects target column and features
-   - Train new model with custom parameters
-   - View model state and training metrics
-   - Reload model to activate changes
+2. **Train Model Tab (Manual Retraining)**
+   - View current **model state** (whether predictors are loaded, feature counts, manifest info).
+   - Trigger retraining using the data currently stored in the database (optionally combined with the original dataset).
+   - After retraining, see a summary message and key metrics (e.g., accuracy, F1 score).
 
 3. **Status Tab**
-   - View database statistics
-   - Check API and model health
-   - Monitor system status
-   - View recent predictions
+   - Check **API server** and **model service** status.
+   - View human-readable status messages and last-checked timestamps.
+
+4. **Manage Tab**
+   - Clear predictions, loan applications, and model metrics from the database.
+   - Optionally drop and recreate tables for a clean schema reset.
+   - See a detailed summary of how many records were deleted per table.
 
 ### Chatbot Assistant
 
 Click the **💬** button in the bottom-right corner to open the chatbot:
 
-- **Quick Actions**: Database Stats, Recent Predictions, Model Performance, Help
-- **Natural Queries**: Ask questions like "show database statistics" or "how many predictions do I have?"
-- **System Guidance**: Get help on using features and understanding results
+- **Feature Guidance**: Ask how to use prediction, batch processing, or admin tools.
+- **Result Interpretation**: Get explanations of fields, risk levels, and mitigation concepts.
+- **Lightweight Help**: Designed as an in-app assistant rather than a full analytics/query engine.
 
 ---
 
@@ -253,12 +255,12 @@ Click the **💬** button in the bottom-right corner to open the chatbot:
 | `/api/v1/db/schema/{table_name}` | GET | Get database table schema |
 | `/api/v1/db/clear` | DELETE | Clear all database data |
 
-#### Model Training
+#### Model Training & Retraining
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/v1/db/retrain` | POST | Retrain model from database |
-| `/api/v1/db/retraining/status` | GET | Get retraining status |
+| `/api/v1/db/retrain` | POST | Retrain model using stored predictions (and optionally original dataset) |
+| `/api/v1/db/retraining/status` | GET | Check whether there is sufficient data/feedback for retraining |
 
 #### Chatbot
 

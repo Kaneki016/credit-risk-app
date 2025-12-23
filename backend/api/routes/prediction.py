@@ -356,13 +356,13 @@ async def predict_risk_dynamic(
     llm_explanation = None
     remediation_suggestion = None
     if include_llm:
-        llm_result = await generate_llm_explanation(
-            input_data=imputed_data,
-            shap_explanation=shap_explanation,
-            risk_level=risk_level,
-        )
-        llm_explanation = llm_result.get("text") if isinstance(llm_result, dict) else str(llm_result)
-        remediation_suggestion = llm_result.get("remediation_suggestion") if isinstance(llm_result, dict) else None
+    llm_result = await generate_llm_explanation(
+        input_data=imputed_data,
+        shap_explanation=shap_explanation,
+        risk_level=risk_level,
+    )
+    llm_explanation = llm_result.get("text") if isinstance(llm_result, dict) else str(llm_result)
+    remediation_suggestion = llm_result.get("remediation_suggestion") if isinstance(llm_result, dict) else None
     else:
         logger.info("Skipping LLM explanation generation (batch processing mode)")
 
