@@ -23,9 +23,6 @@ def clear_database(confirm: bool = False, drop_tables: bool = False, db: Session
     WARNING: This will delete ALL data including:
     - Predictions
     - Loan Applications
-    - Feature Engineering records
-    - Mitigation Plans
-    - Audit Logs
     - Model Metrics
 
     Args:
@@ -62,18 +59,12 @@ def clear_database(confirm: bool = False, drop_tables: bool = False, db: Session
         counts_before = {
             "predictions": db.query(func.count(models.Prediction.id)).scalar(),
             "loan_applications": db.query(func.count(models.LoanApplication.id)).scalar(),
-            "feature_engineering": db.query(func.count(models.FeatureEngineering.id)).scalar(),
-            "mitigation_plans": db.query(func.count(models.MitigationPlan.id)).scalar(),
-            "audit_logs": db.query(func.count(models.AuditLog.id)).scalar(),
             "model_metrics": db.query(func.count(models.ModelMetrics.id)).scalar(),
         }
 
         # Delete all records (order matters due to foreign keys)
-        db.query(models.MitigationPlan).delete()
-        db.query(models.FeatureEngineering).delete()
         db.query(models.Prediction).delete()
         db.query(models.LoanApplication).delete()
-        db.query(models.AuditLog).delete()
         db.query(models.ModelMetrics).delete()
 
         db.commit()

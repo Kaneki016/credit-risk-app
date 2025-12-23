@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import CSVUploader from './components/csv/CSVUploader'
 import DynamicForm from './components/csv/DynamicForm'
 import ResultCard from './components/results/ResultCard'
+import BatchResultsDisplay from './components/results/BatchResultsDisplay'
 import AdminPanel from './components/admin/AdminPanel'
 import Chatbot from './components/chatbot/Chatbot'
 import './styles/admin.css'
@@ -13,6 +14,7 @@ export default function App(){
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [csvData, setCsvData] = useState(null)
+  const [batchResults, setBatchResults] = useState(null)
   const [layout, setLayout] = useState('split') // 'split' or 'stacked'
   const [view, setView] = useState('prediction') // 'prediction' or 'admin'
 
@@ -75,7 +77,21 @@ export default function App(){
           {csvData && (
             <DynamicForm
               csvData={csvData}
-              onResult={(r)=>{ setResult(r); setLoading(false); setError(null)}} 
+              onResult={(r)=>{ 
+                // Only set result for single predictions, not batch results
+                if (r && !r.batchResults) {
+                  setResult(r)
+                  setBatchResults(null) // Clear batch results when single prediction is made
+                  setLoading(false)
+                  setError(null)
+                }
+              }} 
+              onBatchResults={(results)=>{ 
+                setBatchResults(results)
+                setResult(null) // Clear single result when batch processing completes
+                setLoading(false)
+                setError(null)
+              }}
               onLoading={()=>{setLoading(true); setError(null)}} 
               onError={(e)=>{setError(e); setLoading(false)}}
             />
@@ -112,7 +128,24 @@ export default function App(){
                 {error}
               </motion.div>
             )}
-            {result && !loading && !error && <ResultCard data={result} />}
+            {batchResults && !loading && !error && (
+              <BatchResultsDisplay batchResults={batchResults.batchResults} />
+            )}
+            {result && !batchResults && !loading && !error && <ResultCard data={result} />}
+            {!result && !batchResults && !loading && !error && (
+              <div style={{ 
+                padding: '3rem', 
+                textAlign: 'center', 
+                color: '#718096',
+                background: '#f7fafc',
+                borderRadius: '8px',
+                border: '1px dashed #cbd5e0'
+              }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
+                <h3 style={{ margin: '0 0 0.5rem 0', color: '#4a5568' }}>Ready for Predictions</h3>
+                <p style={{ margin: 0 }}>Upload a CSV file and make predictions to see results here</p>
+              </div>
+            )}
           </AnimatePresence>
         </motion.section>
           </main>

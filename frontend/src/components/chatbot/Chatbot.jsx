@@ -19,7 +19,7 @@ export default function Chatbot() {
     // Use requestAnimationFrame to ensure DOM is updated before scrolling
     // This prevents interference with text selection
     requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     })
   }
 

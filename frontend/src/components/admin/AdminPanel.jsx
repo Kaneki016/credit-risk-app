@@ -262,7 +262,7 @@ export default function AdminPanel() {
       // Don't check retrain status after dropping tables (tables don't exist yet)
       // Only check if we didn't drop tables
       if (!dropTables) {
-        await checkRetrainStatus()
+      await checkRetrainStatus()
       }
     } catch (err) {
       setError(err.message)
@@ -618,7 +618,7 @@ export default function AdminPanel() {
                 ) : (
                   <div style={{ padding: '1rem', textAlign: 'center', color: '#718096' }}>
                     Click Refresh to check API status
-                  </div>
+                </div>
                 )}
               </div>
             </motion.div>
@@ -708,19 +708,19 @@ export default function AdminPanel() {
                 <div className="result-box success">
                   <h4>✅ Database Cleared</h4>
                   {clearResult.total_deleted !== undefined ? (
-                    <div className="result-stats">
-                      <div className="stat">
-                        <span className="stat-label">Total Deleted</span>
+                  <div className="result-stats">
+                    <div className="stat">
+                      <span className="stat-label">Total Deleted</span>
                         <span className="stat-value">{clearResult.total_deleted || 0}</span>
-                      </div>
-                      {clearResult.deleted && (
-                        <>
-                          <div className="stat">
-                            <span className="stat-label">Predictions</span>
+                    </div>
+                    {clearResult.deleted && (
+                      <>
+                        <div className="stat">
+                          <span className="stat-label">Predictions</span>
                             <span className="stat-value">{clearResult.deleted.predictions || 0}</span>
-                          </div>
-                          <div className="stat">
-                            <span className="stat-label">Applications</span>
+                        </div>
+                        <div className="stat">
+                          <span className="stat-label">Applications</span>
                             <span className="stat-value">{clearResult.deleted.loan_applications || 0}</span>
                           </div>
                           <div className="stat">
@@ -738,10 +738,10 @@ export default function AdminPanel() {
                           <div className="stat">
                             <span className="stat-label">Model Metrics</span>
                             <span className="stat-value">{clearResult.deleted.model_metrics || 0}</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                   ) : (
                     <div className="result-stats">
                       <div className="stat">

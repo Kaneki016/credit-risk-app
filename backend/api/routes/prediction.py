@@ -1,14 +1,18 @@
 import json
 import logging
 import os
+import time
 from typing import Any, Dict, List
 
 import numpy as np
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 from backend.api.routes.model import ModelManager
 from backend.core.schemas import LoanApplication
+from backend.database import crud
+from backend.database.config import get_db
 from backend.services.imputation import DynamicLoanApplication
 from backend.utils.ai_client import get_ai_client
 
@@ -108,8 +112,83 @@ except Exception as e:
     FEATURE_STATS = {}
 
 
+def _get_model_version() -> str:
+    """Get the current model version from manifest."""
+    try:
+        from pathlib import Path
+        from backend.core.config import PROJECT_ROOT
+        
+        manifest_path = PROJECT_ROOT / "models" / "manifest.json"
+        if manifest_path.exists():
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+                if isinstance(manifest, list) and len(manifest) > 0:
+                    # Get the latest version
+                    latest = manifest[-1]
+                    return latest.get("version") or latest.get("model_version") or "unknown"
+                elif isinstance(manifest, dict):
+                    return manifest.get("version") or manifest.get("model_version") or "unknown"
+    except Exception as e:
+        logger.warning(f"Could not get model version: {e}")
+    return "unknown"
+
+
+def _store_prediction_to_db(
+    db: Session,
+    input_features: Dict[str, Any],
+    risk_level: str,
+    probability_default: float,
+    binary_prediction: int,
+    model_type: str = "dynamic",
+    shap_explanation: Dict[str, float] = None,
+    llm_explanation: str = None,
+    remediation_suggestion: str = None,
+    prediction_time_ms: float = None,
+) -> None:
+    """
+    Store prediction to database for future retraining.
+    
+    Args:
+        db: Database session
+        input_features: Input features (target columns already excluded)
+        risk_level: Predicted risk level
+        probability_default: Probability of default
+        binary_prediction: Binary prediction (0 or 1)
+        model_type: Type of model used
+        shap_explanation: SHAP values (optional)
+        llm_explanation: LLM explanation (optional)
+        remediation_suggestion: Remediation suggestion (optional)
+        prediction_time_ms: Prediction time in milliseconds (optional)
+    """
+    try:
+        # Exclude target columns from input_features (they should not be used as features)
+        target_columns = {"loan_status", "loan_status_num", "default", "target", "label", "outcome"}
+        clean_features = {k: v for k, v in input_features.items() if k not in target_columns}
+        
+        model_version = _get_model_version()
+        
+        prediction_data = {
+            "input_features": clean_features,
+            "risk_level": risk_level,
+            "probability_default": probability_default,
+            "binary_prediction": binary_prediction,
+            "model_type": model_type,
+            "model_version": model_version,
+            "shap_values": shap_explanation,
+            "explanation": llm_explanation,
+            "remediation_suggestion": remediation_suggestion,
+            "prediction_time_ms": prediction_time_ms,
+        }
+        
+        crud.create_prediction(db, prediction_data)
+        logger.debug(f"Prediction stored to database: risk_level={risk_level}, probability={probability_default}")
+    except Exception as e:
+        # Don't fail the prediction if database storage fails
+        logger.warning(f"Failed to store prediction to database: {e}")
+
+
 @router.post("/predict_risk", response_model=Dict[str, Any])
-async def predict_risk(application: LoanApplication):
+async def predict_risk(application: LoanApplication, db: Session = Depends(get_db)):
     """
     Accepts complete loan application data and returns a credit risk prediction, probability,
     SHAP explanation, and AI-generated advice.
@@ -190,6 +269,22 @@ async def predict_risk(application: LoanApplication):
     if drift_warnings:
         operational_notes = "Data drift warnings detected: " + "; ".join(drift_warnings) + ". Please review input data."
 
+    # Store prediction to database for future retraining
+    try:
+        _store_prediction_to_db(
+            db=db,
+            input_features=raw_input_dict,
+            risk_level=risk_level,
+            probability_default=prob,
+            binary_prediction=pred,
+            model_type="traditional",
+            shap_explanation=shap_explanation,
+            llm_explanation=llm_explanation,
+            remediation_suggestion=remediation_suggestion,
+        )
+    except Exception as e:
+        logger.warning(f"Failed to store prediction to database: {e}")
+
     return {
         "status": "success",
         "timestamp": pd.Timestamp.now().isoformat(),
@@ -207,9 +302,17 @@ async def predict_risk(application: LoanApplication):
 
 
 @router.post("/predict_risk_dynamic", response_model=Dict[str, Any])
-async def predict_risk_dynamic(application: DynamicLoanApplication):
+async def predict_risk_dynamic(
+    application: DynamicLoanApplication, 
+    include_llm: bool = True,
+    db: Session = Depends(get_db)
+):
     """
     Primary prediction endpoint for CSV uploads and flexible data input.
+    
+    Args:
+        application: Loan application data
+        include_llm: Whether to generate LLM explanation (default: True). Set to False for batch processing to save tokens.
     """
     dynamic_predictor = ModelManager.get_dynamic_predictor()
     if dynamic_predictor is None:
@@ -249,14 +352,19 @@ async def predict_risk_dynamic(application: DynamicLoanApplication):
     # Data drift check on imputed data
     drift_warnings = _check_drift(imputed_data)
 
-    llm_result = await generate_llm_explanation(
-        input_data=imputed_data,
-        shap_explanation=shap_explanation,
-        risk_level=risk_level,
-    )
-
-    llm_explanation = llm_result.get("text") if isinstance(llm_result, dict) else str(llm_result)
-    remediation_suggestion = llm_result.get("remediation_suggestion") if isinstance(llm_result, dict) else None
+    # Generate LLM explanation only if requested (skip for batch processing to save tokens)
+    llm_explanation = None
+    remediation_suggestion = None
+    if include_llm:
+        llm_result = await generate_llm_explanation(
+            input_data=imputed_data,
+            shap_explanation=shap_explanation,
+            risk_level=risk_level,
+        )
+        llm_explanation = llm_result.get("text") if isinstance(llm_result, dict) else str(llm_result)
+        remediation_suggestion = llm_result.get("remediation_suggestion") if isinstance(llm_result, dict) else None
+    else:
+        logger.info("Skipping LLM explanation generation (batch processing mode)")
 
     operational_notes_parts = []
     if imputation_log:
@@ -267,6 +375,23 @@ async def predict_risk_dynamic(application: DynamicLoanApplication):
         operational_notes_parts.append(f"Data drift detected: {'; '.join(drift_warnings[:3])}")
 
     operational_notes = " | ".join(operational_notes_parts) if operational_notes_parts else ""
+
+    # Store prediction to database for future retraining
+    # Use imputed_data (not raw_input_dict) as it has the actual features used for prediction
+    try:
+        _store_prediction_to_db(
+            db=db,
+            input_features=imputed_data,
+            risk_level=risk_level,
+            probability_default=prob,
+            binary_prediction=pred,
+            model_type="dynamic",
+            shap_explanation=shap_explanation,
+            llm_explanation=llm_explanation,
+            remediation_suggestion=remediation_suggestion,
+        )
+    except Exception as e:
+        logger.warning(f"Failed to store prediction to database: {e}")
 
     return {
         "status": "success",

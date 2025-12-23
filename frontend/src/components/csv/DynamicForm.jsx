@@ -70,7 +70,7 @@ const COLUMN_MAPPINGS = {
   'loan_percent': 'loan_percent_income'
 }
 
-export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
+export default function DynamicForm({ csvData, onResult, onBatchResults, onLoading, onError }) {
   const [detectedFields, setDetectedFields] = useState([])
   const [currentRowIndex, setCurrentRowIndex] = useState(0)
   const [batchMode, setBatchMode] = useState(false)
@@ -186,7 +186,7 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
           }
         }
       }
-      
+
       // 5. Fuzzy match with database columns
       if (!mappedField && dbColumns.length > 0) {
         for (const dbCol of dbColumns) {
@@ -225,8 +225,8 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
         // Convert types if necessary
         const meta = FIELD_METADATA[formField]
         if (meta) {
-          if (meta.type === 'number') {
-            newFormData[formField] = parseFloat(value) || 0
+        if (meta.type === 'number') {
+          newFormData[formField] = parseFloat(value) || 0
           } else if (meta.type === 'select') {
             // Handle select fields - convert numeric values to string if needed
             const strValue = String(value).trim().toUpperCase()
@@ -250,8 +250,8 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
           const numValue = parseFloat(value)
           if (!isNaN(numValue) && isFinite(value)) {
             newFormData[formField] = numValue
-          } else {
-            newFormData[formField] = value
+        } else {
+          newFormData[formField] = value
           }
         }
       }
@@ -293,8 +293,8 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
         if (value !== null && value !== undefined && value !== '') {
           const meta = FIELD_METADATA[formField]
           if (meta) {
-            if (meta.type === 'number') {
-              rowData[formField] = parseFloat(value) || 0
+          if (meta.type === 'number') {
+            rowData[formField] = parseFloat(value) || 0
             } else if (meta.type === 'select') {
               // Handle select fields
               const strValue = String(value).trim().toUpperCase()
@@ -320,15 +320,16 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
             const numValue = parseFloat(value)
             if (!isNaN(numValue) && isFinite(value)) {
               rowData[formField] = numValue
-            } else {
-              rowData[formField] = value
+          } else {
+            rowData[formField] = value
             }
           }
         }
       })
 
       try {
-        const response = await axios.post(API_DYNAMIC, rowData, { timeout: 30000 })
+        // Skip LLM explanation for batch processing to save tokens
+        const response = await axios.post(`${API_DYNAMIC}?include_llm=false`, rowData, { timeout: 30000 })
         results.push({
           rowIndex: i,
           input: rowData,
@@ -350,7 +351,12 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
 
     setBatchResults(results)
     setProcessingBatch(false)
-    onResult && onResult({ batchResults: results })
+    setBatchMode(true) // Ensure batch mode is set to show results
+    
+    // Pass batch results to parent component to display in right column
+    if (onBatchResults) {
+      onBatchResults({ batchResults: results })
+    }
   }
 
   const downloadBatchResults = () => {
@@ -750,7 +756,28 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                   <span className="stat-number">{detectedFields.length}</span>
                   <span className="stat-label">Fields Mapped</span>
                 </div>
+                {batchResults.length > 0 && (
+                  <div className="stat-preview success">
+                    <span className="stat-number">{batchResults.filter(r => r.status === 'success').length}</span>
+                    <span className="stat-label">Completed</span>
+                  </div>
+                )}
               </div>
+
+              {batchResults.length > 0 && !processingBatch && (
+                <div style={{ 
+                  padding: '1rem', 
+                  background: '#f0fff4', 
+                  border: '1px solid #9ae6b4', 
+                  borderRadius: '8px', 
+                  marginBottom: '1rem',
+                  textAlign: 'center'
+                }}>
+                  <strong style={{ color: '#22543d' }}>
+                    ✅ Batch processing completed! Scroll down to see detailed results.
+                  </strong>
+                </div>
+              )}
 
               <button
                 type="button"
@@ -764,7 +791,7 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
                     Processing Row {currentRowIndex + 1} of {csvData.data.length}...
                   </>
                 ) : (
-                  <>🚀 Start Batch Processing</>
+                  <>🚀 {batchResults.length > 0 ? 'Re-process All Rows' : 'Start Batch Processing'}</>
                 )}
               </button>
             </div>
@@ -772,35 +799,28 @@ export default function DynamicForm({ csvData, onResult, onLoading, onError }) {
         )}
       </AnimatePresence>
 
-      {batchMode && batchResults.length > 0 && (
+      {/* Batch results are now displayed in the right column via App.jsx */}
+      {/* Only show a simple completion message in the left column */}
+      {batchResults.length > 0 && !processingBatch && (
         <motion.div
-          className="batch-results"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          style={{ 
+            marginTop: '1.5rem', 
+            padding: '1rem', 
+            background: '#f0fff4', 
+            borderRadius: '8px', 
+            border: '1px solid #9ae6b4',
+            textAlign: 'center'
+          }}
         >
-          <div className="batch-header">
-            <h4>Batch Results</h4>
-            <button onClick={downloadBatchResults} className="download-button">
-              📥 Download CSV
-            </button>
+          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#22543d', marginBottom: '0.5rem' }}>
+            ✅ Batch Processing Complete!
           </div>
-          <div className="batch-summary">
-            <div className="summary-stat">
-              <span className="stat-label">Total:</span>
-              <span className="stat-value">{batchResults.length}</span>
-            </div>
-            <div className="summary-stat success">
-              <span className="stat-label">Success:</span>
-              <span className="stat-value">
-                {batchResults.filter(r => r.status === 'success').length}
-              </span>
-            </div>
-            <div className="summary-stat error">
-              <span className="stat-label">Errors:</span>
-              <span className="stat-value">
-                {batchResults.filter(r => r.status === 'error').length}
-              </span>
-            </div>
+          <div style={{ fontSize: '0.9rem', color: '#2f855a' }}>
+            {batchResults.filter(r => r.status === 'success').length} of {batchResults.length} rows processed successfully.
+            <br />
+            View detailed results in the right panel.
           </div>
         </motion.div>
       )}

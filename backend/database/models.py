@@ -80,85 +80,8 @@ class Prediction(Base):
     feedback_date = Column(DateTime(timezone=True), nullable=True)
 
 
-class FeatureEngineering(Base):
-    """Model for storing feature engineering results."""
-
-    __tablename__ = "feature_engineering"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    # Original data
-    original_features = Column(JSON)
-
-    # Engineered data
-    engineered_features = Column(JSON)
-    new_features = Column(JSON)  # List of new feature names
-
-    # Analysis results
-    data_quality_score = Column(Float)
-    analysis_results = Column(JSON)
-
-    # Metadata
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    processing_time_ms = Column(Float, nullable=True)
-
-
-class MitigationPlan(Base):
-    """Model for storing mitigation plans."""
-
-    __tablename__ = "mitigation_plans"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    # Link to prediction
-    prediction_id = Column(Integer, nullable=True)
-
-    # Risk assessment
-    risk_level = Column(String(50))
-    probability_default = Column(Float)
-
-    # Mitigation plan
-    overall_strategy = Column(Text)
-    immediate_actions = Column(JSON)
-    short_term_goals = Column(JSON)
-    long_term_improvements = Column(JSON)
-    alternative_options = Column(JSON)
-    estimated_risk_reduction = Column(String(100))
-
-    # Metadata
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    # Follow-up
-    implemented = Column(Boolean, default=False)
-    implementation_date = Column(DateTime(timezone=True), nullable=True)
-    effectiveness_score = Column(Float, nullable=True)
-
-
-class AuditLog(Base):
-    """Model for audit logging."""
-
-    __tablename__ = "audit_logs"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    # Event information
-    event_type = Column(String(100))  # prediction, feature_engineering, etc.
-    event_action = Column(String(100))  # create, update, delete
-
-    # User/session information
-    user_id = Column(String(100), nullable=True)
-    session_id = Column(String(100), nullable=True)
-    ip_address = Column(String(50), nullable=True)
-
-    # Event details
-    details = Column(JSON)
-
-    # Status
-    status = Column(String(50))  # success, error
-    error_message = Column(Text, nullable=True)
-
-    # Metadata
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+# Removed unused tables: FeatureEngineering, MitigationPlan, AuditLog
+# These tables were defined but never used in the application
 
 
 class ModelMetrics(Base):

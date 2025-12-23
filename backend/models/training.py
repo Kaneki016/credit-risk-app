@@ -63,7 +63,7 @@ joblib.dump(scaler, MODELS_DIR / "scaler.pkl")
 
 # Persist the full feature list (from the encoded dataframe) as JSON for consistency
 with open(MODELS_DIR / "feature_names.json", "w", encoding="utf-8") as f:
-    json.dump(X.columns.tolist(), f)
+	json.dump(X.columns.tolist(), f)
 
 print(f"\n✅ Model training complete!")
 print(f"   Model saved to: {MODELS_DIR / 'credit_risk_model.pkl'}")

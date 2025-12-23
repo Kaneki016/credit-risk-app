@@ -52,8 +52,7 @@ def drop_loan_application_table(db: Session):
     # 1. Drop dependent tables first to avoid FK violations
     try:
         models.Prediction.__table__.drop(bind=engine, checkfirst=True)
-        models.MitigationPlan.__table__.drop(bind=engine, checkfirst=True) # References Prediction
-        logger.info("Dropped dependent tables (predictions, mitigation_plans)")
+        logger.info("Dropped dependent tables (predictions)")
     except Exception as e:
         logger.warning(f"Error dropping dependent tables: {e}")
 
@@ -104,10 +103,9 @@ def create_loan_application_table(db: Session, csv_columns: Dict[str, Any]):
     new_table.create(bind=engine)
     logger.info(f"Created new loan_applications table with {len(columns)} columns")
     
-    # Recreate dependent tables (Predictions, MitigationPlan)
+    # Recreate dependent tables (Predictions)
     # We use the original model definitions
     models.Prediction.__table__.create(bind=engine)
-    models.MitigationPlan.__table__.create(bind=engine)
     logger.info("Recreated dependent tables")
 
 
@@ -224,99 +222,8 @@ def update_prediction_feedback(db: Session, prediction_id: int, actual_outcome: 
     return db_prediction
 
 
-# ==================== Feature Engineering ====================
-
-
-def create_feature_engineering(db: Session, fe_data: Dict[str, Any]) -> models.FeatureEngineering:
-    """Create a feature engineering record."""
-    db_fe = models.FeatureEngineering(**fe_data)
-    db.add(db_fe)
-    db.commit()
-    db.refresh(db_fe)
-    return db_fe
-
-
-def get_feature_engineering(db: Session, fe_id: int) -> Optional[models.FeatureEngineering]:
-    """Get feature engineering record by ID."""
-    return db.query(models.FeatureEngineering).filter(models.FeatureEngineering.id == fe_id).first()
-
-
-def get_feature_engineering_history(db: Session, skip: int = 0, limit: int = 50) -> List[models.FeatureEngineering]:
-    """Get feature engineering history."""
-    return (
-        db.query(models.FeatureEngineering)
-        .order_by(models.FeatureEngineering.created_at.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
-
-
-# ==================== Mitigation Plans ====================
-
-
-def create_mitigation_plan(db: Session, plan_data: Dict[str, Any]) -> models.MitigationPlan:
-    """Create a mitigation plan."""
-    db_plan = models.MitigationPlan(**plan_data)
-    db.add(db_plan)
-    db.commit()
-    db.refresh(db_plan)
-    return db_plan
-
-
-def get_mitigation_plan(db: Session, plan_id: int) -> Optional[models.MitigationPlan]:
-    """Get mitigation plan by ID."""
-    return db.query(models.MitigationPlan).filter(models.MitigationPlan.id == plan_id).first()
-
-
-def get_mitigation_plans(
-    db: Session, skip: int = 0, limit: int = 100, prediction_id: Optional[int] = None
-) -> List[models.MitigationPlan]:
-    """Get list of mitigation plans."""
-    query = db.query(models.MitigationPlan)
-    if prediction_id:
-        query = query.filter(models.MitigationPlan.prediction_id == prediction_id)
-    return query.order_by(models.MitigationPlan.created_at.desc()).offset(skip).limit(limit).all()
-
-
-def update_mitigation_plan_status(
-    db: Session, plan_id: int, implemented: bool, effectiveness_score: Optional[float] = None
-) -> Optional[models.MitigationPlan]:
-    """Update mitigation plan implementation status."""
-    db_plan = get_mitigation_plan(db, plan_id)
-    if db_plan:
-        db_plan.implemented = implemented
-        if implemented:
-            db_plan.implementation_date = datetime.utcnow()
-        if effectiveness_score is not None:
-            db_plan.effectiveness_score = effectiveness_score
-        db.commit()
-        db.refresh(db_plan)
-    return db_plan
-
-
-# ==================== Audit Logs ====================
-
-
-def create_audit_log(db: Session, log_data: Dict[str, Any]) -> models.AuditLog:
-    """Create an audit log entry."""
-    db_log = models.AuditLog(**log_data)
-    db.add(db_log)
-    db.commit()
-    db.refresh(db_log)
-    return db_log
-
-
-def get_audit_logs(
-    db: Session, skip: int = 0, limit: int = 100, event_type: Optional[str] = None, status: Optional[str] = None
-) -> List[models.AuditLog]:
-    """Get audit logs."""
-    query = db.query(models.AuditLog)
-    if event_type:
-        query = query.filter(models.AuditLog.event_type == event_type)
-    if status:
-        query = query.filter(models.AuditLog.status == status)
-    return query.order_by(models.AuditLog.created_at.desc()).offset(skip).limit(limit).all()
+# Removed unused CRUD functions for FeatureEngineering, MitigationPlan, and AuditLog
+# These tables were never used in the application
 
 
 # ==================== Model Metrics ====================

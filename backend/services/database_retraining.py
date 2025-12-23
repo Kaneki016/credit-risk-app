@@ -80,49 +80,111 @@ class DatabaseRetrainer:
             "feedback_needed": max(0, int(self.min_samples * self.min_feedback_ratio) - feedback_count),
         }
 
-    def extract_training_data(self, db: Session) -> Tuple[pd.DataFrame, pd.Series]:
+    def extract_training_data(self, db: Session, include_original_dataset: bool = True) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Extract training data from database predictions with feedback.
+        Optionally combines with original training dataset for better model performance.
 
         Args:
             db: Database session
+            include_original_dataset: If True, combines original dataset with database predictions
 
         Returns:
             Tuple of (features_df, labels_series)
         """
-        # Get predictions with feedback
+        all_data_records = []
+        all_labels = []
+        
+        # 1. Get predictions with feedback from database
         predictions = crud.get_predictions(db, limit=10000)
         predictions_with_feedback = [p for p in predictions if p.actual_outcome is not None and p.input_features]
 
-        if not predictions_with_feedback:
-            raise ValueError("No predictions with feedback found in database")
+        logger.info(f"Found {len(predictions_with_feedback)} predictions with feedback in database")
 
-        logger.info(f"Extracting training data from {len(predictions_with_feedback)} predictions")
-
-        # Convert to DataFrame
-        data_records = []
-        labels = []
-
+        # Convert database predictions to records
         for pred in predictions_with_feedback:
             try:
                 # Get input features
                 features = pred.input_features
-
-                # Add to records
-                data_records.append(features)
-                labels.append(pred.actual_outcome)
-
+                all_data_records.append(features)
+                all_labels.append(pred.actual_outcome)
             except Exception as e:
                 logger.warning(f"Failed to process prediction {pred.id}: {e}")
                 continue
 
-        # Create DataFrame
-        df = pd.DataFrame(data_records)
-        y = pd.Series(labels, name="loan_status")
+        # 2. Optionally load and combine with original training dataset
+        if include_original_dataset:
+            try:
+                from pathlib import Path
+                from backend.core.config import PROJECT_ROOT
+                
+                original_dataset_path = PROJECT_ROOT / "data" / "credit_risk_dataset.csv"
+                if original_dataset_path.exists():
+                    logger.info(f"Loading original training dataset from {original_dataset_path}")
+                    df_original = pd.read_csv(original_dataset_path)
+                    
+                    # Exclude target column from features
+                    target_columns = {"loan_status", "loan_status_num", "default", "target", "label", "outcome"}
+                    feature_columns = [col for col in df_original.columns if col not in target_columns]
+                    
+                    # Get target
+                    if "loan_status" in df_original.columns:
+                        y_original = df_original["loan_status"]
+                    elif "loan_status_num" in df_original.columns:
+                        y_original = df_original["loan_status_num"]
+                    else:
+                        logger.warning("Original dataset doesn't have loan_status column, skipping")
+                        y_original = None
+                    
+                    if y_original is not None:
+                        # Convert original data to records format (matching database format)
+                        # The database stores features in the format used by DynamicFeatureMapper
+                        for idx, row in df_original.iterrows():
+                            try:
+                                # Create feature dict from original data
+                                # Map original column names to match database format (same as imputation.py)
+                                features = {}
+                                for col in feature_columns:
+                                    if col in row and pd.notna(row[col]):
+                                        value = row[col]
+                                        # Normalize column names to match what's stored in database predictions
+                                        # Database predictions use: home_ownership, default_on_file (not person_home_ownership, cb_person_default_on_file)
+                                        if col == "person_home_ownership":
+                                            features["home_ownership"] = str(value).upper() if value else None
+                                        elif col == "cb_person_default_on_file":
+                                            features["default_on_file"] = str(value).upper() if value else None
+                                        elif col == "loan_intent":
+                                            features["loan_intent"] = str(value).upper() if value else None
+                                        elif col == "loan_grade":
+                                            features["loan_grade"] = str(value).upper() if value else None
+                                        else:
+                                            # Numeric columns stay the same
+                                            try:
+                                                features[col] = float(value) if pd.notna(value) else None
+                                            except (ValueError, TypeError):
+                                                features[col] = value
+                                
+                                all_data_records.append(features)
+                                all_labels.append(int(y_original.iloc[idx]))
+                            except Exception as e:
+                                logger.warning(f"Failed to process original dataset row {idx}: {e}")
+                                continue
+                        
+                        logger.info(f"Added {len(df_original)} samples from original dataset")
+                else:
+                    logger.warning(f"Original dataset not found at {original_dataset_path}, using only database predictions")
+            except Exception as e:
+                logger.warning(f"Failed to load original dataset: {e}, using only database predictions")
 
-        logger.info(f"Extracted {len(df)} samples with {len(df.columns)} features")
+        if not all_data_records:
+            raise ValueError("No training data found (neither database predictions nor original dataset)")
+
+        # Create DataFrame from combined data
+        df = pd.DataFrame(all_data_records)
+        y = pd.Series(all_labels, name="loan_status")
+
+        logger.info(f"Extracted {len(df)} total samples ({len(predictions_with_feedback)} from database, {len(df) - len(predictions_with_feedback)} from original dataset) with {len(df.columns)} features")
         logger.info(f"Feature columns: {list(df.columns)}")
-        logger.info(f"Data types: {df.dtypes.to_dict()}")
 
         return df, y
 
@@ -189,23 +251,26 @@ class DatabaseRetrainer:
 
         return df_processed
 
-    def retrain_model(self, db: Session, test_size: float = 0.2, save_model: bool = True) -> Dict[str, Any]:
+    def retrain_model(self, db: Session, test_size: float = 0.2, save_model: bool = True, include_original_dataset: bool = True) -> Dict[str, Any]:
         """
-        Retrain model using database data.
+        Retrain model using database data, optionally combined with original training dataset.
 
         Args:
             db: Database session
             test_size: Proportion of data for testing
             save_model: Whether to save the retrained model
+            include_original_dataset: If True, combines original dataset with database predictions for better performance
 
         Returns:
             Dictionary with retraining results and metrics
         """
-        logger.info("Starting model retraining from database data")
+        logger.info("Starting model retraining from database data" + (" (with original dataset)" if include_original_dataset else " (database only)"))
 
-        # Check readiness
+        # Check readiness (only check database predictions, original dataset is optional)
         readiness = self.check_retraining_readiness(db)
-        if not readiness["is_ready"]:
+        
+        # If including original dataset, we can proceed even with fewer database predictions
+        if not include_original_dataset and not readiness["is_ready"]:
             return {
                 "status": "insufficient_data",
                 "message": f"Not enough data for retraining. Need {readiness['samples_needed']} more samples and {readiness['feedback_needed']} more feedback entries.",
@@ -217,8 +282,8 @@ class DatabaseRetrainer:
                 "timestamp": datetime.now().isoformat(),
             }
 
-        # Extract training data
-        X, y = self.extract_training_data(db)
+        # Extract training data (combines database predictions + original dataset if requested)
+        X, y = self.extract_training_data(db, include_original_dataset=include_original_dataset)
 
         # Prepare features
         X_processed = self.prepare_features(X)
@@ -383,7 +448,7 @@ class DatabaseRetrainer:
         return output_path
 
 
-def retrain_from_database(min_samples: int = 100, min_feedback_ratio: float = 0.1, test_size: float = 0.2) -> Dict[str, Any]:
+def retrain_from_database(min_samples: int = 100, min_feedback_ratio: float = 0.1, test_size: float = 0.2, include_original_dataset: bool = True) -> Dict[str, Any]:
     """
     Convenience function to retrain model from database.
 
@@ -391,6 +456,7 @@ def retrain_from_database(min_samples: int = 100, min_feedback_ratio: float = 0.
         min_samples: Minimum samples required
         min_feedback_ratio: Minimum feedback ratio required
         test_size: Test set proportion
+        include_original_dataset: If True, combines original dataset with database predictions
 
     Returns:
         Retraining results
@@ -398,7 +464,7 @@ def retrain_from_database(min_samples: int = 100, min_feedback_ratio: float = 0.
     db = SessionLocal()
     try:
         retrainer = DatabaseRetrainer(min_samples, min_feedback_ratio)
-        result = retrainer.retrain_model(db, test_size=test_size)
+        result = retrainer.retrain_model(db, test_size=test_size, include_original_dataset=include_original_dataset)
         
         # Log the result status
         if result.get("status") == "insufficient_data":

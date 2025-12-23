@@ -3,11 +3,11 @@ const ROOT_API_URL = 'http://localhost:8000'
 
 export const ENDPOINTS = {
   // Versioned API endpoints (under /api/v1)
-  IMPORT_CSV: `${API_BASE_URL}/db/import_csv`,
-  RETRAIN: `${API_BASE_URL}/db/retrain`,
-  RETRAIN_STATUS: `${API_BASE_URL}/db/retraining/status`,
-  CLEAR_DB: `${API_BASE_URL}/db/clear`,
-  GET_SCHEMA: `${API_BASE_URL}/db/schema`,
+    IMPORT_CSV: `${API_BASE_URL}/db/import_csv`,
+    RETRAIN: `${API_BASE_URL}/db/retrain`,
+    RETRAIN_STATUS: `${API_BASE_URL}/db/retraining/status`,
+    CLEAR_DB: `${API_BASE_URL}/db/clear`,
+    GET_SCHEMA: `${API_BASE_URL}/db/schema`,
   CHATBOT: `${API_BASE_URL}/chatbot/query`,
   
   // Prediction endpoints

@@ -370,26 +370,11 @@ See [docs/architecture/PROJECT_STRUCTURE.md](docs/architecture/PROJECT_STRUCTURE
 Create a `.env` file in the project root:
 
 ```bash
-# AI API Keys (Optional - for AI-powered explanations and chatbot)
-# OpenRouter (recommended) - Get key from: https://openrouter.ai/keys
-OPENROUTER_API_KEY=your-openrouter-key-here
-OPENROUTER_MODEL=mistralai/mistral-7b-instruct:free  # Optional, defaults to free model
+#Supabase API
+DATABASE_URL=
 
-# Gemini (legacy fallback) - Get key from: https://aistudio.google.com/app/apikey
-GEMINI_API_KEY=your-gemini-key-here
-
-# Feature toggles
-ENABLE_SHAP_EXPLANATIONS=true  # Enable AI explanations in predictions
-ENABLE_CHATBOT=true            # Enable chatbot feature
-
-# Database (Optional - defaults to SQLite)
-DATABASE_URL=sqlite:///./credit_risk.db
-# Or PostgreSQL:
-# DATABASE_URL=postgresql://user:password@localhost:5432/credit_risk_db
-
-# API Configuration (Optional)
-API_HOST=0.0.0.0
-API_PORT=8000
+#OPENROUTER_API_KEY
+OPENROUTER_API_KEY=
 ```
 
 ### Model Configuration
