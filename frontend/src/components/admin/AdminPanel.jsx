@@ -30,10 +30,23 @@ export default function AdminPanel() {
   const checkRetrainStatus = async () => {
     try {
       const response = await fetch(ENDPOINTS.RETRAIN_STATUS)
+      if (!response.ok) {
+        // If tables don't exist, that's okay - just set status to false
+        if (response.status === 500) {
+          const errorData = await response.json().catch(() => ({}))
+          if (errorData.detail && (errorData.detail.includes('does not exist') || errorData.detail.includes('UndefinedTable'))) {
+            setRetrainStatus(false)
+            return
+          }
+        }
+        throw new Error(`Status check failed: ${response.statusText}`)
+      }
       const data = await response.json()
-      setRetrainStatus(data.retraining)
+      setRetrainStatus(data.is_ready || data.retraining || false)
     } catch (err) {
       console.error('Failed to check retrain status:', err)
+      // Don't set error state - just silently fail if tables don't exist
+      setRetrainStatus(false)
     }
   }
 
@@ -161,18 +174,27 @@ export default function AdminPanel() {
       })
 
       if (!response.ok) {
-        throw new Error(`Import failed: ${response.statusText}`)
+        const errorText = await response.text()
+        throw new Error(`Import failed: ${response.statusText} - ${errorText}`)
       }
 
       const result = await response.json()
+      console.log('Import result:', result)
       setImportResult(result)
 
       // Check retrain status after import
       await checkRetrainStatus()
     } catch (err) {
+      console.error('Import error:', err)
       setError(err.message)
+      setImportResult({
+        status: 'error',
+        message: err.message
+      })
     } finally {
+      // Always reset importing state, even if there was an error
       setImporting(false)
+      console.log('Import complete, importing state reset to false')
     }
   }
 
@@ -237,8 +259,11 @@ export default function AdminPanel() {
       setClearResult(result)
       setShowClearConfirm(false)
 
-      // Refresh status
-      await checkRetrainStatus()
+      // Don't check retrain status after dropping tables (tables don't exist yet)
+      // Only check if we didn't drop tables
+      if (!dropTables) {
+        await checkRetrainStatus()
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -252,6 +277,14 @@ export default function AdminPanel() {
     fetchModelState()
     checkApiStatus()
   }, [])
+
+  // Ensure importing state resets when import completes
+  React.useEffect(() => {
+    if (importResult && importing) {
+      console.log('Import result received, resetting importing state')
+      setImporting(false)
+    }
+  }, [importResult, importing])
 
   // Refresh model state when retrain tab is active
   React.useEffect(() => {
@@ -285,7 +318,6 @@ export default function AdminPanel() {
           className={`tab ${activeTab === 'status' ? 'active' : ''}`}
           onClick={() => { 
             setActiveTab('status')
-            checkRetrainStatus()
             checkApiStatus()
           }}
         >
@@ -370,6 +402,7 @@ export default function AdminPanel() {
               <button
                 className="btn-primary"
                 onClick={handleImport}
+                disabled={!file || importing}
                 style={{
                   marginTop: '1.5rem',
                   width: '100%',
@@ -531,32 +564,10 @@ export default function AdminPanel() {
               <h3>System Status</h3>
               <p className="section-description">Check the current status of the retraining system and API.</p>
 
-              {/* Retraining Status */}
-              <div className={`status-card ${retrainStatus ? 'ready' : 'not-ready'}`} style={{ marginBottom: '1.5rem' }}>
-                <div>
-                  <h4>{retrainStatus ? '✅ Ready to Train' : '⚠️ Not Ready'}</h4>
-                  <p style={{ color: '#4a5568' }}>
-                    {retrainStatus
-                      ? 'System has sufficient data for retraining.'
-                      : 'Not enough data to start retraining.'}
-                  </p>
-                </div>
-                <button onClick={checkRetrainStatus} className="btn-secondary">
-                  Refresh Status
-                </button>
-              </div>
-
               {/* API Status */}
               <div className="status-card" style={{ background: '#f7fafc', border: '1px solid #e2e8f0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ marginBottom: '1rem' }}>
                   <h4 style={{ margin: 0 }}>🌐 System API Status</h4>
-                  <button 
-                    onClick={checkApiStatus} 
-                    disabled={loadingApiStatus}
-                    className="btn-secondary"
-                  >
-                    {loadingApiStatus ? '⏳ Loading...' : '🔄 Refresh'}
-                  </button>
                 </div>
                 
                 {apiStatus && !apiStatus.error ? (
@@ -680,6 +691,7 @@ export default function AdminPanel() {
                       >
                         {clearing ? '⏳ Clearing...' : '✓ Yes, Clear Everything'}
                       </button>
+                      &nbsp;&nbsp;&nbsp;&nbsp;
                       <button
                         className="btn-secondary"
                         onClick={() => setShowClearConfirm(false)}
@@ -695,24 +707,49 @@ export default function AdminPanel() {
               {clearResult && (
                 <div className="result-box success">
                   <h4>✅ Database Cleared</h4>
-                  <div className="result-stats">
-                    <div className="stat">
-                      <span className="stat-label">Total Deleted</span>
-                      <span className="stat-value">{clearResult.total_deleted}</span>
+                  {clearResult.total_deleted !== undefined ? (
+                    <div className="result-stats">
+                      <div className="stat">
+                        <span className="stat-label">Total Deleted</span>
+                        <span className="stat-value">{clearResult.total_deleted || 0}</span>
+                      </div>
+                      {clearResult.deleted && (
+                        <>
+                          <div className="stat">
+                            <span className="stat-label">Predictions</span>
+                            <span className="stat-value">{clearResult.deleted.predictions || 0}</span>
+                          </div>
+                          <div className="stat">
+                            <span className="stat-label">Applications</span>
+                            <span className="stat-value">{clearResult.deleted.loan_applications || 0}</span>
+                          </div>
+                          <div className="stat">
+                            <span className="stat-label">Feature Engineering</span>
+                            <span className="stat-value">{clearResult.deleted.feature_engineering || 0}</span>
+                          </div>
+                          <div className="stat">
+                            <span className="stat-label">Mitigation Plans</span>
+                            <span className="stat-value">{clearResult.deleted.mitigation_plans || 0}</span>
+                          </div>
+                          <div className="stat">
+                            <span className="stat-label">Audit Logs</span>
+                            <span className="stat-value">{clearResult.deleted.audit_logs || 0}</span>
+                          </div>
+                          <div className="stat">
+                            <span className="stat-label">Model Metrics</span>
+                            <span className="stat-value">{clearResult.deleted.model_metrics || 0}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
-                    {clearResult.deleted && (
-                      <>
-                        <div className="stat">
-                          <span className="stat-label">Predictions</span>
-                          <span className="stat-value">{clearResult.deleted.predictions}</span>
-                        </div>
-                        <div className="stat">
-                          <span className="stat-label">Applications</span>
-                          <span className="stat-value">{clearResult.deleted.loan_applications}</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="result-stats">
+                      <div className="stat">
+                        <span className="stat-label">Action</span>
+                        <span className="stat-value">{clearResult.action === 'schema_reset' ? 'Schema Reset' : 'Cleared'}</span>
+                      </div>
+                    </div>
+                  )}
                   <p className="result-message" style={{ textAlign: 'center', marginTop: '1rem' }}>{clearResult.message}</p>
                 </div>
               )}

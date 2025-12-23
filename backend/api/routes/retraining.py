@@ -21,6 +21,21 @@ def get_retraining_status():
     try:
         return check_retraining_status()
     except Exception as e:
+        # Handle case when tables don't exist (e.g., after dropping tables)
+        error_str = str(e).lower()
+        if "does not exist" in error_str or "undefinedtable" in error_str or "no such table" in error_str:
+            logger.warning(f"Tables do not exist yet: {e}")
+            return {
+                "is_ready": False,
+                "total_predictions": 0,
+                "feedback_count": 0,
+                "feedback_ratio": 0.0,
+                "min_samples_required": 100,
+                "min_feedback_ratio_required": 0.1,
+                "samples_needed": 100,
+                "feedback_needed": 10,
+                "message": "Database tables do not exist. Please import data first."
+            }
         logger.error(f"Error checking retraining status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -138,6 +138,15 @@ class DatabaseRetrainer:
         """
         df_processed = df.copy()
 
+        # Exclude target columns from features (they should not be used for training)
+        # Target columns: loan_status, loan_status_num, default, target, label, outcome
+        target_columns = {"loan_status", "loan_status_num", "default", "target", "label", "outcome"}
+        feature_columns = [col for col in df_processed.columns if col not in target_columns]
+        df_processed = df_processed[feature_columns]
+        
+        if len(df_processed.columns) == 0:
+            raise ValueError("No valid features found after excluding target columns. Please check your data.")
+
         # 1. Identify columns types
         numeric_features = []
         categorical_features = []
@@ -197,11 +206,16 @@ class DatabaseRetrainer:
         # Check readiness
         readiness = self.check_retraining_readiness(db)
         if not readiness["is_ready"]:
-            raise ValueError(
-                f"Not enough data for retraining. "
-                f"Need {readiness['samples_needed']} more samples and "
-                f"{readiness['feedback_needed']} more feedback entries."
-            )
+            return {
+                "status": "insufficient_data",
+                "message": f"Not enough data for retraining. Need {readiness['samples_needed']} more samples and {readiness['feedback_needed']} more feedback entries.",
+                "readiness": readiness,
+                "training_samples": 0,
+                "test_samples": 0,
+                "features_count": 0,
+                "model_version": None,
+                "timestamp": datetime.now().isoformat(),
+            }
 
         # Extract training data
         X, y = self.extract_training_data(db)
@@ -385,7 +399,25 @@ def retrain_from_database(min_samples: int = 100, min_feedback_ratio: float = 0.
     try:
         retrainer = DatabaseRetrainer(min_samples, min_feedback_ratio)
         result = retrainer.retrain_model(db, test_size=test_size)
+        
+        # Log the result status
+        if result.get("status") == "insufficient_data":
+            logger.warning(f"Retraining skipped: {result.get('message')}")
+        else:
+            logger.info(f"Retraining completed successfully: {result.get('model_version')}")
+        
         return result
+    except Exception as e:
+        logger.error(f"Error during retraining: {e}", exc_info=True)
+        return {
+            "status": "error",
+            "message": f"Retraining failed: {str(e)}",
+            "training_samples": 0,
+            "test_samples": 0,
+            "features_count": 0,
+            "model_version": None,
+            "timestamp": datetime.now().isoformat(),
+        }
     finally:
         db.close()
 

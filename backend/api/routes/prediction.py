@@ -45,23 +45,41 @@ async def generate_llm_explanation(
         ai_client = get_ai_client()
         
         if not ai_client.is_available():
+            logger.warning("AI client not available - no API key configured")
             return {
                 "text": "AI explanation unavailable. Decision based on credit risk model analysis.",
                 "remediation_suggestion": None,
                 "error": "no_api_key"
             }
         
+        logger.info("Generating LLM explanation...")
+        
         result = await ai_client.generate_with_retry(prompt, system_prompt)
         
         if result.get("error"):
+            error_type = result.get("error")
+            logger.warning(f"LLM generation failed with error: {error_type}")
             return {
                 "text": "AI explanation temporarily unavailable. Decision based on credit risk model analysis.",
                 "remediation_suggestion": None,
-                "error": result.get("error")
+                "error": error_type
             }
         
+        # Ensure we always return text, even if empty
+        text = result.get("text", "").strip()
+        if not text:
+            # If text is empty, use fallback
+            logger.warning("LLM returned empty text, using fallback explanation")
+            return {
+                "text": "AI explanation temporarily unavailable. Decision based on credit risk model analysis. Please refer to the SHAP values for detailed feature contributions.",
+                "remediation_suggestion": None,
+                "error": "empty_response",
+                "raw": result.get("raw", "")
+            }
+        
+        logger.info(f"LLM explanation generated successfully ({len(text)} characters)")
         return {
-            "text": result.get("text", ""),
+            "text": text,
             "remediation_suggestion": None,  # Can be enhanced later
             "raw": result.get("raw", "")
         }

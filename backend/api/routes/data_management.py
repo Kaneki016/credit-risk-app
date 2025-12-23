@@ -184,9 +184,14 @@ async def import_csv_data(
                             except:
                                 actual_outcome = 1 if str(loan_status).lower() in ['y', 'yes', '1', 'true'] else 0
                         
+                        # Exclude target columns from input_features (they should not be used as features)
+                        # Target columns: loan_status, loan_status_num, default, target, label, outcome
+                        target_columns = {"loan_status", "loan_status_num", "default", "target", "label", "outcome"}
+                        input_features = {k: v for k, v in app_data.items() if k not in target_columns}
+                        
                         pred_data = {
                             "application_id": app_id,
-                            "input_features": app_data,
+                            "input_features": input_features,
                             "risk_level": "Historical",
                             "probability_default": 0.0,
                             "binary_prediction": actual_outcome,
@@ -211,10 +216,8 @@ async def import_csv_data(
                 # Raising is safer to alert user.
                 raise HTTPException(status_code=500, detail=f"Bulk import failed: {str(e)}")
 
-        # Trigger retraining in background if we imported data
-        if imported_count > 0:
-            from backend.services.database_retraining import retrain_from_database
-            background_tasks.add_task(retrain_from_database)
+        # Note: Auto-retraining removed. Users should manually trigger retraining
+        # after importing data to have better control over when retraining happens.
 
         return {
             "status": "success",

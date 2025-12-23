@@ -9,6 +9,11 @@ export const ENDPOINTS = {
   CLEAR_DB: `${API_BASE_URL}/db/clear`,
   GET_SCHEMA: `${API_BASE_URL}/db/schema`,
   CHATBOT: `${API_BASE_URL}/chatbot/query`,
+  
+  // Prediction endpoints
+  PREDICT: `${API_BASE_URL}/predict_risk`,
+  PREDICT_DYNAMIC: `${API_BASE_URL}/predict_risk_dynamic`,
+  PREDICT_BATCH: `${API_BASE_URL}/predict_risk_batch`,
 
   // Root-level management endpoints (not versioned)
   RELOAD_MODEL: `${ROOT_API_URL}/model/reload`,

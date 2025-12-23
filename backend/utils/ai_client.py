@@ -139,9 +139,13 @@ class AIClientWithRetry:
 
         # Parse OpenRouter response
         if "choices" in result and len(result["choices"]) > 0:
-            text = result["choices"][0]["message"]["content"]
+            text = result["choices"][0]["message"].get("content", "").strip()
+            if not text:
+                logger.warning("OpenRouter returned empty content")
+                return {"text": "", "raw": json.dumps(result), "error": "empty_response"}
             return {"text": text, "raw": json.dumps(result), "error": None}
         else:
+            logger.warning(f"OpenRouter invalid response structure: {result}")
             return {"text": "", "raw": json.dumps(result), "error": "invalid_response"}
 
     async def _call_gemini(

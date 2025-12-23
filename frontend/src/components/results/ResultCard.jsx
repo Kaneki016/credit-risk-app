@@ -122,7 +122,11 @@ export default function ResultCard({data}){
           transition={{ delay: 0.4, duration: 0.5 }}
         >
           <h4>LLM Explanation</h4>
-          <div className="llm-text">{data.llm_explanation || '—'}</div>
+          <div className="llm-text">
+            {data.llm_explanation && data.llm_explanation.trim() 
+              ? data.llm_explanation 
+              : 'AI explanation is being generated...'}
+          </div>
         </motion.div>
       </div>
 

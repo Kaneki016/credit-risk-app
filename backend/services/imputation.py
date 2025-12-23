@@ -121,7 +121,11 @@ class FeatureImputer:
         2. Use historical median/mode
         3. Use safe domain-specific defaults
         """
-        imputed = data.copy()
+        # Exclude target columns (they should never be used as features)
+        target_columns = {"loan_status", "loan_status_num", "default", "target", "label", "outcome"}
+        filtered_data = {k: v for k, v in data.items() if k not in target_columns}
+        
+        imputed = filtered_data.copy()
         imputation_log = []
 
         # Derive loan_percent_income if missing but loan_amnt and person_income are present
@@ -210,26 +214,30 @@ class DynamicFeatureMapper:
         """
         Convert dynamic input to model-expected one-hot encoded format.
         """
+        # Exclude target columns (they should never be used as features)
+        target_columns = {"loan_status", "loan_status_num", "default", "target", "label", "outcome"}
+        filtered_data = {k: v for k, v in data.items() if k not in target_columns}
+        
         mapped = {}
 
         # Add numeric features directly
         for feat in self.numeric_features:
-            if feat in data:
-                mapped[feat] = data[feat]
+            if feat in filtered_data:
+                mapped[feat] = filtered_data[feat]
 
         # One-hot encode categorical features
         # home_ownership -> person_home_ownership_RENT, etc.
-        if "home_ownership" in data and data["home_ownership"]:
-            mapped[f"person_home_ownership_{data['home_ownership']}"] = 1
+        if "home_ownership" in filtered_data and filtered_data["home_ownership"]:
+            mapped[f"person_home_ownership_{filtered_data['home_ownership']}"] = 1
 
-        if "loan_intent" in data and data["loan_intent"]:
-            mapped[f"loan_intent_{data['loan_intent']}"] = 1
+        if "loan_intent" in filtered_data and filtered_data["loan_intent"]:
+            mapped[f"loan_intent_{filtered_data['loan_intent']}"] = 1
 
-        if "loan_grade" in data and data["loan_grade"]:
-            mapped[f"loan_grade_{data['loan_grade']}"] = 1
+        if "loan_grade" in filtered_data and filtered_data["loan_grade"]:
+            mapped[f"loan_grade_{filtered_data['loan_grade']}"] = 1
 
-        if "default_on_file" in data and data["default_on_file"]:
-            mapped[f"cb_person_default_on_file_{data['default_on_file']}"] = 1
+        if "default_on_file" in filtered_data and filtered_data["default_on_file"]:
+            mapped[f"cb_person_default_on_file_{filtered_data['default_on_file']}"] = 1
 
         return mapped
 
